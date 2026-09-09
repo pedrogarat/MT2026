@@ -12,6 +12,7 @@ import io
 import json
 import socket
 import webbrowser
+from datetime import datetime
 from functools import wraps
 from flask import (
     Flask, render_template, request, jsonify, session,
@@ -255,12 +256,20 @@ def list_projects():
     db = get_db_session()
     try:
         user = db.query(User).filter(User.id == session["user_id"]).first()
-        projects = [p.to_dict() for p in user.projects]
-        return jsonify({
+        if not user:
+            session.clear()
+            return jsonify({"status": "error", "error": "Usuario non atopado"}), 401
+
+        projects_query = db.query(Project).filter(Project.user_id == user.id).order_by(Project.updated_at.desc()).all()
+        projects = [p.to_dict() for p in projects_query]
+        
+        resp = jsonify({
             "status": "success",
             "projects": projects,
             "user": user.to_dict()
         })
+        resp.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+        return resp
     finally:
         db.close()
 
@@ -382,6 +391,7 @@ def update_project(project_id):
         if "residuos_data" in data:
             proj.set_residuos_dict(data["residuos_data"])
 
+        proj.updated_at = datetime.utcnow()
         db.commit()
         return jsonify({"status": "success", "project": proj.to_dict()})
     finally:
