@@ -467,6 +467,11 @@
         let projectData = null;
         let isDirty = false;
 
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+
         const MACHINERY_ITEMS = [
             { id: "guindastres_torre", label: "Guindastre torre" },
             { id: "guindastre_mobil", label: "Guindastre móbil autopropulsado" },
