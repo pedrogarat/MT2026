@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="gl" class="h-full bg-slate-50">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asistente EBSS - Estudo Básico de Seguridade e Saúde</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#eef6ff',
+                            100: '#dbeafe',
+                            500: '#2563eb',
+                            600: '#1d4ed8',
+                            700: '#1e40af',
+                            800: '#1e3a8a',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .step-transition {
+            transition: all 0.25s ease-in-out;
+        }
+        input[type="checkbox"]:checked + label {
+            border-color: #2563eb;
+            background-color: #eff6ff;
+        }
+        /* Fallback CSS para modo sen conexión (Offline) */
+        body { font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #f8fafc; color: #1e293b; margin: 0; }
+        header { background-color: #0f172a; color: #ffffff; padding: 1rem; }
+        input, select, textarea { border: 1px solid #cbd5e1; border-radius: 0.5rem; padding: 0.6rem; font-size: 0.875rem; box-sizing: border-box; }
+        button { cursor: pointer; border-radius: 0.5rem; }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body class="h-full text-slate-800 flex flex-col font-sans">
+
+    <!-- Cabeceira Superior -->
+    <header class="bg-slate-900 text-white shadow-md border-b border-slate-800">
+        <div class="max-w-6xl mx-auto px-4 py-4 sm:px-6 flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-lg bg-blue-600 flex items-center justify-center font-bold text-xl shadow">
+                    🛡️
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold tracking-tight text-white flex items-center gap-2">
+                        Estudo Básico de Seguridade e Saúde (EBSS)
+                        <span class="text-xs font-semibold px-2.5 py-0.5 rounded bg-blue-950 text-blue-300 border border-blue-800">R.D. 1627/1997</span>
+                    </h1>
+                    <p class="text-xs text-slate-400">Asistente interactivo de cumprimentación de documento Word</p>
+                </div>
+            </div>
+            <div class="flex items-center space-x-2">
+                <a href="/" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-1.5 rounded-md border border-slate-700 flex items-center gap-1.5">
+                    🏠 Inicio
+                </a>
+                <button type="button" onclick="exportProfile()" title="Descargar datos actuais como perfil JSON" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-1.5 rounded-md border border-slate-700 flex items-center gap-1.5">
+                    💾 Gardar perfil
+                </button>
+                <label class="cursor-pointer text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-1.5 rounded-md border border-slate-700 flex items-center gap-1.5">
+                    📂 Cargar perfil
+                    <input type="file" id="profileInput" accept=".json" class="hidden" onchange="importProfile(event)">
+                </label>
+                <button type="button" onclick="resetToDefaults()" title="Restablecer valores predeterminados da plantilla" class="text-xs text-slate-400 hover:text-white px-2 py-1.5">
+                    🔄 Reiniciar
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Contido Principal -->
+    <main class="flex-1 max-w-6xl w-full mx-auto p-4 sm:p-6 lg:p-8 flex flex-col">
+        
+        <!-- Indicador de Pasos (Stepper) -->
+        <nav aria-label="Progreso" class="mb-8">
+            <ol class="grid grid-cols-2 md:grid-cols-6 gap-2 text-center text-xs font-medium">
+                <li id="step-nav-1" onclick="goToStep(1)" class="cursor-pointer p-2.5 rounded-lg border border-blue-600 bg-blue-50 text-blue-700 font-bold shadow-sm transition">
+                    1. Datos Xerais
+                </li>
+                <li id="step-nav-2" onclick="goToStep(2)" class="cursor-pointer p-2.5 rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-100 transition">
+                    2. Emprazamento
+                </li>
+                <li id="step-nav-3" onclick="goToStep(3)" class="cursor-pointer p-2.5 rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-100 transition">
+                    3. Fases da Obra
+                </li>
+                <li id="step-nav-4" onclick="goToStep(4)" class="cursor-pointer p-2.5 rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-100 transition">
+                    4. Asistencia Médica
+                </li>
+                <li id="step-nav-5" onclick="goToStep(5)" class="cursor-pointer p-2.5 rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-100 transition">
+                    5. Maquinaria e Medios
+                </li>
+                <li id="step-nav-6" onclick="goToStep(6)" class="cursor-pointer p-2.5 rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-100 transition">
+                    6. Data e Asinatura
+                </li>
+            </ol>
+        </nav>
+
+        <!-- Formulario e Pasos -->
+        <form id="ebssForm" onsubmit="event.preventDefault();" class="flex-1 flex flex-col">
+            
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 sm:p-8 flex-1">
+
+                <!-- ==================== PASO 1: DATOS XERAIS ==================== -->
+                <div id="step-1" class="space-y-6">
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-900 flex items-center gap-2">
+                            <span>📋</span> Paso 1: Datos Xerais do Proxecto
+                        </h2>
+                        <p class="text-sm text-slate-500 mt-1">Estes datos cumprimentarán a Táboa 1 da memoria técnica do EBSS.</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-semibold text-slate-700 mb-1">Tipo de obra / Obxecto do proxecto</label>
+                            <input type="text" id="tipo_obra" class="w-full rounded-lg border-slate-300 border p-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="Ex: Melloras de condicións de seguridade, salubridade e ornato">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-1">Situación / Rúa e número</label>
+                            <input type="text" id="situacion" class="w-full rounded-lg border-slate-300 border p-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="Ex: Rúa Baterías 34">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-1">Poboación / Concello</label>
+                            <input type="text" id="poboacion" class="w-full rounded-lg border-slate-300 border p-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="Ex: Ferrol">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-1">Promotor / Cliente</label>
+                            <input type="text" id="promotor" class="w-full rounded-lg border-slate-300 border p-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="Ex: El Bosque Providencia S.L.">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-1">Arquitecto / Redactor do proxecto</label>
+                            <input type="text" id="arquitecto" class="w-full rounded-lg border-slate-300 border p-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="Ex: Estudio Anta Arquitectos S.L.P.">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-1">Coordinador de Seguridade e Saúde</label>
+                            <input type="text" id="coordinador_ss" class="w-full rounded-lg border-slate-300 border p-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="Ex: A determinar">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-1">Orzamento de Execución Material (P.E.M.)</label>
+                            <input type="text" id="orzamento_pem" class="w-full rounded-lg border-slate-300 border p-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="Ex: O indicado no capítulo homónimo do presente proxecto">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-1">Duración estimada da obra</label>
+                            <input type="text" id="duracion_obra" class="w-full rounded-lg border-slate-300 border p-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="Ex: 3 meses">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-1">Nº máximo de traballadores simultáneos</label>
+                            <input type="number" id="num_traballadores" oninput="checkWorkerLimit()" class="w-full rounded-lg border-slate-300 border p-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="6" min="1" max="100">
+                            <p class="text-xs text-slate-400 mt-1">Límite normativo EBSS: non superar 20 traballadores simultáneos.</p>
+                            
+                            <!-- Alerta de validación normativa activa -->
+                            <div id="workerWarningBox" class="hidden mt-2 p-3 bg-amber-50 border border-amber-300 rounded-lg text-amber-900 text-xs flex items-start gap-2">
+                                <span class="text-base">⚠️</span>
+                                <div>
+                                    <strong class="font-bold">Advertencia normativa (R.D. 1627/1997, Art. 4):</strong>
+                                    Superar os 20 traballadores simultáneos esixe legalmente a elaboración dún <em>Estudio de Seguridade e Saúde (ESS)</em> completo, non sendo suficiente un <em>Estudio Básico (EBSS)</em>.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ==================== PASO 2: EMPRAZAMENTO ==================== -->
+                <div id="step-2" class="hidden space-y-6">
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-900 flex items-center gap-2">
+                            <span>📍</span> Paso 2: Condicionantes do Emprazamento
+                        </h2>
+                        <p class="text-sm text-slate-500 mt-1">Características da contorna da obra (Táboa 2 da memoria).</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-semibold text-slate-700 mb-1">Accesos á obra</label>
+                            <input type="text" id="accesos_obra" class="w-full rounded-lg border-slate-300 border p-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="Ex: Directos dende vía pública pavimentada">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-1">Topografía do terreo</label>
+                            <input type="text" id="topografia_terreo" class="w-full rounded-lg border-slate-300 border p-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="Ex: Lixeira pendente / Chá">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-1">Tipo de chan</label>
+                            <input type="text" id="tipo_chan" class="w-full rounded-lg border-slate-300 border p-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="Ex: - ou Rochoso / Arxiloso">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-1">Edificacións lindeiras</label>
+                            <select id="edificacions_lindeiras" class="w-full rounded-lg border-slate-300 border p-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white">
+                                <option value="Si">Si</option>
+                                <option value="Non">Non</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-1">Subministración de enerxía eléctrica</label>
+                            <select id="subministracion_electrica" class="w-full rounded-lg border-slate-300 border p-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white">
+                                <option value="Si">Si</option>
+                                <option value="Non">Non</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-1">Subministración de auga</label>
+                            <select id="subministracion_auga" class="w-full rounded-lg border-slate-300 border p-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white">
+                                <option value="Si">Si</option>
+                                <option value="Non">Non</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-1">Sistema de saneamento</label>
+                            <select id="sistema_saneamento" class="w-full rounded-lg border-slate-300 border p-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white">
+                                <option value="Si">Si</option>
+                                <option value="Non">Non</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ==================== PASO 3: FASES DA OBRA ==================== -->
+                <div id="step-3" class="hidden space-y-6">
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-900 flex items-center gap-2">
+                            <span>🏗️</span> Paso 3: Fases da Obra e Características
+                        </h2>
+                        <p class="text-sm text-slate-500 mt-1">Indica se a obra comprende cada unha das seguintes fases técnicas (Táboa 3).</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                        <div class="p-4 rounded-lg border border-slate-200 bg-slate-50 flex items-center justify-between">
+                            <div>
+                                <span class="font-semibold text-sm text-slate-800">Demolicións</span>
+                                <p class="text-xs text-slate-500">Derrubamento de elementos existentes</p>
+                            </div>
+                            <select id="fase_demolicions" class="rounded-lg border-slate-300 border p-2 text-sm bg-white focus:ring-2 focus:ring-blue-500">
+                                <option value="Si (puntuais)">Si (puntuais)</option>
+                                <option value="Si">Si</option>
+                                <option value="Non">Non</option>
+                            </select>
+                        </div>
+
+                        <div class="p-4 rounded-lg border border-slate-200 bg-slate-50 flex items-center justify-between">
+                            <div>
+                                <span class="font-semibold text-sm text-slate-800">Movemento de terras</span>
+                                <p class="text-xs text-slate-500">Baleirados, gabias e escavacións</p>
+                            </div>
+                            <select id="fase_terras" class="rounded-lg border-slate-300 border p-2 text-sm bg-white focus:ring-2 focus:ring-blue-500">
+                                <option value="Non">Non</option>
+                                <option value="Si">Si</option>
+                            </select>
+                        </div>
+
+                        <div class="p-4 rounded-lg border border-slate-200 bg-slate-50 flex items-center justify-between">
+                            <div>
+                                <span class="font-semibold text-sm text-slate-800">Cimentación e estruturas</span>
+                                <p class="text-xs text-slate-500">Zapatas, muros, piares ou forxados</p>
+                            </div>
+                            <select id="fase_estruturas" class="rounded-lg border-slate-300 border p-2 text-sm bg-white focus:ring-2 focus:ring-blue-500">
+                                <option value="Non">Non</option>
+                                <option value="Si">Si</option>
+                            </select>
+                        </div>
+
+                        <div class="p-4 rounded-lg border border-slate-200 bg-slate-50 flex items-center justify-between">
+                            <div>
+                                <span class="font-semibold text-sm text-slate-800">Cubertas</span>
+                                <p class="text-xs text-slate-500">Tellados, cubertas planas ou inclinadas</p>
+                            </div>
+                            <select id="fase_cubertas" class="rounded-lg border-slate-300 border p-2 text-sm bg-white focus:ring-2 focus:ring-blue-500">
+                                <option value="Non">Non</option>
+                                <option value="Si">Si</option>
+                            </select>
+                        </div>
+
+                        <div class="p-4 rounded-lg border border-slate-200 bg-slate-50 flex items-center justify-between">
+                            <div>
+                                <span class="font-semibold text-sm text-slate-800">Albanelaría e cerramentos</span>
+                                <p class="text-xs text-slate-500">Tabiques, fachadas e peches</p>
+                            </div>
+                            <select id="fase_albanelaria" class="rounded-lg border-slate-300 border p-2 text-sm bg-white focus:ring-2 focus:ring-blue-500">
+                                <option value="Si">Si</option>
+                                <option value="Non">Non</option>
+                            </select>
+                        </div>
+
+                        <div class="p-4 rounded-lg border border-slate-200 bg-slate-50 flex items-center justify-between">
+                            <div>
+                                <span class="font-semibold text-sm text-slate-800">Acabados</span>
+                                <p class="text-xs text-slate-500">Revestimentos, pinturas e solados</p>
+                            </div>
+                            <select id="fase_acabados" class="rounded-lg border-slate-300 border p-2 text-sm bg-white focus:ring-2 focus:ring-blue-500">
+                                <option value="Si">Si</option>
+                                <option value="Non">Non</option>
+                            </select>
+                        </div>
+
+                        <div class="p-4 rounded-lg border border-slate-200 bg-slate-50 flex items-center justify-between md:col-span-2">
+                            <div>
+                                <span class="font-semibold text-sm text-slate-800">Instalacións</span>
+                                <p class="text-xs text-slate-500">Electricidade, fontanería, climatización, saneamento</p>
+                            </div>
+                            <select id="fase_instalacions" class="rounded-lg border-slate-300 border p-2 text-sm bg-white focus:ring-2 focus:ring-blue-500">
+                                <option value="Si">Si</option>
+                                <option value="Non">Non</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ==================== PASO 4: ASISTENCIA SANITARIA ==================== -->
+                <div id="step-4" class="hidden space-y-6">
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-900 flex items-center gap-2">
+                            <span>🏥</span> Paso 4: Asistencia Sanitaria e Instalacións
+                        </h2>
+                        <p class="text-sm text-slate-500 mt-1">Centros médicos de urxencia de referencia e réxime de instalacións provisionais (Táboa 4).</p>
+                    </div>
+
+                    <!-- Instalacións provisionais -->
+                    <div class="p-4 rounded-xl border border-blue-200 bg-blue-50/60 space-y-3">
+                        <div class="flex items-center space-x-3">
+                            <input type="checkbox" id="instalacions_provisionais_necesarias" class="w-4 h-4 text-blue-600 rounded" onchange="toggleProvisionalText()">
+                            <label for="instalacions_provisionais_necesarias" class="text-sm font-semibold text-slate-800 cursor-pointer">
+                                ¿Estímanse necesarias instalacións provisionais específicas na obra? (vestiarios, duchas móbiles, etc.)
+                            </label>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Texto de xustificación que aparecerá no documento:</label>
+                            <textarea id="instalacions_provisionais_texto" rows="2" class="w-full rounded-lg border-slate-300 border p-2 text-xs bg-white focus:ring-2 focus:ring-blue-500"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
+                        <!-- Centro de Saúde / Asistencia Primaria -->
+                        <div class="p-5 rounded-xl border border-slate-200 bg-slate-50 space-y-4">
+                            <div class="flex items-center gap-2 font-bold text-slate-800 text-sm border-b pb-2">
+                                <span>🩺</span> Asistencia Primaria (Urxencias)
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 mb-1">Nome do Centro de Saúde</label>
+                                <input type="text" id="centro_saude_nome" class="w-full rounded-lg border-slate-300 border p-2 text-sm bg-white" placeholder="Centro de Saúde Fontenla Maristany">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 mb-1">Enderezo completo</label>
+                                <input type="text" id="centro_saude_enderezo" class="w-full rounded-lg border-slate-300 border p-2 text-sm bg-white" placeholder="Praza de España, 19, 15403 Ferrol">
+                            </div>
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-700 mb-1">Teléfono</label>
+                                    <input type="text" id="tlf_urxencias" class="w-full rounded-lg border-slate-300 border p-2 text-sm bg-white" placeholder="981 33 66 33">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-700 mb-1">Distancia en km</label>
+                                    <input type="text" id="centro_saude_distancia" class="w-full rounded-lg border-slate-300 border p-2 text-sm bg-white" placeholder="1,1 km">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Hospital / Asistencia Especializada -->
+                        <div class="p-5 rounded-xl border border-slate-200 bg-slate-50 space-y-4">
+                            <div class="flex items-center gap-2 font-bold text-slate-800 text-sm border-b pb-2">
+                                <span>🚑</span> Asistencia Especializada (Hospital)
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 mb-1">Nome do Hospital</label>
+                                <input type="text" id="hospital_nome" class="w-full rounded-lg border-slate-300 border p-2 text-sm bg-white" placeholder="Hospital Arquitecto Marcide">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 mb-1">Enderezo completo</label>
+                                <input type="text" id="hospital_enderezo" class="w-full rounded-lg border-slate-300 border p-2 text-sm bg-white" placeholder="Av. de la Residencia s/n, 15405 Ferrol">
+                            </div>
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-700 mb-1">Teléfono</label>
+                                    <input type="text" id="tlf_hospital" class="w-full rounded-lg border-slate-300 border p-2 text-sm bg-white" placeholder="981 33 40 00">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-700 mb-1">Distancia en km</label>
+                                    <input type="text" id="hospital_distancia" class="w-full rounded-lg border-slate-300 border p-2 text-sm bg-white" placeholder="4,5 km">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ==================== PASO 5: MAQUINARIA E MEDIOS ==================== -->
+                <div id="step-5" class="hidden space-y-6">
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-900 flex items-center gap-2">
+                            <span>🚜</span> Paso 5: Maquinaria e Medios Auxiliares
+                        </h2>
+                        <p class="text-sm text-slate-500 mt-1">Marca a maquinaria prevista na obra (activará as súas correspondentes táboas de riscos no documento).</p>
+                    </div>
+
+                    <!-- Maquinaria -->
+                    <div class="space-y-3 pt-2">
+                        <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wider flex items-center gap-2">
+                            <span>⚙️</span> Maquinaria Pesada e Equipos de Obra (Táboa 5)
+                        </h3>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3" id="machinery-grid">
+                            <!-- Inxéctase dinamicamente por JS -->
+                        </div>
+                    </div>
+
+                    <!-- Medios Auxiliares -->
+                    <div class="space-y-3 pt-4 border-t border-slate-200">
+                        <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wider flex items-center gap-2">
+                            <span>🪜</span> Medios Auxiliares (Táboa 24)
+                        </h3>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                            <label class="flex items-center p-3 rounded-lg border border-slate-200 hover:border-blue-400 bg-white cursor-pointer transition">
+                                <input type="checkbox" id="medio_estadas_colgadas" class="w-4 h-4 text-blue-600 rounded mr-2.5">
+                                <span class="text-xs font-medium text-slate-800">Estadas colgadas (móbiles)</span>
+                            </label>
+                            <label class="flex items-center p-3 rounded-lg border border-slate-200 hover:border-blue-400 bg-white cursor-pointer transition">
+                                <input type="checkbox" id="medio_estadas_tubulares" class="w-4 h-4 text-blue-600 rounded mr-2.5">
+                                <span class="text-xs font-medium text-slate-800">Estadas tubulares (apoiadas)</span>
+                            </label>
+                            <label class="flex items-center p-3 rounded-lg border border-slate-200 hover:border-blue-400 bg-white cursor-pointer transition">
+                                <input type="checkbox" id="medio_estadas_borriquetas" class="w-4 h-4 text-blue-600 rounded mr-2.5">
+                                <span class="text-xs font-medium text-slate-800">Estadas sobre borriquetas</span>
+                            </label>
+                            <label class="flex items-center p-3 rounded-lg border border-slate-200 hover:border-blue-400 bg-white cursor-pointer transition">
+                                <input type="checkbox" id="medio_escaleiras_man" class="w-4 h-4 text-blue-600 rounded mr-2.5">
+                                <span class="text-xs font-medium text-slate-800">Escaleiras de man</span>
+                            </label>
+                            <label class="flex items-center p-3 rounded-lg border border-slate-200 hover:border-blue-400 bg-white cursor-pointer transition">
+                                <input type="checkbox" id="medio_instalacion_electrica" class="w-4 h-4 text-blue-600 rounded mr-2.5">
+                                <span class="text-xs font-medium text-slate-800">Instalación eléctrica provisional</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ==================== PASO 6: DATA E ASINATURAS ==================== -->
+                <div id="step-6" class="hidden space-y-6">
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-900 flex items-center gap-2">
+                            <span>✍️</span> Paso 6: Riscos Evitables, Data e Asinaturas
+                        </h2>
+                        <p class="text-sm text-slate-500 mt-1">Detalles de peche, asinantes do proxecto e xeración do ficheiro.</p>
+                    </div>
+
+                    <!-- Riscos evitables -->
+                    <div class="p-4 rounded-xl border border-slate-200 bg-slate-50 space-y-3">
+                        <span class="text-xs font-bold text-slate-700 uppercase tracking-wider">Riscos Laborais Evitables Completamente (Táboa 25)</span>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <label class="flex items-center p-3 rounded-lg border border-slate-200 bg-white cursor-pointer">
+                                <input type="checkbox" id="risco_rotura_instalacions" class="w-4 h-4 text-blue-600 rounded mr-2.5">
+                                <span class="text-xs text-slate-800 font-medium">Rotura de instalacións existentes (Neutralización)</span>
+                            </label>
+                            <label class="flex items-center p-3 rounded-lg border border-slate-200 bg-white cursor-pointer">
+                                <input type="checkbox" id="risco_linas_alta_tension" class="w-4 h-4 text-blue-600 rounded mr-2.5">
+                                <span class="text-xs text-slate-800 font-medium">Presenza de liñas de alta tensión (Corte de fluído)</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-1">Localidade e Data do documento</label>
+                            <input type="text" id="data_documento" class="w-full rounded-lg border-slate-300 border p-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="Ex: Ferrol, setembro de 2026">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-1">Nome do ficheiro de saída (.docx)</label>
+                            <input type="text" id="nome_ficheiro_saida" class="w-full rounded-lg border-slate-300 border p-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="ESTUDO_BASICO_SEGURIDADE_E_SAUDE_Modificado.docx">
+                        </div>
+
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-semibold text-slate-700 mb-1">Asinatura(s) dos técnicos redactores</label>
+                            <input type="text" id="asinantes" class="w-full rounded-lg border-slate-300 border p-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="Fdo. Sergio J. Beceiro Lodeiro     M. Rosa Vilas Romalde">
+                        </div>
+
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-semibold text-slate-700 mb-1">Entidade profesional / Colexio e nº de colexiado</label>
+                            <input type="text" id="colexiado" class="w-full rounded-lg border-slate-300 border p-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="ESTUDIO ANTA ARQUITECTOS S.L.P.    Nº COAG - 20.039">
+                        </div>
+                    </div>
+
+                    <!-- Botón Destacado de Xeración -->
+                    <div class="pt-6 border-t border-slate-200 flex flex-col items-center">
+                        <button type="button" onclick="submitGenerate()" id="btnGenerate" class="w-full sm:w-auto px-8 py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-base rounded-xl shadow-lg hover:shadow-xl transition flex items-center justify-center gap-2">
+                            <span>🚀</span> Xerar Documento Word (.docx)
+                        </button>
+                        <p class="text-xs text-slate-400 mt-2 text-center">Gardarase en C:\Users\Sergio\Downloads\EBSS\ conservando todos os estilos e maquetación.</p>
+                    </div>
+
+                    <!-- Mensaxe de Éxito / Resultado -->
+                    <div id="resultBox" class="hidden p-4 rounded-xl border border-emerald-200 bg-emerald-50 text-emerald-900 space-y-3">
+                        <div class="flex items-center gap-2 font-bold text-base text-emerald-800">
+                            <span>✅</span> Documento xerado con éxito!
+                        </div>
+                        <div id="resultWarningBox" class="hidden p-2.5 rounded-lg bg-amber-100 border border-amber-300 text-amber-900 text-xs font-medium"></div>
+                        <p class="text-xs text-emerald-700" id="resultPathText"></p>
+                        <div class="flex items-center gap-3 pt-1">
+                            <a id="btnDownload" href="#" download class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs shadow transition">
+                                ⬇️ Descargar agora
+                            </a>
+                            <span class="text-xs text-emerald-600 font-medium">Tamén o tes dispoñible directamente na túa carpeta de Downloads\EBSS.</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Barra de Navegación Inferior (Anterior / Seguinte) -->
+            <div class="flex justify-between items-center mt-6">
+                <button type="button" id="btnPrev" onclick="prevStep()" class="px-5 py-2.5 rounded-lg border border-slate-300 bg-white text-slate-700 font-semibold text-sm hover:bg-slate-50 transition opacity-50 cursor-not-allowed" disabled>
+                    ← Anterior
+                </button>
+
+                <div class="text-xs text-slate-400 font-medium">
+                    Paso <span id="currentStepText">1</span> de 6
+                </div>
+
+                <button type="button" id="btnNext" onclick="nextStep()" class="px-6 py-2.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-white font-semibold text-sm shadow transition">
+                    Seguinte →
+                </button>
+            </div>
+
+        </form>
+    </main>
+
+    <!-- Rodapé -->
+    <footer class="bg-white border-t border-slate-200 py-3 text-center text-xs text-slate-400">
+        Estudo Básico de Seguridade e Saúde (EBSS) • Cumprimento do Real Decreto 1627/1997 e Lei 31/1995
+    </footer>
+
+    <!-- Script de lóxica e interacción -->
+    <script>
+        let currentStep = 1;
+        const totalSteps = 6;
+
+        const MACHINERY_LIST = [
+            { id: 'guindastres_torre', label: 'Guindastres-torre' },
+            { id: 'pison_vibrante', label: 'Pisón vibrante' },
+            { id: 'bomba_formigonado', label: 'Bomba de formigonado' },
+            { id: 'montacargas', label: 'Montacargas' },
+            { id: 'movemento_terras', label: 'Maquinaria movemento de terras' },
+            { id: 'serra_circular', label: 'Serra circular' },
+            { id: 'compresor', label: 'Compresor' },
+            { id: 'martelo_pneumatico', label: 'Martelo pneumático' },
+            { id: 'rozadora_radial', label: 'Rozadora radial' },
+            { id: 'vibrador', label: 'Vibradores' },
+            { id: 'formigoneira_basculante', label: 'Formigoneira basculante' },
+            { id: 'camion_guindastre', label: 'Camión-guindastre' },
+            { id: 'camion_formigoneira', label: 'Camión formigoneira' },
+            { id: 'camions', label: 'Camións' },
+            { id: 'cabrestantes_mecanicos', label: 'Cabrestantes mecánicos' },
+            { id: 'dumper_motovolquete', label: 'Dumper motovolquete' },
+            { id: 'grupo_electroxeno', label: 'Grupo electróxeno' },
+            { id: 'pistola_clavadora', label: 'Pistola cravadora' },
+            { id: 'soldadura_electrica', label: 'Soldadura eléctrica' }
+        ];
+
+        // Renderizar o grid de maquinaria
+        function renderMachineryGrid() {
+            const grid = document.getElementById('machinery-grid');
+            grid.innerHTML = '';
+            MACHINERY_LIST.forEach(item => {
+                const label = document.createElement('label');
+                label.className = 'flex items-center p-3 rounded-lg border border-slate-200 hover:border-blue-400 bg-white cursor-pointer transition';
+                label.innerHTML = `
+                    <input type="checkbox" id="mach_${item.id}" class="w-4 h-4 text-blue-600 rounded mr-2.5">
+                    <span class="text-xs font-medium text-slate-800">${item.label}</span>
+                `;
+                grid.appendChild(label);
+            });
+        }
+
+        // Cargar datos por defecto dende a API
+        async function loadDefaults() {
+            renderMachineryGrid();
+            try {
+                const resp = await fetch('/api/defaults');
+                if (resp.ok) {
+                    const data = await resp.json();
+                    populateForm(data);
+                }
+            } catch (err) {
+                console.error('Erro cargando datos por defecto:', err);
+            }
+        }
+
+        function populateForm(data) {
+            // Campos de texto simples
+            const simpleFields = [
+                'tipo_obra', 'situacion', 'poboacion', 'promotor', 'arquitecto',
+                'coordinador_ss', 'orzamento_pem', 'duracion_obra', 'num_traballadores',
+                'accesos_obra', 'topografia_terreo', 'tipo_chan', 'edificacions_lindeiras',
+                'subministracion_electrica', 'subministracion_auga', 'sistema_saneamento',
+                'fase_demolicions', 'fase_terras', 'fase_estruturas', 'fase_cubertas',
+                'fase_albanelaria', 'fase_acabados', 'fase_instalacions',
+                'tlf_urxencias', 'centro_saude_nome', 'centro_saude_enderezo', 'centro_saude_distancia',
+                'tlf_hospital', 'hospital_nome', 'hospital_enderezo', 'hospital_distancia',
+                'instalacions_provisionais_texto', 'data_documento', 'asinantes', 'colexiado',
+                'nome_ficheiro_saida'
+            ];
+
+            simpleFields.forEach(field => {
+                const el = document.getElementById(field);
+                if (el && data[field] !== undefined) {
+                    el.value = data[field];
+                }
+            });
+
+            // Checkbox instalacións provisionais
+            const provEl = document.getElementById('instalacions_provisionais_necesarias');
+            if (provEl && data.instalacions_provisionais_necesarias !== undefined) {
+                provEl.checked = data.instalacions_provisionais_necesarias;
+            }
+
+            // Maquinaria
+            if (data.maquinaria) {
+                MACHINERY_LIST.forEach(item => {
+                    const el = document.getElementById(`mach_${item.id}`);
+                    if (el) {
+                        el.checked = Boolean(data.maquinaria[item.id]);
+                    }
+                });
+            }
+
+            // Medios auxiliares
+            if (data.medios_auxiliares) {
+                const m = data.medios_auxiliares;
+                const map = {
+                    'estadas_colgadas': 'medio_estadas_colgadas',
+                    'estadas_tubulares': 'medio_estadas_tubulares',
+                    'estadas_borriquetas': 'medio_estadas_borriquetas',
+                    'escaleiras_man': 'medio_escaleiras_man',
+                    'instalacion_electrica': 'medio_instalacion_electrica'
+                };
+                for (const [k, elId] of Object.entries(map)) {
+                    const el = document.getElementById(elId);
+                    if (el && m[k] !== undefined) el.checked = Boolean(m[k]);
+                }
+            }
+
+            // Riscos evitables
+            if (data.riscos_evitables) {
+                const r = data.riscos_evitables;
+                const elRotura = document.getElementById('risco_rotura_instalacions');
+                if (elRotura && r.rotura_instalacions !== undefined) elRotura.checked = Boolean(r.rotura_instalacions);
+                const elAlta = document.getElementById('risco_linas_alta_tension');
+                if (elAlta && r.linas_alta_tension !== undefined) elAlta.checked = Boolean(r.linas_alta_tension);
+            }
+        }
+
+        function collectFormData() {
+            const data = {};
+            const simpleFields = [
+                'tipo_obra', 'situacion', 'poboacion', 'promotor', 'arquitecto',
+                'coordinador_ss', 'orzamento_pem', 'duracion_obra', 'num_traballadores',
+                'accesos_obra', 'topografia_terreo', 'tipo_chan', 'edificacions_lindeiras',
+                'subministracion_electrica', 'subministracion_auga', 'sistema_saneamento',
+                'fase_demolicions', 'fase_terras', 'fase_estruturas', 'fase_cubertas',
+                'fase_albanelaria', 'fase_acabados', 'fase_instalacions',
+                'tlf_urxencias', 'centro_saude_nome', 'centro_saude_enderezo', 'centro_saude_distancia',
+                'tlf_hospital', 'hospital_nome', 'hospital_enderezo', 'hospital_distancia',
+                'instalacions_provisionais_texto', 'data_documento', 'asinantes', 'colexiado',
+                'nome_ficheiro_saida'
+            ];
+
+            simpleFields.forEach(field => {
+                const el = document.getElementById(field);
+                if (el) data[field] = el.value.trim();
+            });
+
+            const provEl = document.getElementById('instalacions_provisionais_necesarias');
+            data.instalacions_provisionais_necesarias = provEl ? provEl.checked : false;
+
+            // Maquinaria
+            data.maquinaria = {};
+            MACHINERY_LIST.forEach(item => {
+                const el = document.getElementById(`mach_${item.id}`);
+                data.maquinaria[item.id] = el ? el.checked : false;
+            });
+
+            // Medios auxiliares
+            data.medios_auxiliares = {
+                estadas_colgadas: document.getElementById('medio_estadas_colgadas')?.checked || false,
+                estadas_tubulares: document.getElementById('medio_estadas_tubulares')?.checked || false,
+                estadas_borriquetas: document.getElementById('medio_estadas_borriquetas')?.checked || false,
+                escaleiras_man: document.getElementById('medio_escaleiras_man')?.checked || false,
+                instalacion_electrica: document.getElementById('medio_instalacion_electrica')?.checked || false,
+            };
+
+            // Riscos evitables
+            data.riscos_evitables = {
+                rotura_instalacions: document.getElementById('risco_rotura_instalacions')?.checked || false,
+                linas_alta_tension: document.getElementById('risco_linas_alta_tension')?.checked || false,
+            };
+
+            return data;
+        }
+
+        function toggleProvisionalText() {
+            const chk = document.getElementById('instalacions_provisionais_necesarias');
+            const txt = document.getElementById('instalacions_provisionais_texto');
+            if (chk.checked) {
+                txt.value = "Estímanse necesarias instalacións provisionais para a presente obra, dispoñendo dos servizos hixiénicos e locais axeitados especificados na normativa.";
+            } else {
+                txt.value = "Non se estiman necesarias instalacións provisionais para a presente obra, debido as súas características e escasa duración.";
+            }
+        }
+
+        // Navegación do Wizard
+        function goToStep(step) {
+            if (step < 1 || step > totalSteps) return;
+            document.getElementById(`step-${currentStep}`).classList.add('hidden');
+            document.getElementById(`step-nav-${currentStep}`).classList.remove('border-blue-600', 'bg-blue-50', 'text-blue-700', 'font-bold', 'shadow-sm');
+            document.getElementById(`step-nav-${currentStep}`).classList.add('border-slate-200', 'bg-white', 'text-slate-600');
+
+            currentStep = step;
+            document.getElementById(`step-${currentStep}`).classList.remove('hidden');
+            document.getElementById(`step-nav-${currentStep}`).classList.remove('border-slate-200', 'bg-white', 'text-slate-600');
+            document.getElementById(`step-nav-${currentStep}`).classList.add('border-blue-600', 'bg-blue-50', 'text-blue-700', 'font-bold', 'shadow-sm');
+
+            document.getElementById('currentStepText').innerText = currentStep;
+
+            // Xestión botóns Anterior / Seguinte
+            const btnPrev = document.getElementById('btnPrev');
+            if (currentStep === 1) {
+                btnPrev.disabled = true;
+                btnPrev.classList.add('opacity-50', 'cursor-not-allowed');
+            } else {
+                btnPrev.disabled = false;
+                btnPrev.classList.remove('opacity-50', 'cursor-not-allowed');
+            }
+
+            const btnNext = document.getElementById('btnNext');
+            if (currentStep === totalSteps) {
+                btnNext.innerText = 'Xerar Documento →';
+                btnNext.onclick = () => {
+                    document.getElementById('btnGenerate').scrollIntoView({ behavior: 'smooth' });
+                };
+            } else {
+                btnNext.innerText = 'Seguinte →';
+                btnNext.onclick = nextStep;
+            }
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function nextStep() {
+            if (currentStep < totalSteps) goToStep(currentStep + 1);
+        }
+
+        function prevStep() {
+            if (currentStep > 1) goToStep(currentStep - 1);
+        }
+
+        // Gardar / Cargar perfís
+        function exportProfile() {
+            const data = collectFormData();
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Perfil_EBSS_${data.poboacion || 'Proxecto'}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function importProfile(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    populateForm(data);
+                    alert('Perfil cargado con éxito.');
+                } catch (err) {
+                    alert('Erro ó ler o arquivo JSON: ' + err.message);
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        async function resetToDefaults() {
+            if (confirm('¿Desexas restablecer todos os campos ós valores predeterminados?')) {
+                await loadDefaults();
+            }
+        }
+
+        // Verificar límite de traballadores para a alerta normativa
+        function checkWorkerLimit() {
+            const el = document.getElementById('num_traballadores');
+            const box = document.getElementById('workerWarningBox');
+            if (!el || !box) return;
+            const val = parseInt(el.value, 10);
+            if (val > 20) {
+                box.classList.remove('hidden');
+            } else {
+                box.classList.add('hidden');
+            }
+        }
+
+        // Enviar datos á API para xerar o Word
+        async function submitGenerate() {
+            const btn = document.getElementById('btnGenerate');
+            const originalText = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = `<span>⏳</span> Xerando documento Word...`;
+
+            const data = collectFormData();
+            try {
+                const resp = await fetch('/api/generate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await resp.json();
+                if (resp.ok && result.status === 'success') {
+                    const resultBox = document.getElementById('resultBox');
+                    const resultPathText = document.getElementById('resultPathText');
+                    const btnDownload = document.getElementById('btnDownload');
+                    const warningBox = document.getElementById('resultWarningBox');
+
+                    if (result.fallback_used && result.warning) {
+                        warningBox.innerText = '⚠️ ' + result.warning;
+                        warningBox.classList.remove('hidden');
+                    } else {
+                        warningBox.classList.add('hidden');
+                    }
+
+                    resultPathText.innerHTML = `<strong>Arquivo gardado en:</strong> ${result.output_path} (${(result.size_bytes / 1024).toFixed(1)} KB)`;
+                    btnDownload.href = `/api/download?file=${encodeURIComponent(result.filename)}`;
+                    btnDownload.setAttribute('download', result.filename);
+
+                    resultBox.classList.remove('hidden');
+                    resultBox.scrollIntoView({ behavior: 'smooth' });
+                } else {
+                    alert('Erro ó xerar o documento: ' + (result.error || 'Erro descoñecido'));
+                }
+            } catch (err) {
+                alert('Erro de conexión co servidor: ' + err.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            }
+        }
+
+        // Iniciar ó cargar a páxina
+        window.onload = function() {
+            loadDefaults();
+            setTimeout(checkWorkerLimit, 500);
+        };
+    </script>
+</body>
+</html>

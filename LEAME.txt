@@ -1,0 +1,56 @@
+========================================================================
+🏛️ ASISTENTE TÉCNICO DE PROXECTOS (EBSS + XESTIÓN DE RESIDUOS)
+SISTEMA MULTIUSUARIO CON BASE DE DATOS Y DATOS COMUNES CENTRALIZADOS
+========================================================================
+
+NOVEDADES DE ESTA VERSIÓN:
+--------------------------
+1. 🔐 MULTIUSUARIO Y PERSISTENCIA:
+   - Registro e inicio de sesión con cuentas de usuario aisladas.
+   - Base de datos relacional integrada (SQLite local / PostgreSQL en la nube).
+   - Guardado de múltiples proyectos con historial de cambios y exportación/importación JSON.
+
+2. 📌 DATOS COMUNES CENTRALIZADOS:
+   - Los datos generales del proyecto (Objeto/Tipo de obra, Situación, Concello,
+     Promotor, Arquitecto, PEM, Duración, Superficie construida y Superficie de actuación D4)
+     se introducen UNA SOLA VEZ en la pestaña "Datos Comúns".
+   - Al modificar la superficie o cualquier dato común, se actualizan automáticamente
+     todos los documentos del proyecto.
+
+3. 🛡️ / ♻️ GENERACIÓN MODULAR E INDEPENDIENTE:
+   - Módulo EBSS: Configura condicionantes, fases y maquinaria. Genera y descarga
+     su archivo "EBSS_[Población].docx" de forma independiente.
+   - Módulo Residuos (EGR): Cálculo matemático en vivo de volúmenes (m³) y toneladas (t)
+     a partir de la superficie de actuación común, con matriz de separación obligatoria.
+     Genera y descarga su archivo "XESTION_RESIDUOS_[Población].docx" por separado.
+
+4. 🌐 DESPLIEGUE EN LA WEB:
+   - La aplicación está basada en Flask + SQLAlchemy + Gunicorn y es 100% compatible
+     con plataformas en la nube (Render, Railway, Fly.io, VPS con Docker).
+   - Incluye "Procfile" y "render.yaml" para despliegue directo.
+
+------------------------------------------------------------------------
+¿CÓMO USAR EN LOCAL / WINDOWS?
+------------------------------------------------------------------------
+1. Haz doble clic en "iniciar_asistente.bat".
+2. Se abrirá automáticamente el navegador en http://127.0.0.1:8080.
+3. Si es la primera vez, pulsa en "Crear Conta" (ej: usuario "admin" o tu nombre).
+4. Accederás al Dashboard donde podrás crear proyectos, editar datos comunes y
+   generar los documentos Word (.docx).
+
+------------------------------------------------------------------------
+ARCHIVOS CLAVE DEL SISTEMA:
+------------------------------------------------------------------------
+- iniciar_asistente.bat                     -> Lanzador de doble clic para Windows
+- app.py                                    -> Servidor web Flask (API REST, Auth y Descargas)
+- models.py                                 -> Modelos de base de datos (User, Project)
+- ebss_processor.py                         -> Motor de generación para EBSS
+- residuos_processor.py                     -> Motor de cálculo y generación de Residuos (EGR)
+- templates/
+    - login.html                            -> Pantalla de acceso y registro
+    - dashboard.html                        -> Panel de gestión de proyectos
+    - project_editor.html                   -> Editor integrado (Datos comunes, EBSS, Residuos)
+- ESTUDO BÁSICO DE SEGURIDADE E SAÚDE.docx -> Plantilla Word base EBSS
+- XESTIÓN DE RESIDUOS.docx                 -> Plantilla Word base Residuos
+- Procfile / render.yaml                    -> Archivos para despliegue en la nube
+========================================================================

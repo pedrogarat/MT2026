@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="gl" class="h-full bg-slate-50">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asistente de Xestión de Residuos (EGR)</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        emerald: {
+                            50: '#ecfdf5',
+                            100: '#d1fae5',
+                            500: '#10b981',
+                            600: '#059669',
+                            700: '#047857',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .step-transition { transition: all 0.25s ease-in-out; }
+        body { font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #f8fafc; color: #1e293b; margin: 0; }
+        header { background-color: #0f172a; color: #ffffff; padding: 1rem; }
+        input, select, textarea { border: 1px solid #cbd5e1; border-radius: 0.5rem; padding: 0.6rem; font-size: 0.875rem; box-sizing: border-box; }
+        button { cursor: pointer; border-radius: 0.5rem; }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body class="h-full text-slate-800 flex flex-col font-sans">
+
+    <!-- Cabeceira Superior -->
+    <header class="bg-slate-900 text-white shadow-md border-b border-slate-800">
+        <div class="max-w-6xl mx-auto px-4 py-4 sm:px-6 flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <a href="/" title="Volver á páxina principal de selección" class="w-10 h-10 rounded-lg bg-emerald-600 hover:bg-emerald-500 flex items-center justify-center font-bold text-xl shadow transition">
+                    ♻️
+                </a>
+                <div>
+                    <h1 class="text-xl font-bold tracking-tight text-white flex items-center gap-2">
+                        Estudio de Xestión de Residuos (EGR)
+                        <span class="text-xs font-semibold px-2.5 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-800">R.D. 105/2008</span>
+                    </h1>
+                    <p class="text-xs text-slate-400">Asistente interactivo de estimación de RCDs e cumprimentación Word</p>
+                </div>
+            </div>
+            <div class="flex items-center space-x-2">
+                <a href="/" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-1.5 rounded-md border border-slate-700 flex items-center gap-1">
+                    🏠 Inicio
+                </a>
+                <button type="button" onclick="exportProfile()" title="Gardar perfil JSON" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-1.5 rounded-md border border-slate-700 flex items-center gap-1">
+                    💾 Gardar
+                </button>
+                <label class="cursor-pointer text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-1.5 rounded-md border border-slate-700 flex items-center gap-1">
+                    📂 Cargar
+                    <input type="file" id="profileInput" accept=".json" class="hidden" onchange="importProfile(event)">
+                </label>
+            </div>
+        </div>
+    </header>
+
+    <!-- Contido Principal -->
+    <main class="flex-1 max-w-6xl w-full mx-auto p-4 sm:p-6 lg:p-8 flex flex-col">
+        
+        <!-- Stepper -->
+        <nav aria-label="Progreso" class="mb-8">
+            <ol class="grid grid-cols-2 md:grid-cols-5 gap-2 text-center text-xs font-medium">
+                <li id="step-nav-1" onclick="goToStep(1)" class="cursor-pointer p-2.5 rounded-lg border border-emerald-600 bg-emerald-50 text-emerald-800 font-bold shadow-sm transition">
+                    1. Datos Xerais
+                </li>
+                <li id="step-nav-2" onclick="goToStep(2)" class="cursor-pointer p-2.5 rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-100 transition">
+                    2. Residuos No Pétreos
+                </li>
+                <li id="step-nav-3" onclick="goToStep(3)" class="cursor-pointer p-2.5 rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-100 transition">
+                    3. Residuos Pétreos
+                </li>
+                <li id="step-nav-4" onclick="goToStep(4)" class="cursor-pointer p-2.5 rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-100 transition">
+                    4. Resumo e Cálculo
+                </li>
+                <li id="step-nav-5" onclick="goToStep(5)" class="cursor-pointer p-2.5 rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-100 transition">
+                    5. Data e Asinatura
+                </li>
+            </ol>
+        </nav>
+
+        <!-- Formulario -->
+        <form id="residuosForm" onsubmit="event.preventDefault();" class="flex-1 flex flex-col">
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 sm:p-8 flex-1">
+
+                <!-- ==================== PASO 1: DATOS XERAIS ==================== -->
+                <div id="step-1" class="space-y-6">
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-900 flex items-center gap-2">
+                            <span>📋</span> Paso 1: Datos Xerais do Proxecto e Superficie
+                        </h2>
+                        <p class="text-sm text-slate-500 mt-1">A superficie de actuación (m²) serve de base para o cálculo dos volumes e toneladas de residuos segundo o Excel do estudo.</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-semibold text-slate-700 mb-1">Tipo de obra / Obxecto do proxecto</label>
+                            <input type="text" id="tipo_obra" class="w-full rounded-lg border-slate-300 border p-2.5 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none" placeholder="Ex: Melloras de condicións de seguridade, salubridade e ornato">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-1">Situación / Rúa e número</label>
+                            <input type="text" id="situacion" class="w-full rounded-lg border-slate-300 border p-2.5 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none" placeholder="Ex: Rúa Baterías 34">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-1">Poboación / Concello</label>
+                            <input type="text" id="poboacion" class="w-full rounded-lg border-slate-300 border p-2.5 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none" placeholder="Ex: Ferrol">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-1">Promotor / Cliente</label>
+                            <input type="text" id="promotor" class="w-full rounded-lg border-slate-300 border p-2.5 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none" placeholder="Ex: El Bosque Providencia S.L.">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-1">Arquitecto / Redactor do proxecto</label>
+                            <input type="text" id="arquitecto" class="w-full rounded-lg border-slate-300 border p-2.5 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none" placeholder="Ex: Estudio Anta Arquitectos S.L.P.">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-1">Orzamento de Execución Material (P.E.M.)</label>
+                            <input type="text" id="orzamento_pem" class="w-full rounded-lg border-slate-300 border p-2.5 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none" placeholder="Ex: O indicado no capítulo homónimo do presente proxecto">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-1">Duración estimada da obra</label>
+                            <input type="text" id="duracion_obra" class="w-full rounded-lg border-slate-300 border p-2.5 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none" placeholder="Ex: 3 meses">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-1">Superficie construída (m²)</label>
+                            <input type="text" id="superficie_construida" class="w-full rounded-lg border-slate-300 border p-2.5 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none" placeholder="Ex: 9,84 m2">
+                        </div>
+
+                        <!-- SUPERFICIE DE ACTUACIÓN (CELDA D4 DO EXCEL) -->
+                        <div class="p-4 rounded-xl border border-emerald-300 bg-emerald-50/70 md:col-span-2 space-y-2">
+                            <label class="block text-sm font-bold text-emerald-900">📐 Superficie de actuación (m²) [Celda D4 da plantilla Excel]</label>
+                            <div class="flex items-center gap-4">
+                                <input type="number" id="superficie_actuacion" step="0.01" min="0.1" value="9.84" oninput="updateLiveCalculation()" class="w-48 rounded-lg border-emerald-400 border p-2.5 text-base font-bold text-emerald-900 bg-white focus:ring-2 focus:ring-emerald-600">
+                                <div class="text-xs text-emerald-800">
+                                    <strong>Estimación automática total:</strong>
+                                    <span id="liveVolumeText" class="font-bold">1,97 m³</span> de residuos | 
+                                    <span id="liveWeightText" class="font-bold">1,97 t</span> de residuo total.
+                                </div>
+                            </div>
+                            <p class="text-[11px] text-emerald-700">Fórmula Excel: Volume estimado (m³) = Superficie (m²) × 0,2.</p>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- ==================== PASO 2: NO PÉTREOS ==================== -->
+                <div id="step-2" class="hidden space-y-6">
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-900 flex items-center gap-2">
+                            <span>📦</span> Paso 2: Alcance de Obra - Residuos Nivel I e No Pétreos
+                        </h2>
+                        <p class="text-sm text-slate-500 mt-1">Marca en "SI" os tipos de residuos previstos segundo o alcance das obras (Equivalente á Columna B do Excel).</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3" id="step2-grid">
+                        <!-- Generado dinámicamente por JS -->
+                    </div>
+                </div>
+
+                <!-- ==================== PASO 3: PÉTREOS E PELIGROSOS ==================== -->
+                <div id="step-3" class="hidden space-y-6">
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-900 flex items-center gap-2">
+                            <span>🧱</span> Paso 3: Alcance de Obra - Residuos Pétreos e Peligrosos
+                        </h2>
+                        <p class="text-sm text-slate-500 mt-1">Indica se a obra comprende residuos pétreos (hormigón, cerámicos, áridos) ou potencialmente perigosos.</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3" id="step3-grid">
+                        <!-- Generado dinámicamente por JS -->
+                    </div>
+                </div>
+
+                <!-- ==================== PASO 4: RESUMO E CÁLCULO ==================== -->
+                <div id="step-4" class="hidden space-y-6">
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-900 flex items-center gap-2">
+                            <span>📊</span> Paso 4: Resumo e Cálculo Matemático en Tempo Real
+                        </h2>
+                        <p class="text-sm text-slate-500 mt-1">Táboas de cantidades estimadas e valoración da Separación Obligatoria en Obra.</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="p-4 rounded-xl bg-slate-900 text-white flex justify-between items-center shadow">
+                            <div>
+                                <span class="text-xs text-slate-400 font-semibold uppercase">Volume Total Estimado</span>
+                                <div id="summaryVolText" class="text-2xl font-extrabold text-emerald-400">1,97 m³</div>
+                            </div>
+                            <span class="text-3xl">📦</span>
+                        </div>
+                        <div class="p-4 rounded-xl bg-slate-900 text-white flex justify-between items-center shadow">
+                            <div>
+                                <span class="text-xs text-slate-400 font-semibold uppercase">Peso Total Estimado</span>
+                                <div id="summaryWeightText" class="text-2xl font-extrabold text-emerald-400">1,97 t</div>
+                            </div>
+                            <span class="text-3xl">⚖️</span>
+                        </div>
+                    </div>
+
+                    <!-- Cuadro de Separación Obligatoria -->
+                    <div class="space-y-3">
+                        <h3 class="text-sm font-bold text-slate-800 flex items-center gap-2">
+                            <span>⚖️</span> Separación Obligatoria en Obra (Táboa 3 do Estudio)
+                        </h3>
+                        <div class="overflow-x-auto border border-slate-200 rounded-lg">
+                            <table class="w-full text-xs text-left text-slate-700">
+                                <thead class="bg-slate-100 text-slate-800 uppercase font-bold border-b border-slate-200">
+                                    <tr>
+                                        <th class="p-2.5">Fracción / Tipo de Residuo</th>
+                                        <th class="p-2.5 text-right">Peso Estimado (t)</th>
+                                        <th class="p-2.5 text-center">Umbral Norma</th>
+                                        <th class="p-2.5 text-center">Entrega / Separación</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tableSeparacionBody" class="divide-y divide-slate-200">
+                                    <!-- Cárgase dinámicamente -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ==================== PASO 5: DATA E ASINATURAS ==================== -->
+                <div id="step-5" class="hidden space-y-6">
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-900 flex items-center gap-2">
+                            <span>✍️</span> Paso 5: Data, Asinaturas e Xeración do Documento
+                        </h2>
+                        <p class="text-sm text-slate-500 mt-1">Peche do documento e xeración do ficheiro Word listo para entregar.</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-1">Localidade e Data do documento</label>
+                            <input type="text" id="data_documento" class="w-full rounded-lg border-slate-300 border p-2.5 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none" placeholder="Ex: Ferrol, xullo de 2026">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-1">Nome do ficheiro de saída (.docx)</label>
+                            <input type="text" id="nome_ficheiro_saida" class="w-full rounded-lg border-slate-300 border p-2.5 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none" placeholder="XESTION_DE_RESIDUOS_Modificado.docx">
+                        </div>
+
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-semibold text-slate-700 mb-1">Asinatura(s) dos técnicos redactores</label>
+                            <input type="text" id="asinantes" class="w-full rounded-lg border-slate-300 border p-2.5 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none" placeholder="Fdo. Sergio J. Beceiro Lodeiro     M. Rosa Vilas Romalde">
+                        </div>
+
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-semibold text-slate-700 mb-1">Entidade profesional / Colexio e nº de colexiado</label>
+                            <input type="text" id="colexiado" class="w-full rounded-lg border-slate-300 border p-2.5 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none" placeholder="ESTUDIO ANTA ARQUITECTOS S.L.P.    Nº COAG - 20.039">
+                        </div>
+                    </div>
+
+                    <!-- Botón de Xeración -->
+                    <div class="pt-6 border-t border-slate-200 flex flex-col items-center">
+                        <button type="button" onclick="submitGenerateResiduos()" id="btnGenerate" class="w-full sm:w-auto px-8 py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-base rounded-xl shadow-lg hover:shadow-xl transition flex items-center justify-center gap-2">
+                            <span>🚀</span> Xerar Documento de Residuos (.docx)
+                        </button>
+                        <p class="text-xs text-slate-400 mt-2 text-center">Cumplimentará as táboas de cantidades e separación conservando os estilos e maquetación.</p>
+                    </div>
+
+                    <!-- Caixa de Resultado -->
+                    <div id="resultBox" class="hidden p-4 rounded-xl border border-emerald-200 bg-emerald-50 text-emerald-900 space-y-3">
+                        <div class="flex items-center gap-2 font-bold text-base text-emerald-800">
+                            <span>✅</span> Documento de Xestión de Residuos xerado con éxito!
+                        </div>
+                        <div id="resultWarningBox" class="hidden p-2.5 rounded-lg bg-amber-100 border border-amber-300 text-amber-900 text-xs font-medium"></div>
+                        <p class="text-xs text-emerald-700" id="resultPathText"></p>
+                        <div class="flex items-center gap-3 pt-1">
+                            <a id="btnDownload" href="#" download class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs shadow transition">
+                                ⬇️ Descargar agora
+                            </a>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- Navegación Inferior -->
+            <div class="flex justify-between items-center mt-6">
+                <button type="button" id="btnPrev" onclick="prevStep()" class="px-5 py-2.5 rounded-lg border border-slate-300 bg-white text-slate-700 font-semibold text-sm hover:bg-slate-50 transition opacity-50 cursor-not-allowed" disabled>
+                    ← Anterior
+                </button>
+                <div class="text-xs text-slate-400 font-medium">
+                    Paso <span id="currentStepText">1</span> de 5
+                </div>
+                <button type="button" id="btnNext" onclick="nextStep()" class="px-6 py-2.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-white font-semibold text-sm shadow transition">
+                    Seguinte →
+                </button>
+            </div>
+        </form>
+
+    </main>
+
+    <!-- Rodapé -->
+    <footer class="bg-white border-t border-slate-200 py-3 text-center text-xs text-slate-400">
+        Estudio de Xestión de Residuos (EGR) • Real Decreto 105/2008 e Orde MAM/304/2002
+    </footer>
+
+    <script>
+        let currentStep = 1;
+        const totalSteps = 5;
+
+        const STEP2_ITEMS = [
+            { id: 'tierras_excavacion', label: '1 Tierras e pétreos da escavación (LER 17 05 04)' },
+            { id: 'asfalto', label: '2 Mezclas bituminosas / Asfalto (LER 17 03 02)' },
+            { id: 'madera', label: '3 Madera (LER 17 02 01)' },
+            { id: 'envases_metalicos', label: '4 Envases metálicos (LER 15 01 04)' },
+            { id: 'cobre_laton', label: '5 Cobre, bronce, latón (LER 17 04 01)' },
+            { id: 'hierro_acero', label: '6 Hierro e acero (LER 17 04 05)' },
+            { id: 'metales_mezclados', label: '7 Metales mezclados (LER 17 04 07)' },
+            { id: 'cables', label: '8 Cables distintos de 17 04 10 (LER 17 04 11)' },
+            { id: 'envases_papel', label: '9 Envases de papel e cartón (LER 15 01 01)' },
+            { id: 'plastico', label: '10 Plástico (LER 17 02 03)' },
+            { id: 'vidrio', label: '11 Vidrio (LER 17 02 02)' },
+            { id: 'yeso', label: '12 Materiales de yeso (LER 17 08 02)' },
+            { id: 'aislamiento', label: '13 Materiales de aislamiento (LER 17 06 04)' },
+            { id: 'mezclados_rcd', label: '14 Residuos mezclados RCD (LER 17 09 04)' }
+        ];
+
+        const STEP3_ITEMS = [
+            { id: 'grava_rocas', label: '1 Grava e rocas trituradas (LER 01 04 08)' },
+            { id: 'arena_arcillas', label: '2 Arena e arcillas (LER 01 04 09)' },
+            { id: 'hormigon', label: '3 Hormigón e prefabricados (LER 17 01 01)' },
+            { id: 'ladrillos', label: '4 Ladrillos (LER 17 01 02)' },
+            { id: 'tejas_ceramicos', label: '5 Tejas e cerámicos (LER 17 01 03)' },
+            { id: 'pintura_barniz', label: '6 Restos de pintura / disolventes (LER 08 01 11 *)' },
+            { id: 'amianto', label: '7 Materiales con amianto (LER 17 06 05 *)' },
+            { id: 'detergentes', label: '8 Detergentes / Limpeza (LER 20 01 30)' }
+        ];
+
+        function renderGrids() {
+            const g2 = document.getElementById('step2-grid');
+            g2.innerHTML = '';
+            STEP2_ITEMS.forEach(item => {
+                g2.appendChild(createCheckboxLabel(item.id, item.label));
+            });
+
+            const g3 = document.getElementById('step3-grid');
+            g3.innerHTML = '';
+            STEP3_ITEMS.forEach(item => {
+                g3.appendChild(createCheckboxLabel(item.id, item.label));
+            });
+        }
+
+        function createCheckboxLabel(id, labelText) {
+            const label = document.createElement('label');
+            label.className = 'flex items-center p-3 rounded-lg border border-slate-200 hover:border-emerald-400 bg-white cursor-pointer transition';
+            label.innerHTML = `
+                <input type="checkbox" id="chk_${id}" onchange="updateLiveCalculation()" class="w-4 h-4 text-emerald-600 rounded mr-2.5" checked>
+                <span class="text-xs font-medium text-slate-800">${labelText}</span>
+            `;
+            return label;
+        }
+
+        async function loadDefaults() {
+            renderGrids();
+            try {
+                const resp = await fetch('/api/residuos/defaults');
+                if (resp.ok) {
+                    const data = await resp.json();
+                    populateForm(data);
+                }
+            } catch (err) {
+                console.error('Erro cargando datos por defecto:', err);
+            }
+            updateLiveCalculation();
+        }
+
+        function populateForm(data) {
+            const fields = [
+                'tipo_obra', 'situacion', 'poboacion', 'promotor', 'arquitecto',
+                'orzamento_pem', 'duracion_obra', 'superficie_construida', 'superficie_actuacion',
+                'data_documento', 'asinantes', 'colexiado', 'nome_ficheiro_saida'
+            ];
+            fields.forEach(f => {
+                const el = document.getElementById(f);
+                if (el && data[f] !== undefined) el.value = data[f];
+            });
+
+            if (data.residuos_selection) {
+                const sel = data.residuos_selection;
+                Object.keys(sel).forEach(k => {
+                    const chk = document.getElementById(`chk_${k}`);
+                    if (chk) chk.checked = Boolean(sel[k]);
+                });
+            }
+        }
+
+        function collectFormData() {
+            const data = {};
+            const fields = [
+                'tipo_obra', 'situacion', 'poboacion', 'promotor', 'arquitecto',
+                'orzamento_pem', 'duracion_obra', 'superficie_construida', 'superficie_actuacion',
+                'data_documento', 'asinantes', 'colexiado', 'nome_ficheiro_saida'
+            ];
+            fields.forEach(f => {
+                const el = document.getElementById(f);
+                if (el) data[f] = el.value.trim();
+            });
+
+            data.residuos_selection = {};
+            const allKeys = [...STEP2_ITEMS, ...STEP3_ITEMS].map(i => i.id);
+            allKeys.forEach(k => {
+                const chk = document.getElementById(`chk_${k}`);
+                data.residuos_selection[k] = chk ? chk.checked : false;
+            });
+
+            return data;
+        }
+
+        async function updateLiveCalculation() {
+            const data = collectFormData();
+            try {
+                const resp = await fetch('/api/residuos/calculate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                if (resp.ok) {
+                    const calc = await resp.json();
+                    document.getElementById('liveVolumeText').innerText = `${calc.volumen_total_estimado.toFixed(2).replace('.', ',')} m³`;
+                    document.getElementById('liveWeightText').innerText = `${calc.toneladas_total_estimadas.toFixed(2).replace('.', ',')} t`;
+
+                    document.getElementById('summaryVolText').innerText = `${calc.volumen_total_estimado.toFixed(2).replace('.', ',')} m³`;
+                    document.getElementById('summaryWeightText').innerText = `${calc.toneladas_total_estimadas.toFixed(2).replace('.', ',')} t`;
+
+                    // Renderizar táboa 3 de separación obligatoria
+                    const tbody = document.getElementById('tableSeparacionBody');
+                    tbody.innerHTML = '';
+                    calc.separacion_tbl3.forEach(row => {
+                        const tr = document.createElement('tr');
+                        const isOb = row.obligatoria;
+                        tr.className = isOb ? 'bg-amber-50 font-bold' : 'hover:bg-slate-50';
+                        tr.innerHTML = `
+                            <td class="p-2.5">${row.tipo}</td>
+                            <td class="p-2.5 text-right font-mono">${row.peso.toFixed(2).replace('.', ',')}</td>
+                            <td class="p-2.5 text-center text-slate-500">${row.umbral ? '>' + row.umbral + ' t' : '---'}</td>
+                            <td class="p-2.5 text-center">
+                                <span class="px-2 py-0.5 rounded text-[11px] font-bold ${isOb ? 'bg-amber-200 text-amber-900 border border-amber-400' : 'bg-slate-200 text-slate-700'}">
+                                    ${isOb ? '⚠️ OBLIGATORIA' : 'NO OBLIGATORIA'}
+                                </span>
+                            </td>
+                        `;
+                        tbody.appendChild(tr);
+                    });
+                }
+            } catch (err) {
+                console.error('Erro no cálculo en vivo:', err);
+            }
+        }
+
+        function goToStep(step) {
+            if (step < 1 || step > totalSteps) return;
+            document.getElementById(`step-${currentStep}`).classList.add('hidden');
+            document.getElementById(`step-nav-${currentStep}`).classList.remove('border-emerald-600', 'bg-emerald-50', 'text-emerald-800', 'font-bold', 'shadow-sm');
+            document.getElementById(`step-nav-${currentStep}`).classList.add('border-slate-200', 'bg-white', 'text-slate-600');
+
+            currentStep = step;
+            document.getElementById(`step-${currentStep}`).classList.remove('hidden');
+            document.getElementById(`step-nav-${currentStep}`).classList.remove('border-slate-200', 'bg-white', 'text-slate-600');
+            document.getElementById(`step-nav-${currentStep}`).classList.add('border-emerald-600', 'bg-emerald-50', 'text-emerald-800', 'font-bold', 'shadow-sm');
+
+            document.getElementById('currentStepText').innerText = currentStep;
+
+            const btnPrev = document.getElementById('btnPrev');
+            btnPrev.disabled = currentStep === 1;
+            btnPrev.classList.toggle('opacity-50', currentStep === 1);
+            btnPrev.classList.toggle('cursor-not-allowed', currentStep === 1);
+
+            const btnNext = document.getElementById('btnNext');
+            if (currentStep === totalSteps) {
+                btnNext.innerText = 'Xerar Documento →';
+                btnNext.onclick = () => document.getElementById('btnGenerate').scrollIntoView({ behavior: 'smooth' });
+            } else {
+                btnNext.innerText = 'Seguinte →';
+                btnNext.onclick = nextStep;
+            }
+
+            if (currentStep === 4) updateLiveCalculation();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function nextStep() { if (currentStep < totalSteps) goToStep(currentStep + 1); }
+        function prevStep() { if (currentStep > 1) goToStep(currentStep - 1); }
+
+        function exportProfile() {
+            const data = collectFormData();
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Perfil_Residuos_${data.poboacion || 'Proxecto'}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function importProfile(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    populateForm(data);
+                    updateLiveCalculation();
+                    alert('Perfil de residuos cargado con éxito.');
+                } catch (err) {
+                    alert('Erro ó ler o JSON: ' + err.message);
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        async function submitGenerateResiduos() {
+            const btn = document.getElementById('btnGenerate');
+            const orig = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = `<span>⏳</span> Xerando documento Word de Residuos...`;
+
+            const data = collectFormData();
+            try {
+                const resp = await fetch('/api/residuos/generate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await resp.json();
+                if (resp.ok && result.status === 'success') {
+                    const resultBox = document.getElementById('resultBox');
+                    const pathTxt = document.getElementById('resultPathText');
+                    const btnDl = document.getElementById('btnDownload');
+                    const warnBox = document.getElementById('resultWarningBox');
+
+                    if (result.fallback_used && result.warning) {
+                        warnBox.innerText = '⚠️ ' + result.warning;
+                        warnBox.classList.remove('hidden');
+                    } else {
+                        warnBox.classList.add('hidden');
+                    }
+
+                    pathTxt.innerHTML = `<strong>Arquivo gardado en:</strong> ${result.output_path} (${(result.size_bytes / 1024).toFixed(1)} KB)`;
+                    btnDl.href = `/api/download?file=${encodeURIComponent(result.filename)}`;
+                    btnDl.setAttribute('download', result.filename);
+
+                    resultBox.classList.remove('hidden');
+                    resultBox.scrollIntoView({ behavior: 'smooth' });
+                } else {
+                    alert('Erro ó xerar o documento: ' + (result.error || 'Erro descoñecido'));
+                }
+            } catch (err) {
+                alert('Erro de conexión: ' + err.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = orig;
+            }
+        }
+
+        window.onload = loadDefaults;
+    </script>
+</body>
+</html>

@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="gl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acceso ao Asistente Técnico de Proxectos</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-900 min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
+    <!-- Ambient Background Blobs -->
+    <div class="absolute -top-40 -left-40 w-96 h-96 bg-blue-600/30 rounded-full blur-3xl pointer-events-none"></div>
+    <div class="absolute -bottom-40 -right-40 w-96 h-96 bg-emerald-600/30 rounded-full blur-3xl pointer-events-none"></div>
+
+    <div class="w-full max-w-md bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 p-8 relative z-10">
+        <!-- Logo & Header -->
+        <div class="text-center mb-8">
+            <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-tr from-blue-600 to-emerald-500 text-white shadow-lg shadow-blue-500/20 text-3xl mb-4">
+                📐
+            </div>
+            <h1 class="text-2xl font-extrabold text-slate-900">Asistente de Proxectos</h1>
+            <p class="text-sm text-slate-500 mt-1">EBSS e Xestión de Residuos de Construcción</p>
+        </div>
+
+        <!-- Notification Banner -->
+        <div id="alertBox" class="hidden mb-5 p-3.5 rounded-xl text-xs font-semibold flex items-center gap-2"></div>
+
+        <!-- Tab Selector -->
+        <div class="flex p-1 bg-slate-100 rounded-xl mb-6">
+            <button id="tabLoginBtn" onclick="switchAuthTab('login')" class="flex-1 py-2 text-xs font-bold rounded-lg transition bg-white text-slate-900 shadow-sm">
+                Iniciar Sesión
+            </button>
+            <button id="tabRegisterBtn" onclick="switchAuthTab('register')" class="flex-1 py-2 text-xs font-bold rounded-lg transition text-slate-500 hover:text-slate-900">
+                Crear Conta
+            </button>
+        </div>
+
+        <!-- Formulario Iniciar Sesión -->
+        <form id="loginForm" onsubmit="handleAuth(event, 'login')" class="space-y-4">
+            <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Usuario ou Email</label>
+                <input type="text" id="loginUsername" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-blue-600 focus:outline-none transition" placeholder="Ex: arquitecto">
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Contrasinal</label>
+                <input type="password" id="loginPassword" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-blue-600 focus:outline-none transition" placeholder="••••••••">
+            </div>
+            <button type="submit" id="loginSubmitBtn" class="w-full py-3 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold shadow-lg shadow-blue-500/25 transition">
+                Acceder ao Panel
+            </button>
+        </form>
+
+        <!-- Formulario Rexistro -->
+        <form id="registerForm" onsubmit="handleAuth(event, 'register')" class="space-y-4 hidden">
+            <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Nome de Usuario</label>
+                <input type="text" id="regUsername" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-emerald-600 focus:outline-none transition" placeholder="Ex: ana_arquitectura">
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Correo Electrónico (opcional)</label>
+                <input type="email" id="regEmail" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-emerald-600 focus:outline-none transition" placeholder="ana@estudio.gal">
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Contrasinal</label>
+                <input type="password" id="regPassword" required minlength="4" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-emerald-600 focus:outline-none transition" placeholder="Mínimo 4 caracteres">
+            </div>
+            <button type="submit" id="regSubmitBtn" class="w-full py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold shadow-lg shadow-emerald-500/25 transition">
+                Rexistrarse e Comezar
+            </button>
+        </form>
+
+        <div class="mt-6 pt-6 border-t border-slate-100 text-center">
+            <p class="text-xs text-slate-400">
+                Asistente de Redacción Técnica • Multi-usuario con Persistencia
+            </p>
+        </div>
+    </div>
+
+    <script>
+        function switchAuthTab(tab) {
+            const loginForm = document.getElementById('loginForm');
+            const registerForm = document.getElementById('registerForm');
+            const tabLoginBtn = document.getElementById('tabLoginBtn');
+            const tabRegisterBtn = document.getElementById('tabRegisterBtn');
+            const alertBox = document.getElementById('alertBox');
+            alertBox.classList.add('hidden');
+
+            if (tab === 'login') {
+                loginForm.classList.remove('hidden');
+                registerForm.classList.add('hidden');
+                tabLoginBtn.className = "flex-1 py-2 text-xs font-bold rounded-lg transition bg-white text-slate-900 shadow-sm";
+                tabRegisterBtn.className = "flex-1 py-2 text-xs font-bold rounded-lg transition text-slate-500 hover:text-slate-900";
+            } else {
+                loginForm.classList.add('hidden');
+                registerForm.classList.remove('hidden');
+                tabRegisterBtn.className = "flex-1 py-2 text-xs font-bold rounded-lg transition bg-white text-slate-900 shadow-sm";
+                tabLoginBtn.className = "flex-1 py-2 text-xs font-bold rounded-lg transition text-slate-500 hover:text-slate-900";
+            }
+        }
+
+        async function handleAuth(event, type) {
+            event.preventDefault();
+            const alertBox = document.getElementById('alertBox');
+            alertBox.classList.add('hidden');
+
+            let body = {};
+            let endpoint = '';
+
+            if (type === 'login') {
+                body = {
+                    username: document.getElementById('loginUsername').value.trim(),
+                    password: document.getElementById('loginPassword').value
+                };
+                endpoint = '/api/auth/login';
+            } else {
+                body = {
+                    username: document.getElementById('regUsername').value.trim(),
+                    email: document.getElementById('regEmail').value.trim(),
+                    password: document.getElementById('regPassword').value
+                };
+                endpoint = '/api/auth/register';
+            }
+
+            try {
+                const res = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+                const data = await res.json();
+
+                if (res.ok && data.status === 'success') {
+                    window.location.href = '/dashboard';
+                } else {
+                    alertBox.textContent = data.error || 'Erro na autenticación.';
+                    alertBox.className = "mb-5 p-3.5 rounded-xl text-xs font-semibold flex items-center gap-2 bg-rose-50 text-rose-700 border border-rose-200";
+                    alertBox.classList.remove('hidden');
+                }
+            } catch (err) {
+                alertBox.textContent = 'Erro ao conectar co servidor: ' + err.message;
+                alertBox.className = "mb-5 p-3.5 rounded-xl text-xs font-semibold flex items-center gap-2 bg-rose-50 text-rose-700 border border-rose-200";
+                alertBox.classList.remove('hidden');
+            }
+        }
+    </script>
+</body>
+</html>

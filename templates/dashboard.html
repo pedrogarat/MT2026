@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="gl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Proxectos • Asistente Técnico</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen flex flex-col text-slate-800">
+
+    <!-- Top Navigation Bar -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-emerald-500 text-white flex items-center justify-center text-xl shadow-sm">
+                    📐
+                </div>
+                <div>
+                    <span class="font-extrabold text-slate-900 text-lg leading-tight block">Asistente Técnico</span>
+                    <span class="text-[11px] text-slate-500 font-medium leading-none block">EBSS & Xestión de Residuos</span>
+                </div>
+            </div>
+
+            <!-- User Menu & Actions -->
+            <div class="flex items-center gap-3">
+                <button onclick="openImportModal()" class="px-3.5 py-2 text-xs font-bold text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 rounded-xl transition flex items-center gap-1.5">
+                    <span>📥</span> Importar JSON
+                </button>
+                <button onclick="openNewProjectModal()" class="px-4 py-2 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl shadow-sm shadow-blue-500/20 transition flex items-center gap-1.5">
+                    <span>➕</span> Novo Proxecto
+                </button>
+                <div class="h-6 w-px bg-slate-200 mx-1"></div>
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-800 font-bold text-xs flex items-center justify-center border border-blue-200" id="userAvatar">
+                        U
+                    </div>
+                    <span class="text-xs font-semibold text-slate-700 hidden sm:inline" id="userGreeting">Usuario</span>
+                    <button onclick="logout()" title="Pechar sesión" class="p-2 text-slate-400 hover:text-rose-600 transition rounded-lg hover:bg-slate-100">
+                        🚪
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        <!-- Welcome & Stats Banner -->
+        <div class="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div>
+                <h1 class="text-2xl font-extrabold text-slate-900">Os meus Proxectos</h1>
+                <p class="text-sm text-slate-500 mt-1">Xestiona os datos comúns do proxecto e xera os estudos técnicos (EBSS e Residuos) de xeito modular.</p>
+            </div>
+            <!-- Search & Filter -->
+            <div class="flex items-center gap-3">
+                <div class="relative">
+                    <input type="text" id="searchInput" oninput="filterProjects()" placeholder="Buscar proxecto ou concello..." class="w-64 pl-9 pr-4 py-2 text-xs rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <span class="absolute left-3 top-2.5 text-xs text-slate-400">🔍</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Project Grid -->
+        <div id="projectsLoading" class="text-center py-20">
+            <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-blue-500 border-t-transparent"></div>
+            <p class="text-xs text-slate-400 mt-3">Cargando proxectos...</p>
+        </div>
+
+        <div id="emptyState" class="hidden text-center py-16 px-4 bg-white rounded-3xl border border-slate-200 shadow-sm max-w-md mx-auto">
+            <div class="text-5xl mb-3">📁</div>
+            <h3 class="text-base font-bold text-slate-900">Aínda non tes proxectos gardados</h3>
+            <p class="text-xs text-slate-500 mt-1 mb-6">Crea o teu primeiro proxecto para introducir os datos comúns e xerar o EBSS e a Xestión de Residuos.</p>
+            <button onclick="openNewProjectModal()" class="px-5 py-2.5 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl shadow transition inline-flex items-center gap-2">
+                <span>➕</span> Crear Primeiro Proxecto
+            </button>
+        </div>
+
+        <div id="projectsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Dynamic project cards inserted via JS -->
+        </div>
+
+    </main>
+
+    <!-- Modal: Novo Proxecto -->
+    <div id="newProjectModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl shadow-2xl max-w-lg w-full p-6 border border-slate-100 relative">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+                    <span>✨</span> Novo Proxecto
+                </h3>
+                <button onclick="closeNewProjectModal()" class="text-slate-400 hover:text-slate-600 p-1 rounded-lg">✕</button>
+            </div>
+            
+            <form onsubmit="handleCreateProject(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Título do Proxecto *</label>
+                    <input type="text" id="newProjectName" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-blue-600 focus:outline-none" placeholder="Ex: Reforma de Vivenda en Ferrol">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Tipo de obra / Obxecto</label>
+                    <input type="text" id="newProjectTipoObra" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-blue-600 focus:outline-none" placeholder="Ex: Melloras de condicións de seguridade, salubridade e ornato" value="Melloras de condicións de seguridade, salubridade e ornato">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Concello / Poboación</label>
+                    <input type="text" id="newProjectPoboacion" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-blue-600 focus:outline-none" placeholder="Ex: Ferrol" value="Ferrol">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Descrición curta (opcional)</label>
+                    <textarea id="newProjectDesc" rows="2" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-blue-600 focus:outline-none" placeholder="Notas internas sobre o proxecto..."></textarea>
+                </div>
+
+                <div class="pt-3 flex items-center justify-end gap-3">
+                    <button type="button" onclick="closeNewProjectModal()" class="px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-xl transition">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="px-5 py-2 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl shadow-sm transition">
+                        Crear e Abrir
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Importar JSON -->
+    <div id="importModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full p-6 border border-slate-100">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+                    <span>📥</span> Importar Proxecto JSON
+                </h3>
+                <button onclick="closeImportModal()" class="text-slate-400 hover:text-slate-600 p-1 rounded-lg">✕</button>
+            </div>
+            
+            <p class="text-xs text-slate-500 mb-4">Selecciona un arquivo JSON de proxecto ou de perfil (EBSS ou Residuos) previamente gardado.</p>
+
+            <div class="border-2 border-dashed border-slate-200 hover:border-blue-500 rounded-2xl p-6 text-center cursor-pointer mb-4 transition" onclick="document.getElementById('importFileInput').click()">
+                <div class="text-3xl mb-2">📄</div>
+                <p class="text-xs font-semibold text-slate-700">Preme para seleccionar arquivo JSON</p>
+                <p class="text-[10px] text-slate-400 mt-1">.json exportado dende este asistente</p>
+                <input type="file" id="importFileInput" accept=".json" class="hidden" onchange="processImportedFile(event)">
+            </div>
+
+            <div class="flex justify-end">
+                <button type="button" onclick="closeImportModal()" class="px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-xl transition">
+                    Pechar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200 py-6 text-center text-xs text-slate-400">
+        Asistente Técnico de Proxectos • Almacenamento seguro en Base de Datos
+    </footer>
+
+    <script>
+        let allProjects = [];
+
+        async function loadProjects() {
+            try {
+                const res = await fetch('/api/projects');
+                if (res.status === 401) {
+                    window.location.href = '/login';
+                    return;
+                }
+                const data = await res.json();
+                if (data.status === 'success') {
+                    allProjects = data.projects;
+                    if (data.user) {
+                        document.getElementById('userGreeting').textContent = data.user.username;
+                        document.getElementById('userAvatar').textContent = data.user.username.charAt(0).toUpperCase();
+                    }
+                    renderProjects(allProjects);
+                }
+            } catch (err) {
+                console.error(err);
+            } finally {
+                document.getElementById('projectsLoading').classList.add('hidden');
+            }
+        }
+
+        function renderProjects(projects) {
+            const grid = document.getElementById('projectsGrid');
+            const empty = document.getElementById('emptyState');
+            grid.innerHTML = '';
+
+            if (projects.length === 0) {
+                empty.classList.remove('hidden');
+                grid.classList.add('hidden');
+                return;
+            }
+
+            empty.classList.add('hidden');
+            grid.classList.remove('hidden');
+
+            projects.forEach(p => {
+                const card = document.createElement('div');
+                card.className = "bg-white rounded-2xl border border-slate-200 p-6 shadow-sm hover:shadow-md hover:border-blue-400 transition-all flex flex-col justify-between group";
+                
+                const poboacion = p.common_data?.poboacion || 'Ferrol';
+                const tipoObra = p.common_data?.tipo_obra || 'Sen especificar';
+                const supAct = p.common_data?.superficie_actuacion ? `${p.common_data.superficie_actuacion} m²` : '9,84 m²';
+
+                card.innerHTML = `
+                    <div>
+                        <div class="flex items-start justify-between gap-3 mb-3">
+                            <h3 class="text-base font-bold text-slate-900 group-hover:text-blue-600 transition leading-snug">${escapeHtml(p.name)}</h3>
+                            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 shrink-0">
+                                📍 ${escapeHtml(poboacion)}
+                            </span>
+                        </div>
+
+                        <p class="text-xs text-slate-500 line-clamp-2 mb-4 leading-relaxed">${escapeHtml(tipoObra)}</p>
+
+                        <!-- Tags / Modulos -->
+                        <div class="flex flex-wrap items-center gap-1.5 mb-4">
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-blue-50 text-blue-700 text-[10px] font-bold border border-blue-200">
+                                🛡️ EBSS
+                            </span>
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 text-[10px] font-bold border border-emerald-200">
+                                ♻️ Residuos (${supAct})
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="pt-4 border-t border-slate-100 flex items-center justify-between mt-2">
+                        <span class="text-[10px] text-slate-400">Modif: ${p.updated_at || p.created_at}</span>
+                        <div class="flex items-center gap-1.5">
+                            <button onclick="exportProjectJson(${p.id})" title="Exportar JSON" class="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition text-xs">
+                                💾
+                            </button>
+                            <button onclick="deleteProject(${p.id})" title="Eliminar" class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition text-xs">
+                                🗑️
+                            </button>
+                            <a href="/project/${p.id}" class="px-3.5 py-1.5 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-sm transition flex items-center gap-1">
+                                Abrir →
+                            </a>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function filterProjects() {
+            const q = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = allProjects.filter(p => 
+                p.name.toLowerCase().includes(q) ||
+                (p.common_data?.poboacion && p.common_data.poboacion.toLowerCase().includes(q)) ||
+                (p.common_data?.tipo_obra && p.common_data.tipo_obra.toLowerCase().includes(q))
+            );
+            renderProjects(filtered);
+        }
+
+        function openNewProjectModal() {
+            document.getElementById('newProjectModal').classList.remove('hidden');
+            document.getElementById('newProjectName').focus();
+        }
+
+        function closeNewProjectModal() {
+            document.getElementById('newProjectModal').classList.add('hidden');
+        }
+
+        function openImportModal() {
+            document.getElementById('importModal').classList.remove('hidden');
+        }
+
+        function closeImportModal() {
+            document.getElementById('importModal').classList.add('hidden');
+        }
+
+        async function handleCreateProject(e) {
+            e.preventDefault();
+            const name = document.getElementById('newProjectName').value.trim();
+            const tipoObra = document.getElementById('newProjectTipoObra').value.trim();
+            const poboacion = document.getElementById('newProjectPoboacion').value.trim();
+            const desc = document.getElementById('newProjectDesc').value.trim();
+
+            try {
+                const res = await fetch('/api/projects', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        name: name,
+                        description: desc,
+                        common_data: {
+                            tipo_obra: tipoObra,
+                            poboacion: poboacion
+                        }
+                    })
+                });
+                const data = await res.json();
+                if (data.status === 'success') {
+                    window.location.href = `/project/${data.project.id}`;
+                } else {
+                    alert('Erro: ' + data.error);
+                }
+            } catch (err) {
+                alert('Erro ao crear o proxecto: ' + err.message);
+            }
+        }
+
+        async function deleteProject(id) {
+            if (!confirm('¿Estás seguro de que desexas eliminar este proxecto? Esta acción non se pode desfacer.')) {
+                return;
+            }
+            try {
+                const res = await fetch(`/api/projects/${id}`, { method: 'DELETE' });
+                const data = await res.json();
+                if (data.status === 'success') {
+                    loadProjects();
+                } else {
+                    alert('Erro ao eliminar: ' + data.error);
+                }
+            } catch (err) {
+                alert('Erro na conexión: ' + err.message);
+            }
+        }
+
+        async function exportProjectJson(id) {
+            try {
+                const res = await fetch(`/api/projects/${id}`);
+                const data = await res.json();
+                if (data.status === 'success') {
+                    const blob = new Blob([JSON.stringify(data.project, null, 2)], { type: 'application/json' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `Proxecto_${data.project.name.replace(/\s+/g, '_')}.json`;
+                    a.click();
+                    URL.revokeObjectURL(url);
+                }
+            } catch (err) {
+                alert('Erro exportando proxecto: ' + err.message);
+            }
+        }
+
+        function processImportedFile(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = async function(evt) {
+                try {
+                    const parsed = JSON.parse(evt.target.result);
+                    let projectName = parsed.name || file.name.replace(/\.json$/i, '').replace(/_/g, ' ');
+                    
+                    let common = parsed.common_data || {};
+                    let ebss = parsed.ebss_data || {};
+                    let resData = parsed.residuos_data || {};
+
+                    // Se é un JSON antigo de EBSS ou Residuos directo
+                    if (!parsed.common_data) {
+                        common = {
+                            tipo_obra: parsed.tipo_obra,
+                            situacion: parsed.situacion,
+                            poboacion: parsed.poboacion,
+                            promotor: parsed.promotor,
+                            arquitecto: parsed.arquitecto,
+                            orzamento_pem: parsed.orzamento_pem,
+                            duracion_obra: parsed.duracion_obra,
+                            superficie_construida: parsed.superficie_construida,
+                            superficie_actuacion: parsed.superficie_actuacion
+                        };
+                        if (parsed.maquinaria) ebss = parsed;
+                        if (parsed.residuos_selection) resData = parsed;
+                    }
+
+                    const res = await fetch('/api/projects', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            name: projectName,
+                            description: 'Importado dende JSON',
+                            common_data: common,
+                            ebss_data: ebss,
+                            residuos_data: resData
+                        })
+                    });
+                    const resDataServer = await res.json();
+                    if (resDataServer.status === 'success') {
+                        closeImportModal();
+                        window.location.href = `/project/${resDataServer.project.id}`;
+                    } else {
+                        alert('Erro ao importar: ' + resDataServer.error);
+                    }
+                } catch (err) {
+                    alert('O arquivo non contén un formato JSON válido: ' + err.message);
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        async function logout() {
+            await fetch('/api/auth/logout', { method: 'POST' });
+            window.location.href = '/login';
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+
+        loadProjects();
+    </script>
+</body>
+</html>

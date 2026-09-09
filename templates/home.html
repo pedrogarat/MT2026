@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="gl" class="h-full bg-slate-50">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plataforma de Xestión e Redacción de Proxectos</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: { 50: '#eef6ff', 100: '#dbeafe', 500: '#2563eb', 600: '#1d4ed8', 700: '#1e40af' }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #f8fafc; color: #1e293b; margin: 0; }
+        header { background-color: #0f172a; color: #ffffff; padding: 1.25rem 1rem; }
+    </style>
+</head>
+<body class="h-full text-slate-800 flex flex-col font-sans">
+
+    <!-- Cabeceira Superior -->
+    <header class="bg-slate-900 text-white shadow-lg border-b border-slate-800">
+        <div class="max-w-6xl mx-auto px-4 py-3 sm:px-6 flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center font-bold text-xl shadow-md">
+                    🏛️
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold tracking-tight text-white flex items-center gap-2">
+                        Asistente Técnico de Proxectos de Edificación
+                    </h1>
+                    <p class="text-xs text-slate-400">Cumprimentación automatizada de memorias técnicas e pliegos formais</p>
+                </div>
+            </div>
+            <div class="text-xs text-slate-400 font-medium hidden sm:block">
+                Versión 2.0 • Galiza
+            </div>
+        </div>
+    </header>
+
+    <!-- Contido Principal -->
+    <main class="flex-1 max-w-5xl w-full mx-auto p-6 sm:p-10 flex flex-col justify-center">
+        
+        <div class="text-center mb-10 space-y-3">
+            <span class="text-xs font-bold uppercase tracking-wider text-blue-600 bg-blue-50 px-3 py-1 rounded-full border border-blue-200">
+                Selección de Documento a Redactar
+            </span>
+            <h2 class="text-3xl font-extrabold text-slate-900 tracking-tight sm:text-4xl">
+                ¿Qué documento desexas xerar hoxe?
+            </h2>
+            <p class="text-slate-500 max-w-2xl mx-auto text-sm sm:text-base">
+                Selecciona o módulo técnico que necesitas cumplimentar. O asistente guiará paso a paso a introdución de datos e calculará automaticamente as táboas normativas.
+            </p>
+        </div>
+
+        <!-- Grid de Tarxetas dos Módulos -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+
+            <!-- Tarxeta 1: EBSS -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 hover:border-blue-500 hover:shadow-xl transition-all duration-300 flex flex-col justify-between p-8 group">
+                <div class="space-y-4">
+                    <div class="w-14 h-14 rounded-2xl bg-blue-50 border border-blue-200 flex items-center justify-center text-3xl group-hover:scale-110 transition duration-300">
+                        🛡️
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <h3 class="text-xl font-bold text-slate-900">Estudio Básico de Seguridade e Saúde</h3>
+                            <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-blue-100 text-blue-800">EBSS</span>
+                        </div>
+                        <p class="text-xs text-slate-400 mt-0.5">Real Decreto 1627/1997 e Ley 31/1995</p>
+                    </div>
+                    <p class="text-sm text-slate-600 leading-relaxed">
+                        Memoria técnica de prevención de riscos laborais en obras de edificación (ata 20 traballadores). Inclúe condicionantes do emprazamento, fases de obra, asistencia sanitaria, maquinaria pesada e medios auxiliares.
+                    </p>
+                </div>
+
+                <div class="pt-6 mt-6 border-t border-slate-100 flex items-center justify-between">
+                    <span class="text-xs text-slate-400 font-medium">6 pasos • ~3 min</span>
+                    <a href="/ebss" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl shadow-md transition flex items-center gap-2">
+                        <span>Iniciar EBSS</span>
+                        <span>→</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Tarxeta 2: XESTIÓN DE RESIDUOS -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 hover:border-emerald-500 hover:shadow-xl transition-all duration-300 flex flex-col justify-between p-8 group">
+                <div class="space-y-4">
+                    <div class="w-14 h-14 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-3xl group-hover:scale-110 transition duration-300">
+                        ♻️
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <h3 class="text-xl font-bold text-slate-900">Estudio de Xestión de Residuos</h3>
+                            <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800">EGR / RCD</span>
+                        </div>
+                        <p class="text-xs text-slate-400 mt-0.5">Real Decreto 105/2008 e Orde MAM/304/2002 (LER)</p>
+                    </div>
+                    <p class="text-sm text-slate-600 leading-relaxed">
+                        Estimación e inventario de residuos de construcción e demolición (RCDs). Calcula volumes (m³) e toneladas (t) a partir da superficie de actuación (m²) e a táboa de separación obrigatoria en obra.
+                    </p>
+                </div>
+
+                <div class="pt-6 mt-6 border-t border-slate-100 flex items-center justify-between">
+                    <span class="text-xs text-slate-400 font-medium">5 pasos • ~2 min</span>
+                    <a href="/residuos" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-md transition flex items-center gap-2">
+                        <span>Iniciar Residuos</span>
+                        <span>→</span>
+                    </a>
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- Rodapé -->
+    <footer class="bg-white border-t border-slate-200 py-4 text-center text-xs text-slate-400">
+        Plataforma de Redacción de Proxectos de Edificación • Cumprimento Normativo Estatal e Autonómico
+    </footer>
+
+</body>
+</html>

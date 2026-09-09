@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="gl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editor de Proxecto • Asistente Técnico</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen flex flex-col text-slate-800">
+
+    <!-- Top Navigation Bar -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-4">
+                <a href="/dashboard" class="px-3 py-1.5 rounded-xl border border-slate-200 hover:bg-slate-100 text-slate-600 text-xs font-bold transition flex items-center gap-1.5">
+                    <span>←</span> Os meus Proxectos
+                </a>
+                <div class="h-6 w-px bg-slate-200"></div>
+                <div>
+                    <h1 id="headerProjectName" class="font-bold text-slate-900 text-base leading-tight">Cargando proxecto...</h1>
+                    <div class="flex items-center gap-2">
+                        <span id="saveStatusBadge" class="text-[10px] text-emerald-600 font-semibold flex items-center gap-1">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Gardado en Base de Datos
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Header Quick Actions -->
+            <div class="flex items-center gap-2">
+                <button onclick="exportCurrentProjectJson()" class="px-3 py-1.5 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-xl transition flex items-center gap-1 border border-slate-200">
+                    <span>💾</span> Exportar JSON
+                </button>
+                <button onclick="saveProject(true)" id="btnManualSave" class="px-4 py-2 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl shadow-sm transition flex items-center gap-1.5">
+                    <span>💾</span> Gardar Proxecto
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <div class="bg-white border-b border-slate-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex space-x-2 py-2 overflow-x-auto">
+            <button id="tabBtnCommon" onclick="switchMainTab('common')" class="px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-2 bg-blue-50 text-blue-700 border border-blue-200">
+                <span>📌</span> 1. Datos Comúns do Proxecto
+            </button>
+            <button id="tabBtnEbss" onclick="switchMainTab('ebss')" class="px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-2 text-slate-600 hover:text-slate-900 border border-transparent">
+                <span>🛡️</span> 2. Estudo de Seguridade (EBSS)
+            </button>
+            <button id="tabBtnResiduos" onclick="switchMainTab('residuos')" class="px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-2 text-slate-600 hover:text-slate-900 border border-transparent">
+                <span>♻️</span> 3. Xestión de Residuos (EGR)
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+        <!-- ============================================================ -->
+        <!-- PESTAÑA 1: DATOS COMÚNS DO PROXECTO                          -->
+        <!-- ============================================================ -->
+        <section id="tabContentCommon" class="space-y-6">
+            <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+                <div class="flex items-start justify-between gap-4 border-b border-slate-100 pb-4 mb-6">
+                    <div>
+                        <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+                            <span>📌</span> Ficha Xeral de Datos Comúns
+                        </h2>
+                        <p class="text-xs text-slate-500 mt-1">Estes datos son compartidos automaticamente por tódolos documentos xerados (EBSS e Residuos).</p>
+                    </div>
+                    <span class="text-[10px] font-bold px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200">
+                        Sincronización Automática
+                    </span>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div class="md:col-span-2">
+                        <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Título interno do Proxecto</label>
+                        <input type="text" id="project_name" oninput="markDirty()" class="w-full rounded-xl border-slate-300 border p-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    </div>
+
+                    <div class="md:col-span-2">
+                        <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Tipo de obra / Obxecto do proxecto</label>
+                        <input type="text" id="common_tipo_obra" oninput="markDirty()" class="w-full rounded-xl border-slate-300 border p-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="Ex: Melloras de condicións de seguridade, salubridade e ornato">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Situación / Rúa e número</label>
+                        <input type="text" id="common_situacion" oninput="markDirty()" class="w-full rounded-xl border-slate-300 border p-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="Ex: Rúa Baterías 34">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Poboación / Concello</label>
+                        <input type="text" id="common_poboacion" oninput="markDirty()" class="w-full rounded-xl border-slate-300 border p-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="Ex: Ferrol">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Promotor / Cliente</label>
+                        <input type="text" id="common_promotor" oninput="markDirty()" class="w-full rounded-xl border-slate-300 border p-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="Ex: El Bosque Providencia S.L.">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Arquitecto / Redactor do proxecto</label>
+                        <input type="text" id="common_arquitecto" oninput="markDirty()" class="w-full rounded-xl border-slate-300 border p-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="Ex: Estudio Anta Arquitectos S.L.P.">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Coordinador de Seguridade e Saúde</label>
+                        <input type="text" id="common_coordinador_ss" oninput="markDirty()" class="w-full rounded-xl border-slate-300 border p-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="Ex: A determinar">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Orzamento de Execución Material (P.E.M.)</label>
+                        <input type="text" id="common_orzamento_pem" oninput="markDirty()" class="w-full rounded-xl border-slate-300 border p-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="Ex: O indicado no capítulo homónimo do presente proxecto">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Duración estimada da obra</label>
+                        <input type="text" id="common_duracion_obra" oninput="markDirty()" class="w-full rounded-xl border-slate-300 border p-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="Ex: 3 meses">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Nº estimado de traballadores</label>
+                        <input type="text" id="common_num_traballadores" oninput="markDirty()" class="w-full rounded-xl border-slate-300 border p-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="Ex: 6">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Superficie construída (m²)</label>
+                        <input type="text" id="common_superficie_construida" oninput="markDirty()" class="w-full rounded-xl border-slate-300 border p-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="Ex: 9,84 m2">
+                    </div>
+
+                    <!-- SUPERFICIE DE ACTUACIÓN (D4) -->
+                    <div class="md:col-span-2 p-4 rounded-xl border border-emerald-300 bg-emerald-50/70 space-y-2">
+                        <label class="block text-xs font-bold text-emerald-900 uppercase">📐 Superficie de actuación (m²) [Celda D4 da plantilla Excel de Residuos]</label>
+                        <div class="flex items-center gap-4">
+                            <input type="number" id="common_superficie_actuacion" step="0.01" min="0.1" value="9.84" oninput="handleCommonSurfaceChange()" class="w-48 rounded-lg border-emerald-400 border p-2.5 text-base font-bold text-emerald-900 bg-white focus:ring-2 focus:ring-emerald-600">
+                            <div class="text-xs text-emerald-800">
+                                <strong>Cálculo en tempo real para Residuos:</strong>
+                                <span id="commonPreviewVol" class="font-bold">1,97 m³</span> de volume | 
+                                <span id="commonPreviewTon" class="font-bold">1,97 t</span> de residuo total.
+                            </div>
+                        </div>
+                        <p class="text-[11px] text-emerald-700">Fórmula Excel: Volume estimado (m³) = Superficie (m²) × 0,2.</p>
+                    </div>
+
+                    <!-- DATOS DE SINATURA COMÚNS -->
+                    <div class="md:col-span-2 pt-4 border-t border-slate-100">
+                        <h3 class="text-sm font-bold text-slate-900 mb-3">Datos de Sinatura e Colexiado</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">Data do documento</label>
+                                <input type="text" id="common_data_documento" oninput="markDirty()" class="w-full rounded-xl border-slate-300 border p-2.5 text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="Ferrol, xullo de 2026">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">Asinantes</label>
+                                <input type="text" id="common_asinantes" oninput="markDirty()" class="w-full rounded-xl border-slate-300 border p-2.5 text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="Fdo. Sergio J. Beceiro Lodeiro     M. Rosa Vilas Romalde">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">Colexiado</label>
+                                <input type="text" id="common_colexiado" oninput="markDirty()" class="w-full rounded-xl border-slate-300 border p-2.5 text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="ESTUDIO ANTA ARQUITECTOS S.L.P.   Nº COAG - 20.039">
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- PESTAÑA 2: ESTUDO BÁSICO DE SEGURIDADE E SAÚDE (EBSS)        -->
+        <!-- ============================================================ -->
+        <section id="tabContentEbss" class="space-y-6 hidden">
+            
+            <!-- Generate Card -->
+            <div class="bg-gradient-to-r from-blue-900 to-indigo-900 rounded-2xl p-6 text-white shadow-md flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <span class="text-xs font-bold text-blue-300 uppercase tracking-wider block">Módulo 1</span>
+                    <h2 class="text-xl font-extrabold text-white">Estudo Básico de Seguridade e Saúde (EBSS)</h2>
+                    <p class="text-xs text-blue-200 mt-1">Xera o documento oficial (.docx) incorporando os datos comúns e os condicionantes de obra.</p>
+                </div>
+                <div class="flex items-center gap-3">
+                    <button onclick="generateEbssDocument()" id="btnGenerateEbss" class="px-6 py-3 bg-white hover:bg-blue-50 text-blue-900 font-extrabold text-xs rounded-xl shadow-lg transition flex items-center gap-2 shrink-0">
+                        <span>📄</span> Xerar e Descargar EBSS (.docx)
+                    </button>
+                </div>
+            </div>
+
+            <!-- EBSS Technical Details Accordion / Sections -->
+            <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm space-y-6">
+                
+                <!-- Condicionantes do Emprazamento -->
+                <div>
+                    <h3 class="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2">
+                        <span>📍</span> Condicionantes do Emprazamento (Táboa 2)
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Accesos á obra</label>
+                            <input type="text" id="ebss_accesos_obra" oninput="markDirty()" class="w-full rounded-xl border-slate-300 border p-2 text-xs">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Topografía do terreo</label>
+                            <input type="text" id="ebss_topografia_terreo" oninput="markDirty()" class="w-full rounded-xl border-slate-300 border p-2 text-xs">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Tipo de chan</label>
+                            <input type="text" id="ebss_tipo_chan" oninput="markDirty()" class="w-full rounded-xl border-slate-300 border p-2 text-xs">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Edificacións lindeiras</label>
+                            <input type="text" id="ebss_edificacions_lindeiras" oninput="markDirty()" class="w-full rounded-xl border-slate-300 border p-2 text-xs">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Fases da Obra -->
+                <div class="pt-4 border-t border-slate-100">
+                    <h3 class="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2">
+                        <span>🏗️</span> Fases da Obra (Táboa 3)
+                    </h3>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                        <div>
+                            <label class="block text-[11px] font-medium text-slate-600 mb-1">Demolicións</label>
+                            <input type="text" id="ebss_fase_demolicions" oninput="markDirty()" class="w-full rounded-lg border-slate-300 border p-1.5 text-xs">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-medium text-slate-600 mb-1">Movemento de Terras</label>
+                            <input type="text" id="ebss_fase_terras" oninput="markDirty()" class="w-full rounded-lg border-slate-300 border p-1.5 text-xs">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-medium text-slate-600 mb-1">Estruturas</label>
+                            <input type="text" id="ebss_fase_estruturas" oninput="markDirty()" class="w-full rounded-lg border-slate-300 border p-1.5 text-xs">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-medium text-slate-600 mb-1">Cubertas</label>
+                            <input type="text" id="ebss_fase_cubertas" oninput="markDirty()" class="w-full rounded-lg border-slate-300 border p-1.5 text-xs">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-medium text-slate-600 mb-1">Albanelaría</label>
+                            <input type="text" id="ebss_fase_albanelaria" oninput="markDirty()" class="w-full rounded-lg border-slate-300 border p-1.5 text-xs">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-medium text-slate-600 mb-1">Acabados</label>
+                            <input type="text" id="ebss_fase_acabados" oninput="markDirty()" class="w-full rounded-lg border-slate-300 border p-1.5 text-xs">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-medium text-slate-600 mb-1">Instalacións</label>
+                            <input type="text" id="ebss_fase_instalacions" oninput="markDirty()" class="w-full rounded-lg border-slate-300 border p-1.5 text-xs">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Asistencia Sanitaria e Urxencias -->
+                <div class="pt-4 border-t border-slate-100">
+                    <h3 class="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2">
+                        <span>🏥</span> Asistencia Sanitaria e Centros Médicos (Táboa 4)
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
+                            <h4 class="text-xs font-bold text-slate-700">Centro de Saúde máis próximo</h4>
+                            <input type="text" id="ebss_centro_saude_nome" placeholder="Nome do centro" oninput="markDirty()" class="w-full rounded-lg border-slate-300 border p-1.5 text-xs">
+                            <input type="text" id="ebss_centro_saude_enderezo" placeholder="Enderezo" oninput="markDirty()" class="w-full rounded-lg border-slate-300 border p-1.5 text-xs">
+                            <div class="grid grid-cols-2 gap-2">
+                                <input type="text" id="ebss_tlf_urxencias" placeholder="Teléfono urxencias" oninput="markDirty()" class="rounded-lg border-slate-300 border p-1.5 text-xs">
+                                <input type="text" id="ebss_centro_saude_distancia" placeholder="Distancia (km)" oninput="markDirty()" class="rounded-lg border-slate-300 border p-1.5 text-xs">
+                            </div>
+                        </div>
+
+                        <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
+                            <h4 class="text-xs font-bold text-slate-700">Hospital de Referencia</h4>
+                            <input type="text" id="ebss_hospital_nome" placeholder="Nome do hospital" oninput="markDirty()" class="w-full rounded-lg border-slate-300 border p-1.5 text-xs">
+                            <input type="text" id="ebss_hospital_enderezo" placeholder="Enderezo" oninput="markDirty()" class="w-full rounded-lg border-slate-300 border p-1.5 text-xs">
+                            <div class="grid grid-cols-2 gap-2">
+                                <input type="text" id="ebss_tlf_hospital" placeholder="Teléfono hospital" oninput="markDirty()" class="rounded-lg border-slate-300 border p-1.5 text-xs">
+                                <input type="text" id="ebss_hospital_distancia" placeholder="Distancia (km)" oninput="markDirty()" class="rounded-lg border-slate-300 border p-1.5 text-xs">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Maquinaria Pesada e Medios Auxiliares -->
+                <div class="pt-4 border-t border-slate-100">
+                    <h3 class="text-sm font-bold text-slate-900 mb-2 flex items-center gap-2">
+                        <span>🚜</span> Maquinaria Pesada e Equipos Previstos (Táboa 5)
+                    </h3>
+                    <p class="text-[11px] text-slate-500 mb-3">Marca os equipos que interveñen na obra. As táboas de prevención activaranse segundo esta selección.</p>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5" id="ebssMachineryGrid">
+                        <!-- Generado por JS -->
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- PESTAÑA 3: XESTIÓN DE RESIDUOS DE CONSTRUCCIÓN (EGR)         -->
+        <!-- ============================================================ -->
+        <section id="tabContentResiduos" class="space-y-6 hidden">
+            
+            <!-- Generate Card -->
+            <div class="bg-gradient-to-r from-emerald-900 to-teal-900 rounded-2xl p-6 text-white shadow-md flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <span class="text-xs font-bold text-emerald-300 uppercase tracking-wider block">Módulo 2</span>
+                    <h2 class="text-xl font-extrabold text-white">Estudio de Xestión de Residuos (EGR)</h2>
+                    <p class="text-xs text-emerald-200 mt-1">Cálculo matemático automático segundo RD 105/2008 e xeración do documento oficial (.docx).</p>
+                </div>
+                <div class="flex items-center gap-3">
+                    <button onclick="generateResiduosDocument()" id="btnGenerateResiduos" class="px-6 py-3 bg-white hover:bg-emerald-50 text-emerald-900 font-extrabold text-xs rounded-xl shadow-lg transition flex items-center gap-2 shrink-0">
+                        <span>♻️</span> Xerar e Descargar Residuos (.docx)
+                    </button>
+                </div>
+            </div>
+
+            <!-- Live Calculation Summary Banner -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+                    <div>
+                        <span class="text-[10px] font-bold uppercase text-slate-400">Superficie Actuación</span>
+                        <div id="resSummarySup" class="text-xl font-extrabold text-slate-900">9,84 m²</div>
+                        <span class="text-[10px] text-slate-400">Sincronizada dos Datos Comúns</span>
+                    </div>
+                    <span class="text-3xl">📐</span>
+                </div>
+                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+                    <div>
+                        <span class="text-[10px] font-bold uppercase text-emerald-600">Volume Total Estimado</span>
+                        <div id="resSummaryVol" class="text-xl font-extrabold text-emerald-600">1,97 m³</div>
+                        <span class="text-[10px] text-slate-400">Fórmula: Sup × 0,2</span>
+                    </div>
+                    <span class="text-3xl">📦</span>
+                </div>
+                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+                    <div>
+                        <span class="text-[10px] font-bold uppercase text-emerald-600">Peso Total Estimado</span>
+                        <div id="resSummaryWeight" class="text-xl font-extrabold text-emerald-600">1,97 t</div>
+                        <span class="text-[10px] text-slate-400">Suma ponderada de densidades</span>
+                    </div>
+                    <span class="text-3xl">⚖️</span>
+                </div>
+            </div>
+
+            <!-- Residuos Selection Grids -->
+            <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm space-y-6">
+                <div>
+                    <h3 class="text-sm font-bold text-slate-900 mb-1 flex items-center gap-2">
+                        <span>📦</span> Residuos Nivel I e No Pétreos (Madeira, Plásticos, Metais, etc.)
+                    </h3>
+                    <p class="text-xs text-slate-500 mb-3">Marca os tipos de residuos previstos no proxecto. Os cálculos de peso e volume actualizaranse ao instante.</p>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3" id="residuosStep2Grid"></div>
+                </div>
+
+                <div class="pt-4 border-t border-slate-100">
+                    <h3 class="text-sm font-bold text-slate-900 mb-1 flex items-center gap-2">
+                        <span>🧱</span> Residuos Pétreos e Peligrosos (Formigón, Ladrillos, Pinturas, etc.)
+                    </h3>
+                    <p class="text-xs text-slate-500 mb-3">Indica se a obra comprende residuos pétreos (cerámicos, árido) ou potencialmente perigosos.</p>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3" id="residuosStep3Grid"></div>
+                </div>
+
+                <!-- Live Separation Table -->
+                <div class="pt-4 border-t border-slate-100">
+                    <h3 class="text-sm font-bold text-slate-900 mb-2 flex items-center gap-2">
+                        <span>📋</span> Táboa 3: Separación Obrigatoria en Obra (RD 105/2008)
+                    </h3>
+                    <div class="overflow-x-auto rounded-xl border border-slate-200">
+                        <table class="w-full text-left text-xs">
+                            <thead class="bg-slate-50 border-b border-slate-200 text-slate-600 font-bold uppercase">
+                                <tr>
+                                    <th class="p-2.5">Tipoloxía de Residuo</th>
+                                    <th class="p-2.5 text-right">Peso Estimado (t)</th>
+                                    <th class="p-2.5 text-center">Limiar RD 105/2008</th>
+                                    <th class="p-2.5 text-center">Separación en Obra</th>
+                                </tr>
+                            </thead>
+                            <tbody id="residuosSeparationTbody" class="divide-y divide-slate-100">
+                                <!-- Filas actualizadas por JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+    </main>
+
+    <script>
+        const projectId = window.location.pathname.split('/').filter(Boolean).pop();
+        let projectData = null;
+        let isDirty = false;
+
+        const MACHINERY_ITEMS = [
+            { id: "guindastres_torre", label: "Guindastre torre" },
+            { id: "guindastre_mobil", label: "Guindastre móbil autopropulsado" },
+            { id: "camion_guindastre", label: "Camión guindastre" },
+            { id: "maquinaria_movemento_terras", label: "Maquinaria movemento de terras" },
+            { id: "dumper", label: "Dumper" },
+            { id: "camion_basculante", label: "Camión basculante" },
+            { id: "formigoneira", label: "Formigoneira" },
+            { id: "bomba_formigon", label: "Bomba de formigón" },
+            { id: "camion_cuba", label: "Camión cuba de formigón" },
+            { id: "montacargas", label: "Montacargas e maquinillos" },
+            { id: "plataforma_elevadora", label: "Plataforma elevadora móbil (PEMP)" },
+            { id: "andamio_colgado", label: "Andamio colgado móbil" },
+            { id: "andamio_tubular", label: "Andamio tubular apoiado" },
+            { id: "torre_traballo_mobil", label: "Torre de traballo móbil" },
+            { id: "escaleiras_man", label: "Escaleiras de man" },
+            { id: "serra_circular", label: "Serra circular de mesa" },
+            { id: "cortadora_disco", label: "Cortadora de mesa con disco de auga" },
+            { id: "ferramenta_manual", label: "Ferramenta manual e eléctrica portátil" }
+        ];
+
+        const RESIDUOS_NON_PETREOS = [
+            { id: 'tierras_excavacion', label: '17 05 04 - Terras de escavación' },
+            { id: 'asfalto', label: '17 03 02 - Mesturas bituminosas (Asfalto)' },
+            { id: 'madera', label: '17 02 01 - Madeira' },
+            { id: 'envases_metalicos', label: '15 01 04 - Envases metálicos' },
+            { id: 'cobre_laton', label: '17 04 01 - Cobre, bronce, latón' },
+            { id: 'hierro_acero', label: '17 04 05 - Ferro e aceiro' },
+            { id: 'metales_mezclados', label: '17 04 07 - Metais mesturados' },
+            { id: 'cables', label: '17 04 11 - Cables' },
+            { id: 'envases_papel', label: '15 01 01 - Envases de papel e cartón' },
+            { id: 'plastico', label: '17 02 03 - Plástico' },
+            { id: 'vidrio', label: '17 02 02 - Vidro' },
+            { id: 'yeso', label: '17 08 02 - Xeso e placas de xeso' },
+            { id: 'aislamiento', label: '17 06 04 - Materiais de illamento' },
+            { id: 'mezclados_rcd', label: '17 09 04 - Residuos mesturados de C e D' }
+        ];
+
+        const RESIDUOS_PETREOS = [
+            { id: 'grava_rocas', label: '01 04 08 - Grava e rochas trituradas' },
+            { id: 'arena_arcillas', label: '01 04 09 - Area e arxilas' },
+            { id: 'hormigon', label: '17 01 01 - Formigón' },
+            { id: 'ladrillos', label: '17 01 02 - Ladrillos' },
+            { id: 'tejas_ceramicos', label: '17 01 03 - Tellas e materiais cerámicos' },
+            { id: 'pintura_barniz', label: '08 01 11 - Residuos de pintura e verniz' },
+            { id: 'amianto', label: '17 06 05 - Materiais que conteñen amianto (Fibrocemento)' },
+            { id: 'detergentes', label: '20 01 30 - Deterxentes e disolventes' }
+        ];
+
+        function initGrids() {
+            // EBSS Machinery Grid
+            const mGrid = document.getElementById('ebssMachineryGrid');
+            mGrid.innerHTML = '';
+            MACHINERY_ITEMS.forEach(item => {
+                const div = document.createElement('label');
+                div.className = "flex items-center p-2.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-white hover:border-blue-300 transition cursor-pointer text-xs";
+                div.innerHTML = `
+                    <input type="checkbox" id="mach_${item.id}" onchange="markDirty()" class="w-4 h-4 text-blue-600 rounded mr-2.5">
+                    <span class="font-medium text-slate-700">${item.label}</span>
+                `;
+                mGrid.appendChild(div);
+            });
+
+            // Residuos Grids
+            const r2Grid = document.getElementById('residuosStep2Grid');
+            r2Grid.innerHTML = '';
+            RESIDUOS_NON_PETREOS.forEach(item => {
+                const div = document.createElement('label');
+                div.className = "flex items-center p-3 rounded-xl border border-slate-200 bg-slate-50 hover:bg-white hover:border-emerald-400 transition cursor-pointer text-xs";
+                div.innerHTML = `
+                    <input type="checkbox" id="rcd_${item.id}" onchange="handleResiduosSelectionChange()" class="w-4 h-4 text-emerald-600 rounded mr-2.5">
+                    <span class="font-medium text-slate-800">${item.label}</span>
+                `;
+                r2Grid.appendChild(div);
+            });
+
+            const r3Grid = document.getElementById('residuosStep3Grid');
+            r3Grid.innerHTML = '';
+            RESIDUOS_PETREOS.forEach(item => {
+                const div = document.createElement('label');
+                div.className = "flex items-center p-3 rounded-xl border border-slate-200 bg-slate-50 hover:bg-white hover:border-emerald-400 transition cursor-pointer text-xs";
+                div.innerHTML = `
+                    <input type="checkbox" id="rcd_${item.id}" onchange="handleResiduosSelectionChange()" class="w-4 h-4 text-emerald-600 rounded mr-2.5">
+                    <span class="font-medium text-slate-800">${item.label}</span>
+                `;
+                r3Grid.appendChild(div);
+            });
+        }
+
+        async function loadProject() {
+            try {
+                const res = await fetch(`/api/projects/${projectId}`);
+                if (res.status === 401) {
+                    window.location.href = '/login';
+                    return;
+                }
+                const data = await res.json();
+                if (data.status === 'success') {
+                    projectData = data.project;
+                    populateForms(projectData);
+                    updateLiveResiduosCalc();
+                } else {
+                    alert('Erro cargando o proxecto: ' + data.error);
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Erro de conexión ao cargar proxecto.');
+            }
+        }
+
+        function populateForms(p) {
+            document.getElementById('headerProjectName').textContent = p.name;
+            document.getElementById('project_name').value = p.name || '';
+
+            const c = p.common_data || {};
+            document.getElementById('common_tipo_obra').value = c.tipo_obra || '';
+            document.getElementById('common_situacion').value = c.situacion || '';
+            document.getElementById('common_poboacion').value = c.poboacion || '';
+            document.getElementById('common_promotor').value = c.promotor || '';
+            document.getElementById('common_arquitecto').value = c.arquitecto || '';
+            document.getElementById('common_coordinador_ss').value = c.coordinador_ss || '';
+            document.getElementById('common_orzamento_pem').value = c.orzamento_pem || '';
+            document.getElementById('common_duracion_obra').value = c.duracion_obra || '';
+            document.getElementById('common_num_traballadores').value = c.num_traballadores || '';
+            document.getElementById('common_superficie_construida').value = c.superficie_construida || '';
+            document.getElementById('common_superficie_actuacion').value = c.superficie_actuacion || 9.84;
+            
+            document.getElementById('common_data_documento').value = c.data_documento || 'Ferrol, xullo de 2026';
+            document.getElementById('common_asinantes').value = c.asinantes || 'Fdo. Sergio J. Beceiro Lodeiro     M. Rosa Vilas Romalde';
+            document.getElementById('common_colexiado').value = c.colexiado || 'ESTUDIO ANTA ARQUITECTOS S.L.P.\tNº COAG - 20.039';
+
+            // EBSS data
+            const eb = p.ebss_data || {};
+            document.getElementById('ebss_accesos_obra').value = eb.accesos_obra || 'Directos dende vía pública pavimentada';
+            document.getElementById('ebss_topografia_terreo').value = eb.topografia_terreo || 'Lixeira pendente';
+            document.getElementById('ebss_tipo_chan').value = eb.tipo_chan || '-';
+            document.getElementById('ebss_edificacions_lindeiras').value = eb.edificacions_lindeiras || 'Si';
+
+            document.getElementById('ebss_fase_demolicions').value = eb.fase_demolicions || 'Si (puntuais)';
+            document.getElementById('ebss_fase_terras').value = eb.fase_terras || 'Non';
+            document.getElementById('ebss_fase_estruturas').value = eb.fase_estruturas || 'Non';
+            document.getElementById('ebss_fase_cubertas').value = eb.fase_cubertas || 'Non';
+            document.getElementById('ebss_fase_albanelaria').value = eb.fase_albanelaria || 'Si';
+            document.getElementById('ebss_fase_acabados').value = eb.fase_acabados || 'Si';
+            document.getElementById('ebss_fase_instalacions').value = eb.fase_instalacions || 'Si';
+
+            document.getElementById('ebss_centro_saude_nome').value = eb.centro_saude_nome || 'Centro de Saúde Fontenla Maristany';
+            document.getElementById('ebss_centro_saude_enderezo').value = eb.centro_saude_enderezo || 'Praza de España, 19, 15403 Ferrol';
+            document.getElementById('ebss_tlf_urxencias').value = eb.tlf_urxencias || '981 33 66 33';
+            document.getElementById('ebss_centro_saude_distancia').value = eb.centro_saude_distancia || '1,1 km';
+
+            document.getElementById('ebss_hospital_nome').value = eb.hospital_nome || 'Hospital Arquitecto Marcide';
+            document.getElementById('ebss_hospital_enderezo').value = eb.hospital_enderezo || 'Av. de la Residencia s/n, 15405 Ferrol';
+            document.getElementById('ebss_tlf_hospital').value = eb.tlf_hospital || '981 33 40 00';
+            document.getElementById('ebss_hospital_distancia').value = eb.hospital_distancia || '4,5 km';
+
+            // Checkboxes Maquinaria
+            const machObj = eb.maquinaria || {};
+            MACHINERY_ITEMS.forEach(m => {
+                const el = document.getElementById(`mach_${m.id}`);
+                if (el) el.checked = !!machObj[m.id];
+            });
+
+            // Residuos Checkboxes
+            const rSel = (p.residuos_data && p.residuos_data.residuos_selection) ? p.residuos_data.residuos_selection : {};
+            [...RESIDUOS_NON_PETREOS, ...RESIDUOS_PETREOS].forEach(r => {
+                const el = document.getElementById(`rcd_${r.id}`);
+                if (el) {
+                    el.checked = (rSel[r.id] !== undefined) ? !!rSel[r.id] : true;
+                }
+            });
+
+            isDirty = false;
+            updateSaveBadge();
+        }
+
+        function collectFormData() {
+            const common = {
+                tipo_obra: document.getElementById('common_tipo_obra').value.trim(),
+                situacion: document.getElementById('common_situacion').value.trim(),
+                poboacion: document.getElementById('common_poboacion').value.trim(),
+                promotor: document.getElementById('common_promotor').value.trim(),
+                arquitecto: document.getElementById('common_arquitecto').value.trim(),
+                coordinador_ss: document.getElementById('common_coordinador_ss').value.trim(),
+                orzamento_pem: document.getElementById('common_orzamento_pem').value.trim(),
+                duracion_obra: document.getElementById('common_duracion_obra').value.trim(),
+                num_traballadores: document.getElementById('common_num_traballadores').value.trim(),
+                superficie_construida: document.getElementById('common_superficie_construida').value.trim(),
+                superficie_actuacion: parseFloat(document.getElementById('common_superficie_actuacion').value) || 9.84,
+                data_documento: document.getElementById('common_data_documento').value.trim(),
+                asinantes: document.getElementById('common_asinantes').value.trim(),
+                colexiado: document.getElementById('common_colexiado').value.trim()
+            };
+
+            const machinery = {};
+            MACHINERY_ITEMS.forEach(m => {
+                const el = document.getElementById(`mach_${m.id}`);
+                machinery[m.id] = el ? el.checked : false;
+            });
+
+            const ebss = {
+                accesos_obra: document.getElementById('ebss_accesos_obra').value.trim(),
+                topografia_terreo: document.getElementById('ebss_topografia_terreo').value.trim(),
+                tipo_chan: document.getElementById('ebss_tipo_chan').value.trim(),
+                edificacions_lindeiras: document.getElementById('ebss_edificacions_lindeiras').value.trim(),
+                fase_demolicions: document.getElementById('ebss_fase_demolicions').value.trim(),
+                fase_terras: document.getElementById('ebss_fase_terras').value.trim(),
+                fase_estruturas: document.getElementById('ebss_fase_estruturas').value.trim(),
+                fase_cubertas: document.getElementById('ebss_fase_cubertas').value.trim(),
+                fase_albanelaria: document.getElementById('ebss_fase_albanelaria').value.trim(),
+                fase_acabados: document.getElementById('ebss_fase_acabados').value.trim(),
+                fase_instalacions: document.getElementById('ebss_fase_instalacions').value.trim(),
+                centro_saude_nome: document.getElementById('ebss_centro_saude_nome').value.trim(),
+                centro_saude_enderezo: document.getElementById('ebss_centro_saude_enderezo').value.trim(),
+                tlf_urxencias: document.getElementById('ebss_tlf_urxencias').value.trim(),
+                centro_saude_distancia: document.getElementById('ebss_centro_saude_distancia').value.trim(),
+                hospital_nome: document.getElementById('ebss_hospital_nome').value.trim(),
+                hospital_enderezo: document.getElementById('ebss_hospital_enderezo').value.trim(),
+                tlf_hospital: document.getElementById('ebss_tlf_hospital').value.trim(),
+                hospital_distancia: document.getElementById('ebss_hospital_distancia').value.trim(),
+                maquinaria: machinery
+            };
+
+            const residuos_selection = {};
+            [...RESIDUOS_NON_PETREOS, ...RESIDUOS_PETREOS].forEach(r => {
+                const el = document.getElementById(`rcd_${r.id}`);
+                residuos_selection[r.id] = el ? el.checked : true;
+            });
+
+            const residuos = {
+                residuos_selection: residuos_selection
+            };
+
+            return {
+                name: document.getElementById('project_name').value.trim() || 'Proxecto Sen Nome',
+                common_data: common,
+                ebss_data: ebss,
+                residuos_data: residuos
+            };
+        }
+
+        async function saveProject(showAlert = false) {
+            const payload = collectFormData();
+            const badge = document.getElementById('saveStatusBadge');
+            badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-ping"></span> Gardando...`;
+
+            try {
+                const res = await fetch(`/api/projects/${projectId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                if (data.status === 'success') {
+                    projectData = data.project;
+                    isDirty = false;
+                    document.getElementById('headerProjectName').textContent = projectData.name;
+                    badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Gardado en Base de Datos`;
+                    if (showAlert) {
+                        const btn = document.getElementById('btnManualSave');
+                        btn.classList.add('bg-emerald-600');
+                        btn.textContent = '✓ Gardado';
+                        setTimeout(() => {
+                            btn.classList.remove('bg-emerald-600');
+                            btn.innerHTML = '<span>💾</span> Gardar Proxecto';
+                        }, 2000);
+                    }
+                } else {
+                    badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span> Erro ao gardar`;
+                    alert('Erro ao gardar: ' + data.error);
+                }
+            } catch (err) {
+                badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span> Erro de rede`;
+                console.error(err);
+            }
+        }
+
+        function markDirty() {
+            isDirty = true;
+            updateSaveBadge();
+        }
+
+        function updateSaveBadge() {
+            const badge = document.getElementById('saveStatusBadge');
+            if (isDirty) {
+                badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span> Cambios sen gardar`;
+            } else {
+                badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Gardado en Base de Datos`;
+            }
+        }
+
+        function handleCommonSurfaceChange() {
+            markDirty();
+            updateLiveResiduosCalc();
+        }
+
+        function handleResiduosSelectionChange() {
+            markDirty();
+            updateLiveResiduosCalc();
+        }
+
+        async function updateLiveResiduosCalc() {
+            const sup = parseFloat(document.getElementById('common_superficie_actuacion').value) || 9.84;
+            const rSel = {};
+            [...RESIDUOS_NON_PETREOS, ...RESIDUOS_PETREOS].forEach(r => {
+                const el = document.getElementById(`rcd_${r.id}`);
+                rSel[r.id] = el ? el.checked : true;
+            });
+
+            try {
+                const res = await fetch('/api/residuos/calculate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        superficie_actuacion: sup,
+                        residuos_selection: rSel
+                    })
+                });
+                const calc = await res.json();
+                if (calc.status !== 'error') {
+                    const volFormatted = `${calc.volumen_total_estimado.toFixed(2).replace('.', ',')} m³`;
+                    const tonFormatted = `${calc.toneladas_total_estimadas.toFixed(2).replace('.', ',')} t`;
+                    const supFormatted = `${calc.superficie_actuacion.toFixed(2).replace('.', ',')} m²`;
+
+                    // Actualizar en Tab 1 (Previsualización)
+                    document.getElementById('commonPreviewVol').textContent = volFormatted;
+                    document.getElementById('commonPreviewTon').textContent = tonFormatted;
+
+                    // Actualizar en Tab 3 (Resumo de Residuos)
+                    document.getElementById('resSummarySup').textContent = supFormatted;
+                    document.getElementById('resSummaryVol').textContent = volFormatted;
+                    document.getElementById('resSummaryWeight').textContent = tonFormatted;
+
+                    // Renderizar Táboa 3 (Separación obrigatoria)
+                    renderSeparationTable(calc.separacion_tbl3);
+                }
+            } catch (err) {
+                console.error('Erro calculando residuos:', err);
+            }
+        }
+
+        function renderSeparationTable(rows) {
+            const tbody = document.getElementById('residuosSeparationTbody');
+            tbody.innerHTML = '';
+            if (!rows) return;
+
+            rows.forEach(r => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 transition";
+                const isOb = r.obligatoria;
+                tr.innerHTML = `
+                    <td class="p-2.5 font-medium text-slate-800">${r.tipo}</td>
+                    <td class="p-2.5 text-right font-mono">${r.peso.toFixed(2).replace('.', ',')}</td>
+                    <td class="p-2.5 text-center text-slate-500">${r.umbral ? '>' + r.umbral + ' t' : '---'}</td>
+                    <td class="p-2.5 text-center">
+                        <span class="px-2 py-0.5 rounded text-[11px] font-bold ${isOb ? 'bg-amber-100 text-amber-900 border border-amber-300' : 'bg-slate-100 text-slate-600'}">
+                            ${isOb ? '⚠️ OBLIGATORIA' : 'NO OBLIGATORIA'}
+                        </span>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function switchMainTab(tab) {
+            const tabs = ['common', 'ebss', 'residuos'];
+            tabs.forEach(t => {
+                const content = document.getElementById(`tabContent${capitalize(t)}`);
+                const btn = document.getElementById(`tabBtn${capitalize(t)}`);
+                if (t === tab) {
+                    content.classList.remove('hidden');
+                    btn.className = "px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-2 bg-blue-50 text-blue-700 border border-blue-200 shadow-sm";
+                } else {
+                    content.classList.add('hidden');
+                    btn.className = "px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-2 text-slate-600 hover:text-slate-900 border border-transparent";
+                }
+            });
+        }
+
+        function capitalize(str) {
+            return str.charAt(0).toUpperCase() + str.slice(1);
+        }
+
+        // ================= XERACIÓN E DESCARGA DIRECTA DOCX =================
+        async function generateEbssDocument() {
+            await saveProject(false);
+            const btn = document.getElementById('btnGenerateEbss');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = `<span>⏳</span> Xerando EBSS...`;
+            btn.disabled = true;
+
+            try {
+                const res = await fetch(`/api/projects/${projectId}/generate-ebss`, { method: 'POST' });
+                if (res.ok) {
+                    const blob = await res.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    const pobl = document.getElementById('common_poboacion').value || 'Proxecto';
+                    a.download = `EBSS_${pobl.replace(/\s+/g, '_')}.docx`;
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                    window.URL.revokeObjectURL(url);
+                } else {
+                    const err = await res.json();
+                    alert('Erro xerando o documento EBSS: ' + (err.error || 'Erro descoñecido'));
+                }
+            } catch (err) {
+                alert('Erro de conexión xerando o documento: ' + err.message);
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        }
+
+        async function generateResiduosDocument() {
+            await saveProject(false);
+            const btn = document.getElementById('btnGenerateResiduos');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = `<span>⏳</span> Xerando Residuos...`;
+            btn.disabled = true;
+
+            try {
+                const res = await fetch(`/api/projects/${projectId}/generate-residuos`, { method: 'POST' });
+                if (res.ok) {
+                    const blob = await res.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    const pobl = document.getElementById('common_poboacion').value || 'Proxecto';
+                    a.download = `XESTION_RESIDUOS_${pobl.replace(/\s+/g, '_')}.docx`;
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                    window.URL.revokeObjectURL(url);
+                } else {
+                    const err = await res.json();
+                    alert('Erro xerando o documento de Residuos: ' + (err.error || 'Erro descoñecido'));
+                }
+            } catch (err) {
+                alert('Erro de conexión xerando o documento: ' + err.message);
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        }
+
+        function exportCurrentProjectJson() {
+            const data = collectFormData();
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Proxecto_${data.name.replace(/\s+/g, '_')}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        initGrids();
+        loadProject();
+    </script>
+</body>
+</html>
