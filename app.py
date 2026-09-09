@@ -28,7 +28,7 @@ from residuos_processor import (
     DEFAULT_RESIDUOS_DATA, generate_residuos, calculate_residuos,
     get_default_residuos_paths
 )
-from geo_service import calculate_health_distances
+from geo_service import calculate_health_distances, find_nearby_health_facilities
 
 app = Flask(__name__, template_folder=os.path.join(CURRENT_DIR, "templates"))
 app.secret_key = os.environ.get("SECRET_KEY", "asistente-tecnico-ebss-residuos-secret-key-2026")
@@ -525,6 +525,22 @@ def api_geo_calculate_distances():
             hosp_enderezo=hosp_enderezo,
             hosp_poboacion=hosp_poboacion
         )
+        return jsonify(res)
+    except Exception as e:
+        return jsonify({"status": "error", "error": str(e)}), 500
+
+
+@app.route("/api/geo/nearby-facilities", methods=["POST"])
+def api_geo_nearby_facilities():
+    data = request.get_json() or {}
+    obra_situacion = data.get("obra_situacion", "").strip()
+    obra_poboacion = data.get("obra_poboacion", "").strip()
+
+    if not obra_situacion and not obra_poboacion:
+        return jsonify({"status": "error", "error": "Indica a situación ou concello da obra nos Datos Comúns."}), 400
+
+    try:
+        res = find_nearby_health_facilities(obra_situacion, obra_poboacion)
         return jsonify(res)
     except Exception as e:
         return jsonify({"status": "error", "error": str(e)}), 500
