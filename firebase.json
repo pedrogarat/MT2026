@@ -1,0 +1,18 @@
+{
+  "hosting": {
+    "public": "templates",
+    "ignore": [
+      "firebase.json",
+      "**/.*"
+    ],
+    "rewrites": [
+      {
+        "source": "**",
+        "run": {
+          "serviceId": "mt2026",
+          "region": "europe-southwest1"
+        }
+      }
+    ]
+  }
+}
