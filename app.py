@@ -28,6 +28,7 @@ from residuos_processor import (
     DEFAULT_RESIDUOS_DATA, generate_residuos, calculate_residuos,
     get_default_residuos_paths
 )
+from geo_service import calculate_health_distances
 
 app = Flask(__name__, template_folder=os.path.join(CURRENT_DIR, "templates"))
 app.secret_key = os.environ.get("SECRET_KEY", "asistente-tecnico-ebss-residuos-secret-key-2026")
@@ -498,6 +499,33 @@ def api_residuos_calculate():
     try:
         calc = calculate_residuos(data)
         return jsonify(calc)
+    except Exception as e:
+        return jsonify({"status": "error", "error": str(e)}), 500
+
+
+@app.route("/api/geo/calculate-distances", methods=["POST"])
+def api_geo_calculate_distances():
+    data = request.get_json() or {}
+    obra_situacion = data.get("obra_situacion", "").strip()
+    obra_poboacion = data.get("obra_poboacion", "").strip()
+    cs_enderezo = data.get("centro_saude_enderezo", "").strip()
+    cs_poboacion = data.get("centro_saude_poboacion", "").strip() or obra_poboacion
+    hosp_enderezo = data.get("hospital_enderezo", "").strip()
+    hosp_poboacion = data.get("hospital_poboacion", "").strip() or obra_poboacion
+
+    if not obra_situacion and not obra_poboacion:
+        return jsonify({"status": "error", "error": "Indica o emprazamento ou concello da obra nos Datos Comúns."}), 400
+
+    try:
+        res = calculate_health_distances(
+            obra_situacion=obra_situacion,
+            obra_poboacion=obra_poboacion,
+            cs_enderezo=cs_enderezo,
+            cs_poboacion=cs_poboacion,
+            hosp_enderezo=hosp_enderezo,
+            hosp_poboacion=hosp_poboacion
+        )
+        return jsonify(res)
     except Exception as e:
         return jsonify({"status": "error", "error": str(e)}), 500
 

@@ -256,9 +256,20 @@
 
                 <!-- Asistencia Sanitaria e Urxencias -->
                 <div class="pt-4 border-t border-slate-100">
-                    <h3 class="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2">
-                        <span>🏥</span> Asistencia Sanitaria e Centros Médicos (Táboa 4)
-                    </h3>
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+                        <div>
+                            <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+                                <span>🏥</span> Asistencia Sanitaria e Centros Médicos (Táboa 4)
+                            </h3>
+                            <p class="text-[11px] text-slate-500">Calcula a distancia de condución real por estrada (km e minutos) dende o emprazamento da obra.</p>
+                        </div>
+                        <button type="button" onclick="autoCalculateDistances()" id="btnAutoDistances" class="px-3.5 py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold text-xs rounded-xl border border-blue-200 shadow-sm transition flex items-center gap-1.5 shrink-0">
+                            <span>📍</span> Calcular distancias automaticamente
+                        </button>
+                    </div>
+
+                    <div id="distCalcAlert" class="hidden text-xs p-2.5 rounded-xl mb-3 flex items-center gap-2"></div>
+
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
                             <h4 class="text-xs font-bold text-slate-700">Centro de Saúde máis próximo</h4>
@@ -266,7 +277,10 @@
                             <input type="text" id="ebss_centro_saude_enderezo" placeholder="Enderezo" oninput="markDirty()" class="w-full rounded-lg border-slate-300 border p-1.5 text-xs">
                             <div class="grid grid-cols-2 gap-2">
                                 <input type="text" id="ebss_tlf_urxencias" placeholder="Teléfono urxencias" oninput="markDirty()" class="rounded-lg border-slate-300 border p-1.5 text-xs">
-                                <input type="text" id="ebss_centro_saude_distancia" placeholder="Distancia (km)" oninput="markDirty()" class="rounded-lg border-slate-300 border p-1.5 text-xs">
+                                <div>
+                                    <input type="text" id="ebss_centro_saude_distancia" placeholder="Distancia (km)" oninput="markDirty()" class="w-full rounded-lg border-slate-300 border p-1.5 text-xs">
+                                    <span id="csDurationBadge" class="text-[10px] text-blue-600 font-semibold mt-0.5 block"></span>
+                                </div>
                             </div>
                         </div>
 
@@ -276,7 +290,10 @@
                             <input type="text" id="ebss_hospital_enderezo" placeholder="Enderezo" oninput="markDirty()" class="w-full rounded-lg border-slate-300 border p-1.5 text-xs">
                             <div class="grid grid-cols-2 gap-2">
                                 <input type="text" id="ebss_tlf_hospital" placeholder="Teléfono hospital" oninput="markDirty()" class="rounded-lg border-slate-300 border p-1.5 text-xs">
-                                <input type="text" id="ebss_hospital_distancia" placeholder="Distancia (km)" oninput="markDirty()" class="rounded-lg border-slate-300 border p-1.5 text-xs">
+                                <div>
+                                    <input type="text" id="ebss_hospital_distancia" placeholder="Distancia (km)" oninput="markDirty()" class="w-full rounded-lg border-slate-300 border p-1.5 text-xs">
+                                    <span id="hospDurationBadge" class="text-[10px] text-blue-600 font-semibold mt-0.5 block"></span>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -850,6 +867,74 @@
             a.download = `Proxecto_${data.name.replace(/\s+/g, '_')}.json`;
             a.click();
             URL.revokeObjectURL(url);
+        }
+
+        async function autoCalculateDistances() {
+            const btn = document.getElementById('btnAutoDistances');
+            const alertBox = document.getElementById('distCalcAlert');
+            alertBox.classList.add('hidden');
+
+            const obraSituacion = document.getElementById('common_situacion').value.trim();
+            const obraPoboacion = document.getElementById('common_poboacion').value.trim();
+            const csEnderezo = document.getElementById('ebss_centro_saude_enderezo').value.trim();
+            const hospEnderezo = document.getElementById('ebss_hospital_enderezo').value.trim();
+
+            if (!obraSituacion && !obraPoboacion) {
+                alertBox.className = "text-xs p-2.5 rounded-xl mb-3 flex items-center gap-2 bg-amber-50 text-amber-800 border border-amber-200";
+                alertBox.innerHTML = `⚠️ Por favor, indica primeiro a <strong>Situación</strong> e <strong>Poboación</strong> da obra na pestaña de Datos Comúns.`;
+                alertBox.classList.remove('hidden');
+                return;
+            }
+
+            const origBtnHtml = btn.innerHTML;
+            btn.innerHTML = `<span>⏳</span> Calculando distancias por estrada...`;
+            btn.disabled = true;
+
+            try {
+                const res = await fetch('/api/geo/calculate-distances', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        obra_situacion: obraSituacion,
+                        obra_poboacion: obraPoboacion,
+                        centro_saude_enderezo: csEnderezo,
+                        hospital_enderezo: hospEnderezo
+                    })
+                });
+                const data = await res.json();
+
+                if (res.ok && data.status === 'success') {
+                    let msg = `📍 <strong>Cálculo completado:</strong> Distancias calculadas por estrada dende a obra.`;
+
+                    if (data.centro_saude && data.centro_saude.found) {
+                        document.getElementById('ebss_centro_saude_distancia').value = data.centro_saude.distancia;
+                        const badge = document.getElementById('csDurationBadge');
+                        if (badge) badge.textContent = `🚗 Tempo estimado: ${data.centro_saude.duracion}`;
+                    }
+                    if (data.hospital && data.hospital.found) {
+                        document.getElementById('ebss_hospital_distancia').value = data.hospital.distancia;
+                        const badge = document.getElementById('hospDurationBadge');
+                        if (badge) badge.textContent = `🚗 Tempo estimado: ${data.hospital.duracion}`;
+                    }
+
+                    alertBox.className = "text-xs p-2.5 rounded-xl mb-3 flex items-center gap-2 bg-emerald-50 text-emerald-800 border border-emerald-200";
+                    alertBox.innerHTML = msg;
+                    alertBox.classList.remove('hidden');
+
+                    markDirty();
+                } else {
+                    alertBox.className = "text-xs p-2.5 rounded-xl mb-3 flex items-center gap-2 bg-rose-50 text-rose-800 border border-rose-200";
+                    alertBox.innerHTML = `⚠️ ${data.error || 'Non foi posible calcular as distancias automaticamente.'}`;
+                    alertBox.classList.remove('hidden');
+                }
+            } catch (err) {
+                alertBox.className = "text-xs p-2.5 rounded-xl mb-3 flex items-center gap-2 bg-rose-50 text-rose-800 border border-rose-200";
+                alertBox.innerHTML = `⚠️ Erro de conexión: ${err.message}`;
+                alertBox.classList.remove('hidden');
+            } finally {
+                btn.innerHTML = origBtnHtml;
+                btn.disabled = false;
+            }
         }
 
         initGrids();
