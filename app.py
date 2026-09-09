@@ -35,7 +35,11 @@ app = Flask(__name__, template_folder=os.path.join(CURRENT_DIR, "templates"))
 app.secret_key = os.environ.get("SECRET_KEY", "asistente-tecnico-ebss-residuos-secret-key-2026")
 
 # Inicializar táboas da base de datos ao arrancar
-init_db()
+try:
+    init_db()
+    print("Base de datos inicializada correctamente.", flush=True)
+except Exception as e:
+    print(f"[AVISO] Non se puido conectar á base de datos no inicio: {e}", flush=True)
 
 
 # ---------------------------------------------------------
