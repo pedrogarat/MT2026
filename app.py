@@ -34,6 +34,23 @@ from geo_service import calculate_health_distances, find_nearby_health_facilitie
 app = Flask(__name__, template_folder=os.path.join(CURRENT_DIR, "templates"))
 app.secret_key = os.environ.get("SECRET_KEY", "asistente-tecnico-ebss-residuos-secret-key-2026")
 
+# Configuración de cookies de sesión para compatibilidade total con Firebase Hosting e Cloud Run
+# Firebase Hosting elimina do proxy todas as cookies agás aquela chamada "__session"
+app.config["SESSION_COOKIE_NAME"] = "__session"
+app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
+app.config["SESSION_COOKIE_HTTPONLY"] = True
+if os.environ.get("PORT"):
+    app.config["SESSION_COOKIE_SECURE"] = True
+
+
+@app.after_request
+def set_cache_headers(response):
+    """Evita que a CDN de Firebase Hosting almacene en caché respostas dinámicas ou sesións."""
+    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate, private"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+    return response
+
 # Inicializar táboas da base de datos ao arrancar
 try:
     init_db()
