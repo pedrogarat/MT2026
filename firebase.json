@@ -1,6 +1,6 @@
 {
   "hosting": {
-    "site": "mtecnicas",
+    "site": "mtecnicas2026",
     "public": "public",
     "ignore": [
       "firebase.json",
