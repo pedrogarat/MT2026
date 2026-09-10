@@ -27,20 +27,36 @@
             </div>
 
             <!-- User Menu & Actions -->
-            <div class="flex items-center gap-3">
-                <button onclick="openImportModal()" class="px-3.5 py-2 text-xs font-bold text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 rounded-xl transition flex items-center gap-1.5">
-                    <span>📥</span> Importar JSON
+            <div class="flex items-center gap-2 sm:gap-3">
+                <!-- Botón exclusivo para Administrador -->
+                <button id="adminPanelBtn" onclick="openAdminModal()" class="hidden px-3.5 py-2 text-xs font-bold text-purple-700 hover:text-purple-900 bg-purple-50 hover:bg-purple-100 border border-purple-200 rounded-xl transition flex items-center gap-1.5 shadow-sm">
+                    <span>⚙️</span>
+                    <span class="hidden sm:inline">Panel de Control</span>
+                    <span id="pendingBadge" class="hidden px-1.5 py-0.2 text-[10px] font-black bg-amber-500 text-white rounded-full">0</span>
                 </button>
-                <button onclick="openNewProjectModal()" class="px-4 py-2 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl shadow-sm shadow-blue-500/20 transition flex items-center gap-1.5">
-                    <span>➕</span> Novo Proxecto
+
+                <button onclick="openImportModal()" class="px-3 py-2 text-xs font-bold text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 rounded-xl transition flex items-center gap-1.5">
+                    <span>📥</span> <span class="hidden md:inline">Importar JSON</span>
                 </button>
+                <button onclick="openNewProjectModal()" class="px-3.5 py-2 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl shadow-sm shadow-blue-500/20 transition flex items-center gap-1.5">
+                    <span>➕</span> <span>Novo Proxecto</span>
+                </button>
+                
                 <div class="h-6 w-px bg-slate-200 mx-1"></div>
+                
+                <!-- Perfil de Usuario -->
                 <div class="flex items-center gap-2">
                     <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-800 font-bold text-xs flex items-center justify-center border border-blue-200" id="userAvatar">
                         U
                     </div>
-                    <span class="text-xs font-semibold text-slate-700 hidden sm:inline" id="userGreeting">Usuario</span>
-                    <button onclick="logout()" title="Pechar sesión" class="p-2 text-slate-400 hover:text-rose-600 transition rounded-lg hover:bg-slate-100">
+                    <div class="hidden sm:block text-left">
+                        <div class="flex items-center gap-1.5">
+                            <span class="text-xs font-bold text-slate-800" id="userGreeting">Usuario</span>
+                            <span id="roleBadge" class="text-[9px] font-extrabold uppercase px-1.5 py-0.2 rounded bg-slate-100 text-slate-600 border border-slate-200">User</span>
+                        </div>
+                        <span id="userGroupLabel" class="text-[10px] text-slate-400 block leading-tight"></span>
+                    </div>
+                    <button onclick="logout()" title="Pechar sesión" class="p-2 text-slate-400 hover:text-rose-600 transition rounded-lg hover:bg-slate-100 ml-1">
                         🚪
                     </button>
                 </div>
@@ -51,41 +67,184 @@
     <!-- Main Content Area -->
     <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
         
-        <!-- Welcome & Stats Banner -->
-        <div class="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <!-- Welcome & Info Banner -->
+        <div class="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
-                <h1 class="text-2xl font-extrabold text-slate-900">Os meus Proxectos</h1>
-                <p class="text-sm text-slate-500 mt-1">Xestiona os datos comúns do proxecto e xera os estudos técnicos (EBSS e Residuos) de xeito modular.</p>
+                <div class="flex items-center gap-2">
+                    <h1 class="text-2xl font-extrabold text-slate-900" id="pageTitle">Proxectos</h1>
+                    <span id="officeBadge" class="hidden text-xs font-bold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1">
+                        🏢 <span id="officeNameText"></span>
+                    </span>
+                </div>
+                <p class="text-xs text-slate-500 mt-1" id="pageSubtitle">
+                    Xestiona os proxectos técnicos e xera os estudos modulares (EBSS e Xestión de Residuos).
+                </p>
             </div>
-            <!-- Search & Filter -->
-            <div class="flex items-center gap-3">
+
+            <!-- Search & Filter Controls -->
+            <div class="flex items-center gap-2 sm:gap-3 flex-wrap">
                 <div class="relative">
-                    <input type="text" id="searchInput" oninput="filterProjects()" placeholder="Buscar proxecto ou concello..." class="w-64 pl-9 pr-4 py-2 text-xs rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <input type="text" id="searchInput" oninput="filterProjects()" placeholder="Buscar por título, concello ou autor..." class="w-64 sm:w-72 pl-9 pr-4 py-2 text-xs rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
                     <span class="absolute left-3 top-2.5 text-xs text-slate-400">🔍</span>
                 </div>
+                <select id="ownershipFilter" onchange="filterProjects()" class="px-3 py-2 text-xs rounded-xl border border-slate-300 bg-white font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="all">Todos os proxectos</option>
+                    <option value="mine">Só os meus</option>
+                    <option value="office">Compañeiros de Oficina</option>
+                </select>
             </div>
         </div>
 
-        <!-- Project Grid -->
+        <!-- Loading State -->
         <div id="projectsLoading" class="text-center py-20">
             <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-blue-500 border-t-transparent"></div>
-            <p class="text-xs text-slate-400 mt-3">Cargando proxectos...</p>
+            <p class="text-xs text-slate-400 mt-3">Cargando listado de proxectos...</p>
         </div>
 
+        <!-- Empty State -->
         <div id="emptyState" class="hidden text-center py-16 px-4 bg-white rounded-3xl border border-slate-200 shadow-sm max-w-md mx-auto">
             <div class="text-5xl mb-3">📁</div>
-            <h3 class="text-base font-bold text-slate-900">Aínda non tes proxectos gardados</h3>
-            <p class="text-xs text-slate-500 mt-1 mb-6">Crea o teu primeiro proxecto para introducir os datos comúns e xerar o EBSS e a Xestión de Residuos.</p>
+            <h3 class="text-base font-bold text-slate-900">Aínda non hai proxectos dispoñibles</h3>
+            <p class="text-xs text-slate-500 mt-1 mb-6">Crea o teu primeiro proxecto técnico para comezar a traballar.</p>
             <button onclick="openNewProjectModal()" class="px-5 py-2.5 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl shadow transition inline-flex items-center gap-2">
                 <span>➕</span> Crear Primeiro Proxecto
             </button>
         </div>
 
-        <div id="projectsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <!-- Dynamic project cards inserted via JS -->
+        <!-- LISTA DE PROXECTOS EN FILAS (MODO LISTA) -->
+        <div id="projectsListContainer" class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-slate-50/80 border-b border-slate-200 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                            <th class="py-3.5 px-5">Proxecto / Obxecto</th>
+                            <th class="py-3.5 px-4">Concello</th>
+                            <th class="py-3.5 px-4">Tipo de Obra</th>
+                            <th class="py-3.5 px-4">Oficina / Autor</th>
+                            <th class="py-3.5 px-4">Actualizado</th>
+                            <th class="py-3.5 px-5 text-right">Accións</th>
+                        </tr>
+                    </thead>
+                    <tbody id="projectsTableBody" class="divide-y divide-slate-100 text-xs">
+                        <!-- Filas xeradas dinamicamente mediante JavaScript -->
+                    </tbody>
+                </table>
+            </div>
         </div>
 
     </main>
+
+    <!-- ========================================================= -->
+    <!-- MODAL: PANEL DE CONTROL DE ADMINISTRACIÓN (pgarat)        -->
+    <!-- ========================================================= -->
+    <div id="adminModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl shadow-2xl max-w-4xl w-full max-h-[90vh] flex flex-col border border-slate-100 overflow-hidden">
+            <!-- Modal Header -->
+            <div class="p-6 border-b border-slate-200 flex items-center justify-between bg-slate-50/80">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-2xl bg-purple-600 text-white flex items-center justify-center text-xl shadow-md shadow-purple-500/20">
+                        ⚙️
+                    </div>
+                    <div>
+                        <h2 class="text-lg font-extrabold text-slate-900 leading-tight">Panel de Control de Administración</h2>
+                        <p class="text-xs text-slate-500">Xestión de usuarios, validación de altas e configuración de oficinas</p>
+                    </div>
+                </div>
+                <button onclick="closeAdminModal()" class="text-slate-400 hover:text-slate-600 p-2 rounded-xl hover:bg-slate-100 transition">✕</button>
+            </div>
+
+            <!-- Admin Sub-tabs -->
+            <div class="flex border-b border-slate-200 bg-white px-6 gap-4">
+                <button id="adminTabUsersBtn" onclick="switchAdminTab('users')" class="py-3 text-xs font-bold border-b-2 border-purple-600 text-purple-700 flex items-center gap-2">
+                    <span>👥</span> Usuarios e Solicitudes
+                    <span id="adminPendingCount" class="hidden px-2 py-0.5 text-[10px] bg-amber-500 text-white rounded-full">0</span>
+                </button>
+                <button id="adminTabGroupsBtn" onclick="switchAdminTab('groups')" class="py-3 text-xs font-bold border-b-2 border-transparent text-slate-500 hover:text-slate-800 flex items-center gap-2">
+                    <span>🏢</span> Oficinas / Grupos de Traballo
+                </button>
+            </div>
+
+            <!-- Modal Content (Scrollable) -->
+            <div class="p-6 overflow-y-auto flex-1 bg-slate-50/50">
+                
+                <!-- TAB 1: USUARIOS E VALIDACIÓN -->
+                <div id="adminTabUsersSection" class="space-y-4">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-slate-700 uppercase tracking-wider">Listado de Usuarios Rexistrados</span>
+                        <button onclick="loadAdminData()" class="text-xs text-purple-600 hover:text-purple-800 font-semibold flex items-center gap-1">
+                            🔄 Actualizar
+                        </button>
+                    </div>
+
+                    <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
+                        <table class="w-full text-left text-xs border-collapse">
+                            <thead>
+                                <tr class="bg-slate-50 border-b border-slate-200 text-[11px] font-bold text-slate-500 uppercase">
+                                    <th class="py-3 px-4">Usuario / Email</th>
+                                    <th class="py-3 px-3">Rol</th>
+                                    <th class="py-3 px-3">Oficina Asignada</th>
+                                    <th class="py-3 px-3">Estado</th>
+                                    <th class="py-3 px-4 text-right">Accións</th>
+                                </tr>
+                            </thead>
+                            <tbody id="adminUsersTableBody" class="divide-y divide-slate-100">
+                                <tr>
+                                    <td colspan="5" class="py-8 text-center text-slate-400">Cargando usuarios...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- TAB 2: OFICINAS / GRUPOS -->
+                <div id="adminTabGroupsSection" class="space-y-6 hidden">
+                    <!-- Crear Nova Oficina -->
+                    <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+                        <h4 class="text-xs font-bold text-slate-800 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+                            <span>➕</span> Crear Nova Oficina ou Grupo de Traballo
+                        </h4>
+                        <form onsubmit="handleCreateGroup(event)" class="flex flex-col sm:flex-row gap-3">
+                            <input type="text" id="newGroupName" required placeholder="Nome da oficina (Ex: Estudio Anta Ferrol)" class="flex-1 px-3.5 py-2 text-xs rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-purple-600">
+                            <input type="text" id="newGroupDesc" placeholder="Descrición opcional (Ex: Sede Principal)" class="flex-1 px-3.5 py-2 text-xs rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-purple-600">
+                            <button type="submit" class="px-4 py-2 text-xs font-bold text-white bg-purple-600 hover:bg-purple-700 rounded-xl shadow transition shrink-0">
+                                Gardar Oficina
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Listado de Oficinas -->
+                    <div>
+                        <span class="text-xs font-bold text-slate-700 uppercase tracking-wider block mb-3">Oficinas Existentes</span>
+                        <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
+                            <table class="w-full text-left text-xs border-collapse">
+                                <thead>
+                                    <tr class="bg-slate-50 border-b border-slate-200 text-[11px] font-bold text-slate-500 uppercase">
+                                        <th class="py-3 px-4">Nome da Oficina</th>
+                                        <th class="py-3 px-4">Descrición</th>
+                                        <th class="py-3 px-3 text-center">Membros</th>
+                                        <th class="py-3 px-4 text-right">Accións</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="adminGroupsTableBody" class="divide-y divide-slate-100">
+                                    <tr>
+                                        <td colspan="4" class="py-8 text-center text-slate-400">Cargando oficinas...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="p-4 border-t border-slate-200 bg-white flex justify-end">
+                <button onclick="closeAdminModal()" class="px-5 py-2 text-xs font-bold text-slate-700 hover:bg-slate-100 rounded-xl transition">
+                    Pechar Panel
+                </button>
+            </div>
+        </div>
+    </div>
 
     <!-- Modal: Novo Proxecto -->
     <div id="newProjectModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
@@ -156,11 +315,17 @@
 
     <!-- Footer -->
     <footer class="bg-white border-t border-slate-200 py-6 text-center text-xs text-slate-400">
-        Asistente Técnico de Proxectos • Almacenamento seguro en Base de Datos
+        Memorias Técnicas 2026 • Asistente EBSS & Xestión de Residuos
     </footer>
 
+    <!-- ========================================================= -->
+    <!-- JAVASCRIPT: LÓXICA DE PROXECTOS E ADMINISTRACIÓN          -->
+    <!-- ========================================================= -->
     <script>
         let allProjects = [];
+        let currentUser = null;
+        let adminUsers = [];
+        let adminGroups = [];
 
         async function loadProjects() {
             try {
@@ -172,11 +337,40 @@
                 const data = await res.json();
                 if (data.status === 'success') {
                     allProjects = data.projects;
-                    if (data.user) {
-                        document.getElementById('userGreeting').textContent = data.user.username;
-                        document.getElementById('userAvatar').textContent = data.user.username.charAt(0).toUpperCase();
+                    currentUser = data.user;
+
+                    // Actualizar barra de usuario
+                    if (currentUser) {
+                        document.getElementById('userGreeting').textContent = currentUser.username;
+                        document.getElementById('userAvatar').textContent = currentUser.username.charAt(0).toUpperCase();
+                        
+                        const roleBadge = document.getElementById('roleBadge');
+                        if (currentUser.is_admin) {
+                            roleBadge.textContent = 'Admin';
+                            roleBadge.className = 'text-[9px] font-black uppercase px-1.5 py-0.2 rounded bg-purple-100 text-purple-700 border border-purple-200';
+                            document.getElementById('adminPanelBtn').classList.remove('hidden');
+                        } else {
+                            roleBadge.textContent = 'Usuario';
+                            roleBadge.className = 'text-[9px] font-bold uppercase px-1.5 py-0.2 rounded bg-slate-100 text-slate-600 border border-slate-200';
+                        }
+
+                        if (currentUser.group_name) {
+                            document.getElementById('userGroupLabel').textContent = '🏢 ' + currentUser.group_name;
+                            document.getElementById('officeBadge').classList.remove('hidden');
+                            document.getElementById('officeNameText').textContent = currentUser.group_name;
+                            document.getElementById('pageTitle').textContent = 'Proxectos de ' + currentUser.group_name;
+                            document.getElementById('pageSubtitle').textContent = 'Proxectos compartidos entre os membros de ' + currentUser.group_name;
+                        } else if (currentUser.is_admin) {
+                            document.getElementById('pageSubtitle').textContent = 'Modo Administrador: visualizando todos os proxectos da plataforma.';
+                        }
                     }
+
                     renderProjects(allProjects);
+
+                    // Se é administrador, cargar información de solicitudes pendentes
+                    if (currentUser && currentUser.is_admin) {
+                        checkPendingUsers();
+                    }
                 }
             } catch (err) {
                 console.error(err);
@@ -186,78 +380,458 @@
         }
 
         function renderProjects(projects) {
-            const grid = document.getElementById('projectsGrid');
+            const tableContainer = document.getElementById('projectsListContainer');
+            const tbody = document.getElementById('projectsTableBody');
             const empty = document.getElementById('emptyState');
-            grid.innerHTML = '';
+            tbody.innerHTML = '';
 
             if (projects.length === 0) {
                 empty.classList.remove('hidden');
-                grid.classList.add('hidden');
+                tableContainer.classList.add('hidden');
                 return;
             }
 
             empty.classList.add('hidden');
-            grid.classList.remove('hidden');
+            tableContainer.classList.remove('hidden');
 
             projects.forEach(p => {
-                const card = document.createElement('div');
-                card.className = "bg-white rounded-2xl border border-slate-200 p-6 shadow-sm hover:shadow-md hover:border-blue-400 transition-all flex flex-col justify-between group";
-                
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50/80 transition group";
+
                 const poboacion = p.common_data?.poboacion || 'Ferrol';
                 const tipoObra = p.common_data?.tipo_obra || 'Sen especificar';
                 const supAct = p.common_data?.superficie_actuacion ? `${p.common_data.superficie_actuacion} m²` : '9,84 m²';
 
-                card.innerHTML = `
-                    <div>
-                        <div class="flex items-start justify-between gap-3 mb-3">
-                            <h3 class="text-base font-bold text-slate-900 group-hover:text-blue-600 transition leading-snug">${escapeHtml(p.name)}</h3>
-                            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 shrink-0">
-                                📍 ${escapeHtml(poboacion)}
-                            </span>
+                // Autoría e Oficina
+                let authorHtml = '';
+                if (p.is_owner) {
+                    authorHtml = `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-blue-50 text-blue-700 text-[11px] font-bold border border-blue-200">Ti</span>`;
+                } else {
+                    const groupStr = p.group_name ? `<span class="text-[10px] text-slate-400 block leading-none mt-0.5">🏢 ${escapeHtml(p.group_name)}</span>` : '';
+                    authorHtml = `
+                        <div>
+                            <span class="font-bold text-slate-700 flex items-center gap-1">👤 ${escapeHtml(p.owner_username)}</span>
+                            ${groupStr}
                         </div>
+                    `;
+                }
 
-                        <p class="text-xs text-slate-500 line-clamp-2 mb-4 leading-relaxed">${escapeHtml(tipoObra)}</p>
+                // Botón de eliminar (só se ten permiso)
+                let deleteBtnHtml = '';
+                if (p.can_delete) {
+                    deleteBtnHtml = `
+                        <button onclick="deleteProject(${p.id})" title="Eliminar proxecto" class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition">
+                            🗑️
+                        </button>
+                    `;
+                }
 
-                        <!-- Tags / Modulos -->
-                        <div class="flex flex-wrap items-center gap-1.5 mb-4">
-                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-blue-50 text-blue-700 text-[10px] font-bold border border-blue-200">
+                tr.innerHTML = `
+                    <td class="py-3.5 px-5">
+                        <a href="/project/${p.id}" class="font-bold text-slate-900 hover:text-blue-600 transition text-sm block leading-snug">
+                            ${escapeHtml(p.name)}
+                        </a>
+                        <div class="flex flex-wrap items-center gap-1.5 mt-1">
+                            <span class="inline-flex items-center px-1.5 py-0.2 rounded bg-blue-50 text-blue-700 text-[10px] font-semibold border border-blue-200">
                                 🛡️ EBSS
                             </span>
-                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 text-[10px] font-bold border border-emerald-200">
+                            <span class="inline-flex items-center px-1.5 py-0.2 rounded bg-emerald-50 text-emerald-700 text-[10px] font-semibold border border-emerald-200">
                                 ♻️ Residuos (${supAct})
                             </span>
                         </div>
-                    </div>
-
-                    <div class="pt-4 border-t border-slate-100 flex items-center justify-between mt-2">
-                        <span class="text-[10px] text-slate-400">Modif: ${p.updated_at || p.created_at}</span>
-                        <div class="flex items-center gap-1.5">
-                            <button onclick="exportProjectJson(${p.id})" title="Exportar JSON" class="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition text-xs">
+                    </td>
+                    <td class="py-3.5 px-4 text-slate-600 font-medium">
+                        <span class="inline-flex items-center gap-1">📍 ${escapeHtml(poboacion)}</span>
+                    </td>
+                    <td class="py-3.5 px-4 text-slate-500 max-w-xs truncate" title="${escapeHtml(tipoObra)}">
+                        ${escapeHtml(tipoObra)}
+                    </td>
+                    <td class="py-3.5 px-4">
+                        ${authorHtml}
+                    </td>
+                    <td class="py-3.5 px-4 text-slate-400 text-[11px] whitespace-nowrap">
+                        ${escapeHtml(p.updated_at || p.created_at)}
+                    </td>
+                    <td class="py-3.5 px-5 text-right whitespace-nowrap">
+                        <div class="inline-flex items-center gap-1.5">
+                            <button onclick="exportProjectJson(${p.id})" title="Exportar JSON" class="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition">
                                 💾
                             </button>
-                            <button onclick="deleteProject(${p.id})" title="Eliminar" class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition text-xs">
-                                🗑️
+                            <button onclick="duplicateProject(${p.id})" title="Duplicar proxecto" class="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition">
+                                📑
                             </button>
-                            <a href="/project/${p.id}" class="px-3.5 py-1.5 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-sm transition flex items-center gap-1">
+                            ${deleteBtnHtml}
+                            <a href="/project/${p.id}" class="ml-1 px-3 py-1.5 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl shadow-sm transition inline-flex items-center gap-1">
                                 Abrir →
                             </a>
                         </div>
-                    </div>
+                    </td>
                 `;
-                grid.appendChild(card);
+
+                tbody.appendChild(tr);
             });
         }
 
         function filterProjects() {
             const q = document.getElementById('searchInput').value.toLowerCase();
-            const filtered = allProjects.filter(p => 
-                p.name.toLowerCase().includes(q) ||
-                (p.common_data?.poboacion && p.common_data.poboacion.toLowerCase().includes(q)) ||
-                (p.common_data?.tipo_obra && p.common_data.tipo_obra.toLowerCase().includes(q))
-            );
+            const ownership = document.getElementById('ownershipFilter').value;
+
+            const filtered = allProjects.filter(p => {
+                const matchQuery = p.name.toLowerCase().includes(q) ||
+                    (p.common_data?.poboacion && p.common_data.poboacion.toLowerCase().includes(q)) ||
+                    (p.common_data?.tipo_obra && p.common_data.tipo_obra.toLowerCase().includes(q)) ||
+                    (p.owner_username && p.owner_username.toLowerCase().includes(q));
+
+                if (!matchQuery) return false;
+
+                if (ownership === 'mine') return p.is_owner;
+                if (ownership === 'office') return !p.is_owner;
+                return true;
+            });
+
             renderProjects(filtered);
         }
 
+        async function duplicateProject(id) {
+            try {
+                const res = await fetch(`/api/projects/${id}`);
+                const data = await res.json();
+                if (data.status === 'success') {
+                    const original = data.project;
+                    const resCopy = await fetch('/api/projects', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            name: `${original.name} (Copia)`,
+                            description: original.description || '',
+                            common_data: original.common_data,
+                            ebss_data: original.ebss_data,
+                            residuos_data: original.residuos_data
+                        })
+                    });
+                    const copyData = await resCopy.json();
+                    if (copyData.status === 'success') {
+                        loadProjects();
+                    } else {
+                        alert('Erro ao duplicar: ' + copyData.error);
+                    }
+                }
+            } catch (err) {
+                alert('Erro ao duplicar proxecto: ' + err.message);
+            }
+        }
+
+        // =========================================================
+        // LÓXICA DO PANEL DE ADMINISTRACIÓN
+        // =========================================================
+        async function checkPendingUsers() {
+            try {
+                const res = await fetch('/api/admin/users');
+                const data = await res.json();
+                if (data.status === 'success') {
+                    const pending = data.users.filter(u => !u.is_approved);
+                    const badge = document.getElementById('pendingBadge');
+                    const adminPendingBadge = document.getElementById('adminPendingCount');
+                    
+                    if (pending.length > 0) {
+                        badge.textContent = pending.length;
+                        badge.classList.remove('hidden');
+                        adminPendingBadge.textContent = pending.length;
+                        adminPendingBadge.classList.remove('hidden');
+                    } else {
+                        badge.classList.add('hidden');
+                        adminPendingBadge.classList.add('hidden');
+                    }
+                }
+            } catch (err) {
+                console.error('Erro comprobando usuarios pendentes:', err);
+            }
+        }
+
+        function openAdminModal() {
+            document.getElementById('adminModal').classList.remove('hidden');
+            loadAdminData();
+        }
+
+        function closeAdminModal() {
+            document.getElementById('adminModal').classList.add('hidden');
+            loadProjects(); // Recargar proxectos por se cambiaron asignacións
+        }
+
+        function switchAdminTab(tab) {
+            const usersBtn = document.getElementById('adminTabUsersBtn');
+            const groupsBtn = document.getElementById('adminTabGroupsBtn');
+            const usersSec = document.getElementById('adminTabUsersSection');
+            const groupsSec = document.getElementById('adminTabGroupsSection');
+
+            if (tab === 'users') {
+                usersBtn.className = 'py-3 text-xs font-bold border-b-2 border-purple-600 text-purple-700 flex items-center gap-2';
+                groupsBtn.className = 'py-3 text-xs font-bold border-b-2 border-transparent text-slate-500 hover:text-slate-800 flex items-center gap-2';
+                usersSec.classList.remove('hidden');
+                groupsSec.classList.add('hidden');
+            } else {
+                groupsBtn.className = 'py-3 text-xs font-bold border-b-2 border-purple-600 text-purple-700 flex items-center gap-2';
+                usersBtn.className = 'py-3 text-xs font-bold border-b-2 border-transparent text-slate-500 hover:text-slate-800 flex items-center gap-2';
+                groupsSec.classList.remove('hidden');
+                usersSec.classList.add('hidden');
+            }
+        }
+
+        async function loadAdminData() {
+            await Promise.all([loadAdminUsers(), loadAdminGroups()]);
+        }
+
+        async function loadAdminUsers() {
+            const tbody = document.getElementById('adminUsersTableBody');
+            try {
+                const res = await fetch('/api/admin/users');
+                const data = await res.json();
+                if (data.status === 'success') {
+                    adminUsers = data.users;
+                    renderAdminUsers();
+                } else {
+                    tbody.innerHTML = `<tr><td colspan="5" class="py-4 text-center text-rose-500">${data.error}</td></tr>`;
+                }
+            } catch (err) {
+                tbody.innerHTML = `<tr><td colspan="5" class="py-4 text-center text-rose-500">${err.message}</td></tr>`;
+            }
+        }
+
+        async function loadAdminGroups() {
+            try {
+                const res = await fetch('/api/admin/groups');
+                const data = await res.json();
+                if (data.status === 'success') {
+                    adminGroups = data.groups;
+                    renderAdminGroups();
+                    renderAdminUsers(); // Actualizar selectores de oficina nos usuarios
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        function renderAdminUsers() {
+            const tbody = document.getElementById('adminUsersTableBody');
+            tbody.innerHTML = '';
+
+            if (adminUsers.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-slate-400">Non hai usuarios rexistrados.</td></tr>`;
+                return;
+            }
+
+            adminUsers.forEach(u => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50/80 transition";
+
+                const isPgarat = (u.username.toLowerCase() === 'pgarat');
+
+                // Rol Badge / Select
+                const roleBadge = u.role === 'admin' 
+                    ? `<span class="px-2 py-0.5 text-[10px] font-black uppercase rounded bg-purple-100 text-purple-700 border border-purple-200">Admin</span>`
+                    : `<span class="px-2 py-0.5 text-[10px] font-semibold uppercase rounded bg-slate-100 text-slate-600 border border-slate-200">Usuario</span>`;
+
+                // Selector de Oficina
+                let groupOptions = `<option value="">(Sen Oficina)</option>`;
+                adminGroups.forEach(g => {
+                    const sel = (u.group_id === g.id) ? 'selected' : '';
+                    groupOptions += `<option value="${g.id}" ${sel}>${escapeHtml(g.name)}</option>`;
+                });
+                const groupSelect = `
+                    <select onchange="updateUserGroup(${u.id}, this.value)" class="px-2.5 py-1 text-xs rounded-lg border border-slate-300 bg-white font-medium text-slate-700 focus:ring-1 focus:ring-purple-600">
+                        ${groupOptions}
+                    </select>
+                `;
+
+                // Estado de aprobación
+                let statusHtml = '';
+                if (!u.is_approved) {
+                    statusHtml = `
+                        <div class="flex items-center gap-2">
+                            <span class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-amber-100 text-amber-800 border border-amber-200">
+                                ⚠️ Pendente
+                            </span>
+                            <button onclick="approveUser(${u.id})" class="px-2.5 py-1 text-[11px] font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg shadow-sm transition">
+                                ✅ Aprobar
+                            </button>
+                        </div>
+                    `;
+                } else {
+                    const toggleBtn = isPgarat ? '' : `
+                        <button onclick="toggleUserStatus(${u.id})" title="Suspender acceso" class="text-[10px] text-slate-400 hover:text-slate-700 ml-1 underline">
+                            (Desactivar)
+                        </button>
+                    `;
+                    statusHtml = `
+                        <div class="flex items-center">
+                            <span class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200">
+                                ✓ Activo
+                            </span>
+                            ${toggleBtn}
+                        </div>
+                    `;
+                }
+
+                // Botón Eliminar
+                const deleteBtn = isPgarat ? '' : `
+                    <button onclick="deleteUser(${u.id}, '${escapeHtml(u.username)}')" title="Eliminar usuario" class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition">
+                        🗑️
+                    </button>
+                `;
+
+                tr.innerHTML = `
+                    <td class="py-3 px-4">
+                        <span class="font-bold text-slate-800 block">${escapeHtml(u.username)}</span>
+                        <span class="text-[10px] text-slate-400">${escapeHtml(u.email || 'Sen email')}</span>
+                    </td>
+                    <td class="py-3 px-3">${roleBadge}</td>
+                    <td class="py-3 px-3">${groupSelect}</td>
+                    <td class="py-3 px-3">${statusHtml}</td>
+                    <td class="py-3 px-4 text-right">${deleteBtn}</td>
+                `;
+
+                tbody.appendChild(tr);
+            });
+        }
+
+        function renderAdminGroups() {
+            const tbody = document.getElementById('adminGroupsTableBody');
+            tbody.innerHTML = '';
+
+            if (adminGroups.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="py-8 text-center text-slate-400">Aínda non hai oficinas creadas. Crea unha arriba.</td></tr>`;
+                return;
+            }
+
+            adminGroups.forEach(g => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50/80 transition";
+
+                tr.innerHTML = `
+                    <td class="py-3 px-4 font-bold text-slate-800">🏢 ${escapeHtml(g.name)}</td>
+                    <td class="py-3 px-4 text-slate-500">${escapeHtml(g.description || '—')}</td>
+                    <td class="py-3 px-3 text-center">
+                        <span class="px-2 py-0.5 rounded-full bg-slate-100 font-bold text-slate-700 text-[10px]">
+                            ${g.member_count} membros
+                        </span>
+                    </td>
+                    <td class="py-3 px-4 text-right">
+                        <button onclick="deleteGroup(${g.id}, '${escapeHtml(g.name)}')" title="Eliminar oficina" class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition">
+                            🗑️
+                        </button>
+                    </td>
+                `;
+
+                tbody.appendChild(tr);
+            });
+        }
+
+        async function approveUser(id) {
+            try {
+                const res = await fetch(`/api/admin/users/${id}/approve`, { method: 'POST' });
+                const data = await res.json();
+                if (data.status === 'success') {
+                    loadAdminData();
+                } else {
+                    alert('Erro: ' + data.error);
+                }
+            } catch (err) {
+                alert('Erro: ' + err.message);
+            }
+        }
+
+        async function toggleUserStatus(id) {
+            try {
+                const res = await fetch(`/api/admin/users/${id}/toggle-status`, { method: 'POST' });
+                const data = await res.json();
+                if (data.status === 'success') {
+                    loadAdminData();
+                } else {
+                    alert('Erro: ' + data.error);
+                }
+            } catch (err) {
+                alert('Erro: ' + err.message);
+            }
+        }
+
+        async function updateUserGroup(userId, groupId) {
+            try {
+                const res = await fetch(`/api/admin/users/${userId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ group_id: groupId || null })
+                });
+                const data = await res.json();
+                if (data.status !== 'success') {
+                    alert('Erro ao actualizar oficina: ' + data.error);
+                }
+            } catch (err) {
+                alert('Erro: ' + err.message);
+            }
+        }
+
+        async function deleteUser(id, name) {
+            if (!confirm(`¿Estás seguro de que desexas eliminar ao usuario "${name}"? Esta acción eliminará os seus proxectos e datos.`)) {
+                return;
+            }
+            try {
+                const res = await fetch(`/api/admin/users/${id}`, { method: 'DELETE' });
+                const data = await res.json();
+                if (data.status === 'success') {
+                    loadAdminData();
+                } else {
+                    alert('Erro: ' + data.error);
+                }
+            } catch (err) {
+                alert('Erro: ' + err.message);
+            }
+        }
+
+        async function handleCreateGroup(e) {
+            e.preventDefault();
+            const name = document.getElementById('newGroupName').value.trim();
+            const desc = document.getElementById('newGroupDesc').value.trim();
+            if (!name) return;
+
+            try {
+                const res = await fetch('/api/admin/groups', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name: name, description: desc })
+                });
+                const data = await res.json();
+                if (data.status === 'success') {
+                    document.getElementById('newGroupName').value = '';
+                    document.getElementById('newGroupDesc').value = '';
+                    loadAdminGroups();
+                } else {
+                    alert('Erro: ' + data.error);
+                }
+            } catch (err) {
+                alert('Erro ao crear oficina: ' + err.message);
+            }
+        }
+
+        async function deleteGroup(id, name) {
+            if (!confirm(`¿Estás seguro de eliminar a oficina "${name}"? Os usuarios membros non se eliminarán, pero quedarán sen grupo asignado.`)) {
+                return;
+            }
+            try {
+                const res = await fetch(`/api/admin/groups/${id}`, { method: 'DELETE' });
+                const data = await res.json();
+                if (data.status === 'success') {
+                    loadAdminGroups();
+                } else {
+                    alert('Erro: ' + data.error);
+                }
+            } catch (err) {
+                alert('Erro: ' + err.message);
+            }
+        }
+
+        // =========================================================
+        // CREACIÓN E IMPORTACIÓN DE PROXECTOS
+        // =========================================================
         function openNewProjectModal() {
             document.getElementById('newProjectModal').classList.remove('hidden');
             document.getElementById('newProjectName').focus();
@@ -355,7 +929,6 @@
                     let ebss = parsed.ebss_data || {};
                     let resData = parsed.residuos_data || {};
 
-                    // Se é un JSON antigo de EBSS ou Residuos directo
                     if (!parsed.common_data) {
                         common = {
                             tipo_obra: parsed.tipo_obra,

@@ -135,8 +135,13 @@
 
                 if (res.ok && data.status === 'success') {
                     window.location.href = '/dashboard';
+                } else if (data.status === 'pending') {
+                    alertBox.textContent = '⏳ ' + (data.message || 'A túa conta foi rexistrada e está pendente de validación polo Administrador.');
+                    alertBox.className = "mb-5 p-3.5 rounded-xl text-xs font-semibold flex items-center gap-2 bg-amber-50 text-amber-800 border border-amber-200";
+                    alertBox.classList.remove('hidden');
+                    switchAuthTab('login');
                 } else {
-                    alertBox.textContent = data.error || 'Erro na autenticación.';
+                    alertBox.textContent = '⚠️ ' + (data.error || 'Erro na autenticación.');
                     alertBox.className = "mb-5 p-3.5 rounded-xl text-xs font-semibold flex items-center gap-2 bg-rose-50 text-rose-700 border border-rose-200";
                     alertBox.classList.remove('hidden');
                 }

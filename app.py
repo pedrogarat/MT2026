@@ -2,8 +2,8 @@
 """
 app.py
 Aplicación Web Flask para o Asistente Técnico de Proxectos (EBSS & Xestión de Residuos).
-Inclúe soporte multiusuario, base de datos relacional (SQLite local / PostgreSQL nube),
-xestión de proxectos con datos comúns compartidos e xeración modular independente de .docx.
+Inclúe soporte multiusuario, roles (Administrador / Usuario), validación de altas,
+oficinas/grupos con proxectos compartidos, base de datos relacional e xeración modular de .docx.
 """
 
 import os
@@ -23,7 +23,7 @@ CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 if CURRENT_DIR not in sys.path:
     sys.path.insert(0, CURRENT_DIR)
 
-from models import init_db, SessionLocal, User, Project
+from models import init_db, SessionLocal, User, Project, Group
 from ebss_processor import DEFAULT_DATA, generate_ebss, get_default_paths
 from residuos_processor import (
     DEFAULT_RESIDUOS_DATA, generate_residuos, calculate_residuos,
@@ -48,7 +48,6 @@ def logo_route():
     return send_file(os.path.join(CURRENT_DIR, "public", "logo.png"), mimetype="image/png")
 
 # Configuración de cookies de sesión para compatibilidade total con Firebase Hosting e Cloud Run
-# Firebase Hosting elimina do proxy todas as cookies agás aquela chamada "__session"
 app.config["SESSION_COOKIE_NAME"] = "__session"
 app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
 app.config["SESSION_COOKIE_HTTPONLY"] = True
@@ -73,7 +72,7 @@ except Exception as e:
 
 
 # ---------------------------------------------------------
-# Utilidades e Decoradores de Autenticación
+# Utilidades e Decoradores de Permisos e Autenticación
 # ---------------------------------------------------------
 def get_db_session():
     return SessionLocal()
@@ -99,6 +98,36 @@ def get_current_user():
         return db.query(User).filter(User.id == user_id).first()
     finally:
         db.close()
+
+
+def admin_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        user = get_current_user()
+        if not user or user.role != "admin":
+            if request.is_json or request.path.startswith("/api/"):
+                return jsonify({"status": "error", "error": "Acceso restrinxido ao Administrador."}), 403
+            abort(403)
+        return f(*args, **kwargs)
+    return decorated_function
+
+
+def can_access_project(user, proj):
+    """Determina se un usuario pode ver/editar un proxecto (propio, da súa oficina ou como admin)."""
+    if not user or not proj:
+        return False
+    if user.role == "admin" or proj.user_id == user.id:
+        return True
+    if user.group_id and proj.user and proj.user.group_id == user.group_id:
+        return True
+    return False
+
+
+def can_delete_project(user, proj):
+    """Determina se un usuario pode eliminar un proxecto (só o autor ou o Administrador)."""
+    if not user or not proj:
+        return False
+    return user.role == "admin" or proj.user_id == user.id
 
 
 # ---------------------------------------------------------
@@ -129,12 +158,10 @@ def dashboard():
 def project_editor(project_id):
     db = get_db_session()
     try:
-        project = db.query(Project).filter(
-            Project.id == project_id,
-            Project.user_id == session["user_id"]
-        ).first()
-        if not project:
-            abort(404, "Proxecto non atopado ou sen permisos.")
+        user = db.query(User).filter(User.id == session["user_id"]).first()
+        proj = db.query(Project).filter(Project.id == project_id).first()
+        if not proj or not can_access_project(user, proj):
+            abort(404, "Proxecto non atopado ou sen permisos para acceder.")
         return render_template("project_editor.html")
     finally:
         db.close()
@@ -157,7 +184,7 @@ def legacy_residuos():
 
 
 # ---------------------------------------------------------
-# API de Autenticación
+# API de Autenticación e Perfil
 # ---------------------------------------------------------
 @app.route("/api/auth/register", methods=["POST"])
 def auth_register():
@@ -178,12 +205,22 @@ def auth_register():
         if existing:
             return jsonify({"status": "error", "error": "O nome de usuario xa está en uso."}), 409
 
-        user = User(username=username, email=email)
+        # O usuario 'pgarat' é sempre Administrador e queda validado de xeito automático
+        is_pgarat = (username.lower() == "pgarat")
+        role = "admin" if is_pgarat else "user"
+        is_approved = True if is_pgarat else False
+
+        user = User(
+            username=username,
+            email=email,
+            role=role,
+            is_approved=is_approved
+        )
         user.set_password(password)
         db.add(user)
         db.commit()
 
-        # Crear automáticamente un proxecto inicial de benvida
+        # Crear automaticamente un proxecto de exemplo
         default_common = {
             "tipo_obra": DEFAULT_DATA.get("tipo_obra", "Melloras de condicións de seguridade, salubridade e ornato"),
             "situacion": DEFAULT_DATA.get("situacion", "Rúa Baterías 34"),
@@ -239,10 +276,20 @@ def auth_register():
         db.add(proj)
         db.commit()
 
-        session["user_id"] = user.id
-        session["username"] = user.username
-
-        return jsonify({"status": "success", "user": user.to_dict()})
+        if is_approved:
+            session["user_id"] = user.id
+            session["username"] = user.username
+            return jsonify({
+                "status": "success",
+                "user": user.to_dict(),
+                "message": "Conta creada correctamente."
+            })
+        else:
+            return jsonify({
+                "status": "pending",
+                "user": user.to_dict(),
+                "message": "Rexistro completado con éxito. A túa conta está pendente de validación polo Administrador antes de poder acceder."
+            })
     finally:
         db.close()
 
@@ -265,12 +312,27 @@ def auth_login():
         if not user or not user.check_password(password):
             return jsonify({"status": "error", "error": "Credenciais incorrectas."}), 401
 
+        if not user.is_approved and user.role != "admin":
+            return jsonify({
+                "status": "error",
+                "error": "A túa conta está pendente de validación polo Administrador."
+            }), 403
+
         session["user_id"] = user.id
         session["username"] = user.username
 
         return jsonify({"status": "success", "user": user.to_dict()})
     finally:
         db.close()
+
+
+@app.route("/api/auth/me", methods=["GET"])
+@login_required
+def auth_me():
+    user = get_current_user()
+    if not user:
+        return jsonify({"status": "error", "error": "Usuario non atopado"}), 404
+    return jsonify({"status": "success", "user": user.to_dict()})
 
 
 @app.route("/api/auth/logout", methods=["POST", "GET"])
@@ -282,7 +344,7 @@ def auth_logout():
 
 
 # ---------------------------------------------------------
-# API de Xestión de Proxectos
+# API de Xestión de Proxectos (Propios e de Oficina/Grupo)
 # ---------------------------------------------------------
 @app.route("/api/projects", methods=["GET"])
 @login_required
@@ -294,12 +356,33 @@ def list_projects():
             session.clear()
             return jsonify({"status": "error", "error": "Usuario non atopado"}), 401
 
-        projects_query = db.query(Project).filter(Project.user_id == user.id).order_by(Project.updated_at.desc()).all()
-        projects = [p.to_dict() for p in projects_query]
+        # Lóxica de visibilidade de proxectos:
+        # 1. Se é Administrador: pode ver todos os proxectos da plataforma
+        # 2. Se ten Oficina/Grupo: pode ver os seus proxectos e os de todos os seus compañeiros de oficina
+        # 3. Se non ten grupo: só ve os seus proxectos
+        if user.role == "admin":
+            projects_query = db.query(Project).order_by(Project.updated_at.desc()).all()
+        elif user.group_id:
+            colleagues = db.query(User.id).filter(User.group_id == user.group_id).all()
+            colleague_ids = [c[0] for c in colleagues]
+            projects_query = db.query(Project).filter(
+                Project.user_id.in_(colleague_ids)
+            ).order_by(Project.updated_at.desc()).all()
+        else:
+            projects_query = db.query(Project).filter(
+                Project.user_id == user.id
+            ).order_by(Project.updated_at.desc()).all()
+
+        project_list = []
+        for p in projects_query:
+            p_dict = p.to_dict()
+            p_dict["is_owner"] = (p.user_id == user.id)
+            p_dict["can_delete"] = can_delete_project(user, p)
+            project_list.append(p_dict)
         
         resp = jsonify({
             "status": "success",
-            "projects": projects,
+            "projects": project_list,
             "user": user.to_dict()
         })
         resp.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
@@ -318,7 +401,6 @@ def create_project():
 
     db = get_db_session()
     try:
-        # Valores por defecto para novo proxecto
         common = {
             "tipo_obra": data.get("common_data", {}).get("tipo_obra", "Melloras de condicións de seguridade, salubridade e ornato"),
             "situacion": data.get("common_data", {}).get("situacion", "Rúa Baterías 34"),
@@ -335,8 +417,6 @@ def create_project():
             "asinantes": data.get("common_data", {}).get("asinantes", "Fdo. Sergio J. Beceiro Lodeiro     M. Rosa Vilas Romalde"),
             "colexiado": data.get("common_data", {}).get("colexiado", "ESTUDIO ANTA ARQUITECTOS S.L.P.\tNº COAG - 20.039")
         }
-        if "common_data" in data and isinstance(data["common_data"], dict):
-            common.update(data["common_data"])
 
         ebss = {
             "accesos_obra": DEFAULT_DATA.get("accesos_obra"),
@@ -380,7 +460,10 @@ def create_project():
         db.add(proj)
         db.commit()
 
-        return jsonify({"status": "success", "project": proj.to_dict()})
+        p_dict = proj.to_dict()
+        p_dict["is_owner"] = True
+        p_dict["can_delete"] = True
+        return jsonify({"status": "success", "project": p_dict})
     finally:
         db.close()
 
@@ -390,13 +473,15 @@ def create_project():
 def get_project(project_id):
     db = get_db_session()
     try:
-        proj = db.query(Project).filter(
-            Project.id == project_id,
-            Project.user_id == session["user_id"]
-        ).first()
-        if not proj:
-            return jsonify({"status": "error", "error": "Proxecto non atopado."}), 404
-        return jsonify({"status": "success", "project": proj.to_dict()})
+        user = db.query(User).filter(User.id == session["user_id"]).first()
+        proj = db.query(Project).filter(Project.id == project_id).first()
+        if not proj or not can_access_project(user, proj):
+            return jsonify({"status": "error", "error": "Proxecto non atopado ou sen permisos."}), 404
+        
+        p_dict = proj.to_dict()
+        p_dict["is_owner"] = (proj.user_id == user.id)
+        p_dict["can_delete"] = can_delete_project(user, proj)
+        return jsonify({"status": "success", "project": p_dict})
     finally:
         db.close()
 
@@ -407,12 +492,10 @@ def update_project(project_id):
     data = request.get_json() or {}
     db = get_db_session()
     try:
-        proj = db.query(Project).filter(
-            Project.id == project_id,
-            Project.user_id == session["user_id"]
-        ).first()
-        if not proj:
-            return jsonify({"status": "error", "error": "Proxecto non atopado."}), 404
+        user = db.query(User).filter(User.id == session["user_id"]).first()
+        proj = db.query(Project).filter(Project.id == project_id).first()
+        if not proj or not can_access_project(user, proj):
+            return jsonify({"status": "error", "error": "Proxecto non atopado ou sen permisos."}), 404
 
         if "name" in data:
             proj.name = data["name"].strip() or proj.name
@@ -427,7 +510,11 @@ def update_project(project_id):
 
         proj.updated_at = datetime.utcnow()
         db.commit()
-        return jsonify({"status": "success", "project": proj.to_dict()})
+
+        p_dict = proj.to_dict()
+        p_dict["is_owner"] = (proj.user_id == user.id)
+        p_dict["can_delete"] = can_delete_project(user, proj)
+        return jsonify({"status": "success", "project": p_dict})
     finally:
         db.close()
 
@@ -437,12 +524,12 @@ def update_project(project_id):
 def delete_project(project_id):
     db = get_db_session()
     try:
-        proj = db.query(Project).filter(
-            Project.id == project_id,
-            Project.user_id == session["user_id"]
-        ).first()
+        user = db.query(User).filter(User.id == session["user_id"]).first()
+        proj = db.query(Project).filter(Project.id == project_id).first()
         if not proj:
             return jsonify({"status": "error", "error": "Proxecto non atopado."}), 404
+        if not can_delete_project(user, proj):
+            return jsonify({"status": "error", "error": "Só o autor ou o Administrador poden eliminar este proxecto."}), 403
 
         db.delete(proj)
         db.commit()
@@ -459,14 +546,11 @@ def delete_project(project_id):
 def project_generate_ebss(project_id):
     db = get_db_session()
     try:
-        proj = db.query(Project).filter(
-            Project.id == project_id,
-            Project.user_id == session["user_id"]
-        ).first()
-        if not proj:
-            return jsonify({"status": "error", "error": "Proxecto non atopado."}), 404
+        user = db.query(User).filter(User.id == session["user_id"]).first()
+        proj = db.query(Project).filter(Project.id == project_id).first()
+        if not proj or not can_access_project(user, proj):
+            return jsonify({"status": "error", "error": "Proxecto non atopado ou sen permisos."}), 404
 
-        # Combinar datos comúns con datos específicos de EBSS
         common = proj.get_common_dict()
         ebss = proj.get_ebss_dict()
 
@@ -474,7 +558,6 @@ def project_generate_ebss(project_id):
         merged_data.update(common)
         merged_data.update(ebss)
 
-        # Xerar directamente na memoria (BytesIO)
         stream = io.BytesIO()
         pobl = common.get("poboacion", "Proxecto").strip() or "Proxecto"
         filename = f"EBSS_{pobl.replace(' ', '_')}.docx"
@@ -499,14 +582,11 @@ def project_generate_ebss(project_id):
 def project_generate_residuos(project_id):
     db = get_db_session()
     try:
-        proj = db.query(Project).filter(
-            Project.id == project_id,
-            Project.user_id == session["user_id"]
-        ).first()
-        if not proj:
-            return jsonify({"status": "error", "error": "Proxecto non atopado."}), 404
+        user = db.query(User).filter(User.id == session["user_id"]).first()
+        proj = db.query(Project).filter(Project.id == project_id).first()
+        if not proj or not can_access_project(user, proj):
+            return jsonify({"status": "error", "error": "Proxecto non atopado ou sen permisos."}), 404
 
-        # Combinar datos comúns con datos específicos de Residuos
         common = proj.get_common_dict()
         residuos = proj.get_residuos_dict()
 
@@ -514,7 +594,6 @@ def project_generate_residuos(project_id):
         merged_data.update(common)
         merged_data.update(residuos)
 
-        # Xerar directamente na memoria (BytesIO)
         stream = io.BytesIO()
         pobl = common.get("poboacion", "Proxecto").strip() or "Proxecto"
         filename = f"XESTION_RESIDUOS_{pobl.replace(' ', '_')}.docx"
@@ -530,6 +609,191 @@ def project_generate_residuos(project_id):
         )
     except Exception as e:
         return jsonify({"status": "error", "error": str(e)}), 500
+    finally:
+        db.close()
+
+
+# ---------------------------------------------------------
+# API DE ADMINISTRACIÓN (Exclusiva para o Administrador 'pgarat')
+# ---------------------------------------------------------
+@app.route("/api/admin/users", methods=["GET"])
+@login_required
+@admin_required
+def admin_list_users():
+    db = get_db_session()
+    try:
+        users = db.query(User).order_by(User.created_at.desc()).all()
+        return jsonify({"status": "success", "users": [u.to_dict() for u in users]})
+    finally:
+        db.close()
+
+
+@app.route("/api/admin/users/<int:target_user_id>/approve", methods=["POST"])
+@login_required
+@admin_required
+def admin_approve_user(target_user_id):
+    db = get_db_session()
+    try:
+        target = db.query(User).filter(User.id == target_user_id).first()
+        if not target:
+            return jsonify({"status": "error", "error": "Usuario non atopado."}), 404
+        target.is_approved = True
+        db.commit()
+        return jsonify({"status": "success", "user": target.to_dict()})
+    finally:
+        db.close()
+
+
+@app.route("/api/admin/users/<int:target_user_id>/toggle-status", methods=["POST"])
+@login_required
+@admin_required
+def admin_toggle_user_status(target_user_id):
+    db = get_db_session()
+    try:
+        target = db.query(User).filter(User.id == target_user_id).first()
+        if not target:
+            return jsonify({"status": "error", "error": "Usuario non atopado."}), 404
+        if target.username.lower() == "pgarat":
+            return jsonify({"status": "error", "error": "Non se pode suspender ao Administrador principal."}), 400
+        target.is_approved = not target.is_approved
+        db.commit()
+        return jsonify({"status": "success", "user": target.to_dict()})
+    finally:
+        db.close()
+
+
+@app.route("/api/admin/users/<int:target_user_id>", methods=["PUT"])
+@login_required
+@admin_required
+def admin_update_user(target_user_id):
+    data = request.get_json() or {}
+    db = get_db_session()
+    try:
+        target = db.query(User).filter(User.id == target_user_id).first()
+        if not target:
+            return jsonify({"status": "error", "error": "Usuario non atopado."}), 404
+        
+        # Actualizar grupo/oficina
+        if "group_id" in data:
+            gid = data["group_id"]
+            if gid in (None, "", 0, "0"):
+                target.group_id = None
+            else:
+                group = db.query(Group).filter(Group.id == int(gid)).first()
+                if group:
+                    target.group_id = group.id
+                else:
+                    target.group_id = None
+
+        # Actualizar rol
+        if "role" in data:
+            new_role = str(data["role"]).strip().lower()
+            if target.username.lower() == "pgarat" and new_role != "admin":
+                return jsonify({"status": "error", "error": "O usuario pgarat debe manter sempre o rol de Administrador."}), 400
+            if new_role in ["admin", "user"]:
+                target.role = new_role
+
+        # Actualizar estado de aprobación
+        if "is_approved" in data:
+            if target.username.lower() == "pgarat":
+                target.is_approved = True
+            else:
+                target.is_approved = bool(data["is_approved"])
+
+        db.commit()
+        return jsonify({"status": "success", "user": target.to_dict()})
+    finally:
+        db.close()
+
+
+@app.route("/api/admin/users/<int:target_user_id>", methods=["DELETE"])
+@login_required
+@admin_required
+def admin_delete_user(target_user_id):
+    db = get_db_session()
+    try:
+        target = db.query(User).filter(User.id == target_user_id).first()
+        if not target:
+            return jsonify({"status": "error", "error": "Usuario non atopado."}), 404
+        if target.username.lower() == "pgarat":
+            return jsonify({"status": "error", "error": "Non se pode eliminar o Administrador principal (pgarat)."}), 400
+        db.delete(target)
+        db.commit()
+        return jsonify({"status": "success"})
+    finally:
+        db.close()
+
+
+@app.route("/api/admin/groups", methods=["GET"])
+@login_required
+@admin_required
+def admin_list_groups():
+    db = get_db_session()
+    try:
+        groups = db.query(Group).order_by(Group.name.asc()).all()
+        return jsonify({"status": "success", "groups": [g.to_dict() for g in groups]})
+    finally:
+        db.close()
+
+
+@app.route("/api/admin/groups", methods=["POST"])
+@login_required
+@admin_required
+def admin_create_group():
+    data = request.get_json() or {}
+    name = data.get("name", "").strip()
+    if not name:
+        return jsonify({"status": "error", "error": "O nome da oficina ou grupo é obrigatorio."}), 400
+    desc = data.get("description", "").strip()
+    db = get_db_session()
+    try:
+        existing = db.query(Group).filter(Group.name.ilike(name)).first()
+        if existing:
+            return jsonify({"status": "error", "error": "Xa existe unha oficina ou grupo con ese nome."}), 409
+        group = Group(name=name, description=desc)
+        db.add(group)
+        db.commit()
+        return jsonify({"status": "success", "group": group.to_dict()})
+    finally:
+        db.close()
+
+
+@app.route("/api/admin/groups/<int:group_id>", methods=["PUT"])
+@login_required
+@admin_required
+def admin_update_group(group_id):
+    data = request.get_json() or {}
+    name = data.get("name", "").strip()
+    desc = data.get("description", "").strip()
+    db = get_db_session()
+    try:
+        group = db.query(Group).filter(Group.id == group_id).first()
+        if not group:
+            return jsonify({"status": "error", "error": "Oficina non atopada."}), 404
+        if name:
+            group.name = name
+        if "description" in data:
+            group.description = desc
+        db.commit()
+        return jsonify({"status": "success", "group": group.to_dict()})
+    finally:
+        db.close()
+
+
+@app.route("/api/admin/groups/<int:group_id>", methods=["DELETE"])
+@login_required
+@admin_required
+def admin_delete_group(group_id):
+    db = get_db_session()
+    try:
+        group = db.query(Group).filter(Group.id == group_id).first()
+        if not group:
+            return jsonify({"status": "error", "error": "Oficina non atopada."}), 404
+        for u in group.users:
+            u.group_id = None
+        db.delete(group)
+        db.commit()
+        return jsonify({"status": "success"})
     finally:
         db.close()
 
@@ -617,8 +881,8 @@ def start_server(port=None, auto_open=True):
 
     url = f"http://127.0.0.1:{port}"
     print("=" * 65, flush=True)
-    print("  ASISTENTE TÉCNICO DE PROXECTOS (EBSS + XESTIÓN DE RESIDUOS)", flush=True)
-    print("  SISTEMA MULTIUSUARIO CON BASE DE DATOS E PERSISTENCIA DE PROXECTOS", flush=True)
+    print("  MEMORIAS TÉCNICAS 2026 (EBSS + XESTIÓN DE RESIDUOS)", flush=True)
+    print("  SISTEMA MULTIUSUARIO CON ROLES, OFICINAS E BASE DE DATOS", flush=True)
     print("=" * 65, flush=True)
     print(f" Servidor activo en: {url}", flush=True)
     print(" Preme Ctrl+C no terminal para pechar o asistente.", flush=True)
