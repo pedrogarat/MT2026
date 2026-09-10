@@ -31,8 +31,21 @@ from residuos_processor import (
 )
 from geo_service import calculate_health_distances, find_nearby_health_facilities
 
-app = Flask(__name__, template_folder=os.path.join(CURRENT_DIR, "templates"))
+app = Flask(
+    __name__,
+    template_folder=os.path.join(CURRENT_DIR, "templates"),
+    static_folder=os.path.join(CURRENT_DIR, "public"),
+    static_url_path="/static"
+)
 app.secret_key = os.environ.get("SECRET_KEY", "asistente-tecnico-ebss-residuos-secret-key-2026")
+
+@app.route("/favicon.ico")
+def favicon():
+    return send_file(os.path.join(CURRENT_DIR, "public", "favicon.ico"), mimetype="image/x-icon")
+
+@app.route("/logo.png")
+def logo_route():
+    return send_file(os.path.join(CURRENT_DIR, "public", "logo.png"), mimetype="image/png")
 
 # Configuración de cookies de sesión para compatibilidade total con Firebase Hosting e Cloud Run
 # Firebase Hosting elimina do proxy todas as cookies agás aquela chamada "__session"
