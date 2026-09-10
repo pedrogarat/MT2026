@@ -9,7 +9,8 @@ Aplicación web multiusuario orientada a técnicos, arquitectos e enxeñeiros en
 1. **Estudo Básico de Seguridade e Saúde (EBSS)** segundo RD 1627/1997.
 2. **Estudo de Xestión de Residuos de Construcción e Demolición (EGR)** segundo RD 105/2008 e normativa galega.
 
-- **Idioma de traballo**: Galego en interface e documentos xerados en Word (`.docx`).
+- **Idioma de traballo do proxecto**: Galego na interface e documentos xerados en Word (`.docx`).
+- **Idioma de comunicación co usuario**: Responder SEMPRE en castelán (español) nas mensaxes co usuario.
 - **Formato de texto**: Caracteres e unidades estándar UTF-8 (`m²`, `m³`, `t`, `× 0,2`). **Nunca empregar sintaxe LaTeX** como `$m^2$` nin similares.
 
 ---
