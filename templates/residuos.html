@@ -51,16 +51,18 @@
                     </h1>
                     <p class="text-xs text-slate-400">Asistente interactivo de estimación de RCDs e cumprimentación Word</p>
                 </div>
-            </div>
-            <div class="flex items-center space-x-2">
-                <a href="/" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-1.5 rounded-md border border-slate-700 flex items-center gap-1">
-                    🏠 Inicio
+                       <div class="flex items-center space-x-2">
+                <a href="/" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-1.5 rounded-md border border-slate-700 flex items-center gap-1.5">
+                    <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+                    <span>Inicio</span>
                 </a>
-                <button type="button" onclick="exportProfile()" title="Gardar perfil JSON" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-1.5 rounded-md border border-slate-700 flex items-center gap-1">
-                    💾 Gardar
+                <button type="button" onclick="exportProfile()" title="Gardar perfil JSON" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-1.5 rounded-md border border-slate-700 flex items-center gap-1.5">
+                    <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path></svg>
+                    <span>Gardar</span>
                 </button>
-                <label class="cursor-pointer text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-1.5 rounded-md border border-slate-700 flex items-center gap-1">
-                    📂 Cargar
+                <label class="cursor-pointer text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-1.5 rounded-md border border-slate-700 flex items-center gap-1.5">
+                    <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                    <span>Cargar</span>
                     <input type="file" id="profileInput" accept=".json" class="hidden" onchange="importProfile(event)">
                 </label>
             </div>
@@ -99,7 +101,8 @@
                 <div id="step-1" class="space-y-6">
                     <div>
                         <h2 class="text-xl font-bold text-slate-900 flex items-center gap-2">
-                            <span>📋</span> Paso 1: Datos Xerais do Proxecto e Superficie
+                            <svg class="w-5 h-5 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                            <span>Paso 1: Datos Xerais do Proxecto e Superficie</span>
                         </h2>
                         <p class="text-sm text-slate-500 mt-1">A superficie de actuación (m²) serve de base para o cálculo dos volumes e toneladas de residuos segundo o Excel do estudo.</p>
                     </div>
@@ -147,7 +150,10 @@
 
                         <!-- SUPERFICIE DE ACTUACIÓN (CELDA D4 DO EXCEL) -->
                         <div class="p-4 rounded-xl border border-emerald-300 bg-emerald-50/70 md:col-span-2 space-y-2">
-                            <label class="block text-sm font-bold text-emerald-900">📐 Superficie de actuación (m²) [Celda D4 da plantilla Excel]</label>
+                            <label class="block text-sm font-bold text-emerald-900 flex items-center gap-1.5">
+                                <svg class="w-4 h-4 text-emerald-700 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path></svg>
+                                <span>Superficie de actuación (m²) [Celda D4 da plantilla Excel]</span>
+                            </label>
                             <div class="flex items-center gap-4">
                                 <input type="number" id="superficie_actuacion" step="0.01" min="0.1" value="9.84" oninput="updateLiveCalculation()" class="w-48 rounded-lg border-emerald-400 border p-2.5 text-base font-bold text-emerald-900 bg-white focus:ring-2 focus:ring-emerald-600">
                                 <div class="text-xs text-emerald-800">
@@ -158,7 +164,6 @@
                             </div>
                             <p class="text-[11px] text-emerald-700">Fórmula Excel: Volume estimado (m³) = Superficie (m²) × 0,2.</p>
                         </div>
-
                     </div>
                 </div>
 
@@ -166,7 +171,8 @@
                 <div id="step-2" class="hidden space-y-6">
                     <div>
                         <h2 class="text-xl font-bold text-slate-900 flex items-center gap-2">
-                            <span>📦</span> Paso 2: Alcance de Obra - Residuos Nivel I e No Pétreos
+                            <svg class="w-5 h-5 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
+                            <span>Paso 2: Alcance de Obra - Residuos Nivel I e No Pétreos</span>
                         </h2>
                         <p class="text-sm text-slate-500 mt-1">Marca en "SI" os tipos de residuos previstos segundo o alcance das obras (Equivalente á Columna B do Excel).</p>
                     </div>
@@ -180,7 +186,8 @@
                 <div id="step-3" class="hidden space-y-6">
                     <div>
                         <h2 class="text-xl font-bold text-slate-900 flex items-center gap-2">
-                            <span>🧱</span> Paso 3: Alcance de Obra - Residuos Pétreos e Peligrosos
+                            <svg class="w-5 h-5 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                            <span>Paso 3: Alcance de Obra - Residuos Pétreos e Peligrosos</span>
                         </h2>
                         <p class="text-sm text-slate-500 mt-1">Indica se a obra comprende residuos pétreos (hormigón, cerámicos, áridos) ou potencialmente perigosos.</p>
                     </div>
@@ -194,7 +201,8 @@
                 <div id="step-4" class="hidden space-y-6">
                     <div>
                         <h2 class="text-xl font-bold text-slate-900 flex items-center gap-2">
-                            <span>📊</span> Paso 4: Resumo e Cálculo Matemático en Tempo Real
+                            <svg class="w-5 h-5 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                            <span>Paso 4: Resumo e Cálculo Matemático en Tempo Real</span>
                         </h2>
                         <p class="text-sm text-slate-500 mt-1">Táboas de cantidades estimadas e valoración da Separación Obligatoria en Obra.</p>
                     </div>
@@ -205,21 +213,26 @@
                                 <span class="text-xs text-slate-400 font-semibold uppercase">Volume Total Estimado</span>
                                 <div id="summaryVolText" class="text-2xl font-extrabold text-emerald-400">1,97 m³</div>
                             </div>
-                            <span class="text-3xl">📦</span>
+                            <div class="p-2.5 rounded-xl bg-slate-800 text-emerald-400">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
+                            </div>
                         </div>
                         <div class="p-4 rounded-xl bg-slate-900 text-white flex justify-between items-center shadow">
                             <div>
                                 <span class="text-xs text-slate-400 font-semibold uppercase">Peso Total Estimado</span>
                                 <div id="summaryWeightText" class="text-2xl font-extrabold text-emerald-400">1,97 t</div>
                             </div>
-                            <span class="text-3xl">⚖️</span>
+                            <div class="p-2.5 rounded-xl bg-slate-800 text-emerald-400">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3"></path></svg>
+                            </div>
                         </div>
                     </div>
 
                     <!-- Cuadro de Separación Obligatoria -->
                     <div class="space-y-3">
                         <h3 class="text-sm font-bold text-slate-800 flex items-center gap-2">
-                            <span>⚖️</span> Separación Obligatoria en Obra (Táboa 3 do Estudio)
+                            <svg class="w-4 h-4 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 4h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                            <span>Separación Obligatoria en Obra (Táboa 3 do Estudio)</span>
                         </h3>
                         <div class="overflow-x-auto border border-slate-200 rounded-lg">
                             <table class="w-full text-xs text-left text-slate-700">
@@ -243,7 +256,8 @@
                 <div id="step-5" class="hidden space-y-6">
                     <div>
                         <h2 class="text-xl font-bold text-slate-900 flex items-center gap-2">
-                            <span>✍️</span> Paso 5: Data, Asinaturas e Xeración do Documento
+                            <svg class="w-5 h-5 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                            <span>Paso 5: Data, Asinaturas e Xeración do Documento</span>
                         </h2>
                         <p class="text-sm text-slate-500 mt-1">Peche do documento e xeración do ficheiro Word listo para entregar.</p>
                     </div>
@@ -272,8 +286,9 @@
 
                     <!-- Botón de Xeración -->
                     <div class="pt-6 border-t border-slate-200 flex flex-col items-center">
-                        <button type="button" onclick="submitGenerateResiduos()" id="btnGenerate" class="w-full sm:w-auto px-8 py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-base rounded-xl shadow-lg hover:shadow-xl transition flex items-center justify-center gap-2">
-                            <span>🚀</span> Xerar Documento de Residuos (.docx)
+                        <button type="button" onclick="submitGenerateResiduos()" id="btnGenerate" class="w-full sm:w-auto px-8 py-3.5 bg-slate-900 hover:bg-slate-800 text-white font-bold text-base rounded-xl shadow-lg transition flex items-center justify-center gap-2">
+                            <svg class="w-5 h-5 text-slate-300 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                            <span>Xerar Documento de Residuos (.docx)</span>
                         </button>
                         <p class="text-xs text-slate-400 mt-2 text-center">Cumplimentará as táboas de cantidades e separación conservando os estilos e maquetación.</p>
                     </div>
@@ -281,13 +296,15 @@
                     <!-- Caixa de Resultado -->
                     <div id="resultBox" class="hidden p-4 rounded-xl border border-emerald-200 bg-emerald-50 text-emerald-900 space-y-3">
                         <div class="flex items-center gap-2 font-bold text-base text-emerald-800">
-                            <span>✅</span> Documento de Xestión de Residuos xerado con éxito!
+                            <svg class="w-5 h-5 text-emerald-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                            <span>Documento de Xestión de Residuos xerado con éxito!</span>
                         </div>
                         <div id="resultWarningBox" class="hidden p-2.5 rounded-lg bg-amber-100 border border-amber-300 text-amber-900 text-xs font-medium"></div>
                         <p class="text-xs text-emerald-700" id="resultPathText"></p>
                         <div class="flex items-center gap-3 pt-1">
                             <a id="btnDownload" href="#" download class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs shadow transition">
-                                ⬇️ Descargar agora
+                                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                                <span>Descargar agora</span>
                             </a>
                         </div>
                     </div>
@@ -457,8 +474,8 @@
                             <td class="p-2.5 text-right font-mono">${row.peso.toFixed(2).replace('.', ',')}</td>
                             <td class="p-2.5 text-center text-slate-500">${row.umbral ? '>' + row.umbral + ' t' : '---'}</td>
                             <td class="p-2.5 text-center">
-                                <span class="px-2 py-0.5 rounded text-[11px] font-bold ${isOb ? 'bg-amber-200 text-amber-900 border border-amber-400' : 'bg-slate-200 text-slate-700'}">
-                                    ${isOb ? '⚠️ OBLIGATORIA' : 'NO OBLIGATORIA'}
+                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-bold ${isOb ? 'bg-amber-50 text-amber-900 border border-amber-200' : 'bg-slate-100 text-slate-600'}">
+                                    ${isOb ? '<svg class="w-3 h-3 text-amber-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg> OBLIGATORIA' : 'NON OBLIGATORIA'}
                                 </span>
                             </td>
                         `;
@@ -536,7 +553,7 @@
             const btn = document.getElementById('btnGenerate');
             const orig = btn.innerHTML;
             btn.disabled = true;
-            btn.innerHTML = `<span>⏳</span> Xerando documento Word de Residuos...`;
+            btn.innerHTML = `<svg class="animate-spin w-4 h-4 inline-block text-current shrink-0 mr-2" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> <span>Xerando documento Word de Residuos...</span>`;
 
             const data = collectFormData();
             try {
@@ -553,7 +570,7 @@
                     const warnBox = document.getElementById('resultWarningBox');
 
                     if (result.fallback_used && result.warning) {
-                        warnBox.innerText = '⚠️ ' + result.warning;
+                        warnBox.innerHTML = `<svg class="w-4 h-4 text-amber-600 inline-block mr-1 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg> ` + result.warning;
                         warnBox.classList.remove('hidden');
                     } else {
                         warnBox.classList.add('hidden');
