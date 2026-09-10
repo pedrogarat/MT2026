@@ -821,7 +821,22 @@
             };
         }
 
+        let autoSaveTimer = null;
+        let isSaving = false;
+        let pendingSaveAfterCurrent = false;
+
         async function saveProject(showAlert = false) {
+            if (autoSaveTimer) {
+                clearTimeout(autoSaveTimer);
+                autoSaveTimer = null;
+            }
+
+            if (isSaving) {
+                pendingSaveAfterCurrent = true;
+                return;
+            }
+
+            isSaving = true;
             const payload = collectFormData();
             const badge = document.getElementById('saveStatusBadge');
             badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-ping"></span> Gardando...`;
@@ -849,17 +864,35 @@
                     }
                 } else {
                     badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span> Erro ao gardar`;
-                    alert('Erro ao gardar: ' + data.error);
+                    if (showAlert) alert('Erro ao gardar: ' + data.error);
                 }
             } catch (err) {
                 badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span> Erro de rede`;
                 console.error(err);
+            } finally {
+                isSaving = false;
+                if (pendingSaveAfterCurrent) {
+                    pendingSaveAfterCurrent = false;
+                    saveProject(false);
+                }
             }
         }
 
         function markDirty() {
             isDirty = true;
             updateSaveBadge();
+            scheduleAutoSave();
+        }
+
+        function scheduleAutoSave() {
+            if (autoSaveTimer) {
+                clearTimeout(autoSaveTimer);
+            }
+            autoSaveTimer = setTimeout(() => {
+                if (isDirty && !isSaving) {
+                    saveProject(false);
+                }
+            }, 1500);
         }
 
         function updateSaveBadge() {
@@ -1594,6 +1627,13 @@
                 if (hm && !hm.classList.contains('hidden')) {
                     closeNearbyHealthModal();
                 }
+            }
+        });
+
+        window.addEventListener('beforeunload', (e) => {
+            if (isDirty) {
+                e.preventDefault();
+                e.returnValue = '';
             }
         });
 
