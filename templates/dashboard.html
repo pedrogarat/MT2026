@@ -29,35 +29,37 @@
             <!-- User Menu & Actions -->
             <div class="flex items-center gap-2 sm:gap-3">
                 <!-- Botón exclusivo para Administrador -->
-                <button id="adminPanelBtn" onclick="openAdminModal()" class="hidden px-3.5 py-2 text-xs font-bold text-purple-700 hover:text-purple-900 bg-purple-50 hover:bg-purple-100 border border-purple-200 rounded-xl transition flex items-center gap-1.5 shadow-sm">
-                    <span>⚙️</span>
+                <button id="adminPanelBtn" onclick="openAdminModal()" class="hidden px-3.5 py-2 text-xs font-bold text-slate-800 hover:text-black bg-slate-100 hover:bg-slate-200 border border-slate-300 rounded-xl transition flex items-center gap-2 shadow-sm">
+                    <svg class="w-3.5 h-3.5 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><circle cx="12" cy="12" r="3" stroke-width="2"></circle></svg>
                     <span class="hidden sm:inline">Panel de Control</span>
-                    <span id="pendingBadge" class="hidden px-1.5 py-0.2 text-[10px] font-black bg-amber-500 text-white rounded-full">0</span>
+                    <span id="pendingBadge" class="hidden px-1.5 py-0.2 text-[10px] font-black bg-slate-900 text-white rounded-full">0</span>
                 </button>
 
-                <button onclick="openImportModal()" class="px-3 py-2 text-xs font-bold text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 rounded-xl transition flex items-center gap-1.5">
-                    <span>📥</span> <span class="hidden md:inline">Importar JSON</span>
+                <button onclick="openImportModal()" class="px-3 py-2 text-xs font-bold text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 rounded-xl transition flex items-center gap-1.5 border border-slate-200">
+                    <svg class="w-3.5 h-3.5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                    <span class="hidden md:inline">Importar JSON</span>
                 </button>
-                <button onclick="openNewProjectModal()" class="px-3.5 py-2 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl shadow-sm shadow-blue-500/20 transition flex items-center gap-1.5">
-                    <span>➕</span> <span>Novo Proxecto</span>
+                <button onclick="openNewProjectModal()" class="px-3.5 py-2 text-xs font-bold text-white bg-slate-900 hover:bg-slate-800 rounded-xl shadow-sm transition flex items-center gap-1.5">
+                    <svg class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                    <span>Novo Proxecto</span>
                 </button>
                 
                 <div class="h-6 w-px bg-slate-200 mx-1"></div>
                 
                 <!-- Perfil de Usuario -->
                 <div class="flex items-center gap-2">
-                    <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-800 font-bold text-xs flex items-center justify-center border border-blue-200" id="userAvatar">
+                    <div class="w-8 h-8 rounded-full bg-slate-100 text-slate-800 font-bold text-xs flex items-center justify-center border border-slate-300" id="userAvatar">
                         U
                     </div>
                     <div class="hidden sm:block text-left">
                         <div class="flex items-center gap-1.5">
                             <span class="text-xs font-bold text-slate-800" id="userGreeting">Usuario</span>
-                            <span id="roleBadge" class="text-[9px] font-extrabold uppercase px-1.5 py-0.2 rounded bg-slate-100 text-slate-600 border border-slate-200">User</span>
+                            <span id="roleBadge" class="text-[9px] font-extrabold uppercase px-1.5 py-0.2 rounded bg-slate-100 text-slate-700 border border-slate-300">User</span>
                         </div>
-                        <span id="userGroupLabel" class="text-[10px] text-slate-400 block leading-tight"></span>
+                        <span id="userGroupLabel" class="text-[10px] text-slate-500 block leading-tight"></span>
                     </div>
-                    <button onclick="logout()" title="Pechar sesión" class="p-2 text-slate-400 hover:text-rose-600 transition rounded-lg hover:bg-slate-100 ml-1">
-                        🚪
+                    <button onclick="logout()" title="Pechar sesión" class="p-2 text-slate-500 hover:text-slate-900 transition rounded-lg hover:bg-slate-100 ml-1">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
                     </button>
                 </div>
             </div>
@@ -72,8 +74,9 @@
             <div>
                 <div class="flex items-center gap-2">
                     <h1 class="text-2xl font-extrabold text-slate-900" id="pageTitle">Proxectos</h1>
-                    <span id="officeBadge" class="hidden text-xs font-bold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1">
-                        🏢 <span id="officeNameText"></span>
+                    <span id="officeBadge" class="hidden text-xs font-bold px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200 flex items-center gap-1.5">
+                        <svg class="w-3 h-3 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+                        <span id="officeNameText"></span>
                     </span>
                 </div>
                 <p class="text-xs text-slate-500 mt-1" id="pageSubtitle">
@@ -84,10 +87,12 @@
             <!-- Search & Filter Controls -->
             <div class="flex items-center gap-2 sm:gap-3 flex-wrap">
                 <div class="relative">
-                    <input type="text" id="searchInput" oninput="filterProjects()" placeholder="Buscar por título, concello ou autor..." class="w-64 sm:w-72 pl-9 pr-4 py-2 text-xs rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
-                    <span class="absolute left-3 top-2.5 text-xs text-slate-400">🔍</span>
+                    <input type="text" id="searchInput" oninput="filterProjects()" placeholder="Buscar por título, concello ou autor..." class="w-64 sm:w-72 pl-9 pr-4 py-2 text-xs rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-slate-700 bg-white">
+                    <span class="absolute left-3 top-2.5 text-xs text-slate-400">
+                        <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                    </span>
                 </div>
-                <select id="ownershipFilter" onchange="filterProjects()" class="px-3 py-2 text-xs rounded-xl border border-slate-300 bg-white font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <select id="ownershipFilter" onchange="filterProjects()" class="px-3 py-2 text-xs rounded-xl border border-slate-300 bg-white font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-700">
                     <option value="all">Todos os proxectos</option>
                     <option value="mine">Só os meus</option>
                     <option value="office">Compañeiros de Oficina</option>
@@ -97,17 +102,20 @@
 
         <!-- Loading State -->
         <div id="projectsLoading" class="text-center py-20">
-            <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-blue-500 border-t-transparent"></div>
-            <p class="text-xs text-slate-400 mt-3">Cargando listado de proxectos...</p>
+            <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-slate-700 border-t-transparent"></div>
+            <p class="text-xs text-slate-500 mt-3">Cargando listado de proxectos...</p>
         </div>
 
         <!-- Empty State -->
         <div id="emptyState" class="hidden text-center py-16 px-4 bg-white rounded-3xl border border-slate-200 shadow-sm max-w-md mx-auto">
-            <div class="text-5xl mb-3">📁</div>
+            <div class="w-12 h-12 mx-auto mb-3 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-500">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path></svg>
+            </div>
             <h3 class="text-base font-bold text-slate-900">Aínda non hai proxectos dispoñibles</h3>
             <p class="text-xs text-slate-500 mt-1 mb-6">Crea o teu primeiro proxecto técnico para comezar a traballar.</p>
-            <button onclick="openNewProjectModal()" class="px-5 py-2.5 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl shadow transition inline-flex items-center gap-2">
-                <span>➕</span> Crear Primeiro Proxecto
+            <button onclick="openNewProjectModal()" class="px-5 py-2.5 text-xs font-bold text-white bg-slate-900 hover:bg-slate-800 rounded-xl shadow transition inline-flex items-center gap-2">
+                <svg class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                <span>Crear Primeiro Proxecto</span>
             </button>
         </div>
 
@@ -142,8 +150,8 @@
             <!-- Modal Header -->
             <div class="p-6 border-b border-slate-200 flex items-center justify-between bg-slate-50/80">
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-2xl bg-purple-600 text-white flex items-center justify-center text-xl shadow-md shadow-purple-500/20">
-                        ⚙️
+                    <div class="w-10 h-10 rounded-2xl bg-slate-900 text-white flex items-center justify-center shadow-md">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><circle cx="12" cy="12" r="3" stroke-width="2"></circle></svg>
                     </div>
                     <div>
                         <h2 class="text-lg font-extrabold text-slate-900 leading-tight">Panel de Control de Administración</h2>
@@ -155,12 +163,14 @@
 
             <!-- Admin Sub-tabs -->
             <div class="flex border-b border-slate-200 bg-white px-6 gap-4">
-                <button id="adminTabUsersBtn" onclick="switchAdminTab('users')" class="py-3 text-xs font-bold border-b-2 border-purple-600 text-purple-700 flex items-center gap-2">
-                    <span>👥</span> Usuarios e Solicitudes
+                <button id="adminTabUsersBtn" onclick="switchAdminTab('users')" class="py-3 text-xs font-bold border-b-2 border-slate-900 text-slate-900 flex items-center gap-2">
+                    <svg class="w-4 h-4 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                    <span>Usuarios e Solicitudes</span>
                     <span id="adminPendingCount" class="hidden px-2 py-0.5 text-[10px] bg-amber-500 text-white rounded-full">0</span>
                 </button>
                 <button id="adminTabGroupsBtn" onclick="switchAdminTab('groups')" class="py-3 text-xs font-bold border-b-2 border-transparent text-slate-500 hover:text-slate-800 flex items-center gap-2">
-                    <span>🏢</span> Oficinas / Grupos de Traballo
+                    <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+                    <span>Oficinas / Grupos de Traballo</span>
                 </button>
             </div>
 
@@ -171,8 +181,9 @@
                 <div id="adminTabUsersSection" class="space-y-4">
                     <div class="flex items-center justify-between">
                         <span class="text-xs font-bold text-slate-700 uppercase tracking-wider">Listado de Usuarios Rexistrados</span>
-                        <button onclick="loadAdminData()" class="text-xs text-purple-600 hover:text-purple-800 font-semibold flex items-center gap-1">
-                            🔄 Actualizar
+                        <button onclick="loadAdminData()" class="text-xs text-slate-600 hover:text-slate-900 font-semibold flex items-center gap-1">
+                            <svg class="w-3.5 h-3.5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                            Actualizar
                         </button>
                     </div>
 
@@ -201,12 +212,14 @@
                     <!-- Crear Nova Oficina -->
                     <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
                         <h4 class="text-xs font-bold text-slate-800 uppercase tracking-wider mb-3 flex items-center gap-1.5">
-                            <span>➕</span> Crear Nova Oficina ou Grupo de Traballo
+                            <svg class="w-3.5 h-3.5 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                            Crear Nova Oficina ou Grupo de Traballo
                         </h4>
                         <form onsubmit="handleCreateGroup(event)" class="flex flex-col sm:flex-row gap-3">
-                            <input type="text" id="newGroupName" required placeholder="Nome da oficina (Ex: Estudio Anta Ferrol)" class="flex-1 px-3.5 py-2 text-xs rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-purple-600">
-                            <input type="text" id="newGroupDesc" placeholder="Descrición opcional (Ex: Sede Principal)" class="flex-1 px-3.5 py-2 text-xs rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-purple-600">
-                            <button type="submit" class="px-4 py-2 text-xs font-bold text-white bg-purple-600 hover:bg-purple-700 rounded-xl shadow transition shrink-0">
+                            <input type="text" id="newGroupName" required placeholder="Nome da oficina (Ex: Estudio Anta Ferrol)" class="flex-1 px-3.5 py-2 text-xs rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-slate-700">
+                            <input type="text" id="newGroupDesc" placeholder="Descrición opcional (Ex: Sede Principal)" class="flex-1 px-3.5 py-2 text-xs rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-slate-700">
+                            <button type="submit" class="px-4 py-2 text-xs font-bold text-white bg-slate-900 hover:bg-slate-800 rounded-xl shadow transition shrink-0 inline-flex items-center gap-1.5">
+                                <svg class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                                 Gardar Oficina
                             </button>
                         </form>
@@ -246,12 +259,48 @@
         </div>
     </div>
 
+    <!-- ========================================================= -->
+    <!-- MODAL: EDITAR OFICINA / GRUPO                             -->
+    <!-- ========================================================= -->
+    <div id="editGroupModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full p-6 border border-slate-100">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
+                    <svg class="w-4 h-4 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                    Editar Oficina / Grupo
+                </h3>
+                <button onclick="closeEditGroupModal()" class="text-slate-400 hover:text-slate-600 p-1 rounded-lg">✕</button>
+            </div>
+            <form onsubmit="handleSaveEditedGroup(event)" class="space-y-4">
+                <input type="hidden" id="editGroupId">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Nome da Oficina *</label>
+                    <input type="text" id="editGroupName" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-slate-700 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Descrición</label>
+                    <textarea id="editGroupDesc" rows="2" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-slate-700 focus:outline-none" placeholder="Ex: Sede Principal ou Delegación"></textarea>
+                </div>
+                <div class="flex justify-end gap-2 pt-2">
+                    <button type="button" onclick="closeEditGroupModal()" class="px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-xl transition">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="px-4 py-2 text-xs font-bold text-white bg-slate-900 hover:bg-slate-800 rounded-xl shadow-sm transition inline-flex items-center gap-1.5">
+                        <svg class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                        Gardar Cambios
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- Modal: Novo Proxecto -->
     <div id="newProjectModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
         <div class="bg-white rounded-3xl shadow-2xl max-w-lg w-full p-6 border border-slate-100 relative">
             <div class="flex items-center justify-between mb-4">
                 <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
-                    <span>✨</span> Novo Proxecto
+                    <svg class="w-5 h-5 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                    Novo Proxecto
                 </h3>
                 <button onclick="closeNewProjectModal()" class="text-slate-400 hover:text-slate-600 p-1 rounded-lg">✕</button>
             </div>
@@ -259,26 +308,27 @@
             <form onsubmit="handleCreateProject(event)" class="space-y-4">
                 <div>
                     <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Título do Proxecto *</label>
-                    <input type="text" id="newProjectName" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-blue-600 focus:outline-none" placeholder="Ex: Reforma de Vivenda en Ferrol">
+                    <input type="text" id="newProjectName" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-slate-700 focus:outline-none" placeholder="Ex: Reforma de Vivenda en Ferrol">
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Tipo de obra / Obxecto</label>
-                    <input type="text" id="newProjectTipoObra" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-blue-600 focus:outline-none" placeholder="Ex: Melloras de condicións de seguridade, salubridade e ornato" value="Melloras de condicións de seguridade, salubridade e ornato">
+                    <input type="text" id="newProjectTipoObra" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-slate-700 focus:outline-none" placeholder="Ex: Melloras de condicións de seguridade, salubridade e ornato" value="Melloras de condicións de seguridade, salubridade e ornato">
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Concello / Poboación</label>
-                    <input type="text" id="newProjectPoboacion" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-blue-600 focus:outline-none" placeholder="Ex: Ferrol" value="Ferrol">
+                    <input type="text" id="newProjectPoboacion" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-slate-700 focus:outline-none" placeholder="Ex: Ferrol" value="Ferrol">
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Descrición curta (opcional)</label>
-                    <textarea id="newProjectDesc" rows="2" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-blue-600 focus:outline-none" placeholder="Notas internas sobre o proxecto..."></textarea>
+                    <textarea id="newProjectDesc" rows="2" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-slate-700 focus:outline-none" placeholder="Notas internas sobre o proxecto..."></textarea>
                 </div>
 
                 <div class="pt-3 flex items-center justify-end gap-3">
                     <button type="button" onclick="closeNewProjectModal()" class="px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-xl transition">
                         Cancelar
                     </button>
-                    <button type="submit" class="px-5 py-2 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl shadow-sm transition">
+                    <button type="submit" class="px-5 py-2 text-xs font-bold text-white bg-slate-900 hover:bg-slate-800 rounded-xl shadow-sm transition inline-flex items-center gap-1.5">
+                        <svg class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
                         Crear e Abrir
                     </button>
                 </div>
@@ -291,15 +341,18 @@
         <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full p-6 border border-slate-100">
             <div class="flex items-center justify-between mb-4">
                 <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
-                    <span>📥</span> Importar Proxecto JSON
+                    <svg class="w-5 h-5 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                    Importar Proxecto JSON
                 </h3>
                 <button onclick="closeImportModal()" class="text-slate-400 hover:text-slate-600 p-1 rounded-lg">✕</button>
             </div>
             
             <p class="text-xs text-slate-500 mb-4">Selecciona un arquivo JSON de proxecto ou de perfil (EBSS ou Residuos) previamente gardado.</p>
 
-            <div class="border-2 border-dashed border-slate-200 hover:border-blue-500 rounded-2xl p-6 text-center cursor-pointer mb-4 transition" onclick="document.getElementById('importFileInput').click()">
-                <div class="text-3xl mb-2">📄</div>
+            <div class="border-2 border-dashed border-slate-200 hover:border-slate-500 rounded-2xl p-6 text-center cursor-pointer mb-4 transition" onclick="document.getElementById('importFileInput').click()">
+                <div class="w-12 h-12 mx-auto mb-2 rounded-xl bg-slate-100 flex items-center justify-center text-slate-600">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                </div>
                 <p class="text-xs font-semibold text-slate-700">Preme para seleccionar arquivo JSON</p>
                 <p class="text-[10px] text-slate-400 mt-1">.json exportado dende este asistente</p>
                 <input type="file" id="importFileInput" accept=".json" class="hidden" onchange="processImportedFile(event)">
@@ -347,15 +400,15 @@
                         const roleBadge = document.getElementById('roleBadge');
                         if (currentUser.is_admin) {
                             roleBadge.textContent = 'Admin';
-                            roleBadge.className = 'text-[9px] font-black uppercase px-1.5 py-0.2 rounded bg-purple-100 text-purple-700 border border-purple-200';
+                            roleBadge.className = 'text-[9px] font-black uppercase px-1.5 py-0.2 rounded bg-slate-900 text-white border border-slate-900';
                             document.getElementById('adminPanelBtn').classList.remove('hidden');
                         } else {
                             roleBadge.textContent = 'Usuario';
-                            roleBadge.className = 'text-[9px] font-bold uppercase px-1.5 py-0.2 rounded bg-slate-100 text-slate-600 border border-slate-200';
+                            roleBadge.className = 'text-[9px] font-bold uppercase px-1.5 py-0.2 rounded bg-slate-100 text-slate-700 border border-slate-300';
                         }
 
                         if (currentUser.group_name) {
-                            document.getElementById('userGroupLabel').textContent = '🏢 ' + currentUser.group_name;
+                            document.getElementById('userGroupLabel').textContent = currentUser.group_name;
                             document.getElementById('officeBadge').classList.remove('hidden');
                             document.getElementById('officeNameText').textContent = currentUser.group_name;
                             document.getElementById('pageTitle').textContent = 'Proxectos de ' + currentUser.group_name;
@@ -367,7 +420,6 @@
 
                     renderProjects(allProjects);
 
-                    // Se é administrador, cargar información de solicitudes pendentes
                     if (currentUser && currentUser.is_admin) {
                         checkPendingUsers();
                     }
@@ -405,12 +457,15 @@
                 // Autoría e Oficina
                 let authorHtml = '';
                 if (p.is_owner) {
-                    authorHtml = `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-blue-50 text-blue-700 text-[11px] font-bold border border-blue-200">Ti</span>`;
+                    authorHtml = `<span class="inline-flex items-center px-2 py-0.5 rounded bg-slate-100 text-slate-700 text-[11px] font-bold border border-slate-300">Ti</span>`;
                 } else {
-                    const groupStr = p.group_name ? `<span class="text-[10px] text-slate-400 block leading-none mt-0.5">🏢 ${escapeHtml(p.group_name)}</span>` : '';
+                    const groupStr = p.group_name ? `<span class="text-[10px] text-slate-400 block leading-none mt-0.5">${escapeHtml(p.group_name)}</span>` : '';
                     authorHtml = `
                         <div>
-                            <span class="font-bold text-slate-700 flex items-center gap-1">👤 ${escapeHtml(p.owner_username)}</span>
+                            <span class="font-bold text-slate-700 flex items-center gap-1">
+                                <svg class="w-3 h-3 text-slate-400 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                                ${escapeHtml(p.owner_username)}
+                            </span>
                             ${groupStr}
                         </div>
                     `;
@@ -421,7 +476,7 @@
                 if (p.can_delete) {
                     deleteBtnHtml = `
                         <button onclick="deleteProject(${p.id})" title="Eliminar proxecto" class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition">
-                            🗑️
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                         </button>
                     `;
                 }
@@ -432,16 +487,19 @@
                             ${escapeHtml(p.name)}
                         </a>
                         <div class="flex flex-wrap items-center gap-1.5 mt-1">
-                            <span class="inline-flex items-center px-1.5 py-0.2 rounded bg-blue-50 text-blue-700 text-[10px] font-semibold border border-blue-200">
-                                🛡️ EBSS
+                            <span class="inline-flex items-center px-1.5 py-0.2 rounded bg-slate-100 text-slate-700 text-[10px] font-semibold border border-slate-200">
+                                EBSS
                             </span>
-                            <span class="inline-flex items-center px-1.5 py-0.2 rounded bg-emerald-50 text-emerald-700 text-[10px] font-semibold border border-emerald-200">
-                                ♻️ Residuos (${supAct})
+                            <span class="inline-flex items-center px-1.5 py-0.2 rounded bg-slate-100 text-slate-700 text-[10px] font-semibold border border-slate-200">
+                                Residuos (${supAct})
                             </span>
                         </div>
                     </td>
                     <td class="py-3.5 px-4 text-slate-600 font-medium">
-                        <span class="inline-flex items-center gap-1">📍 ${escapeHtml(poboacion)}</span>
+                        <span class="inline-flex items-center gap-1">
+                            <svg class="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                            ${escapeHtml(poboacion)}
+                        </span>
                     </td>
                     <td class="py-3.5 px-4 text-slate-500 max-w-xs truncate" title="${escapeHtml(tipoObra)}">
                         ${escapeHtml(tipoObra)}
@@ -455,14 +513,15 @@
                     <td class="py-3.5 px-5 text-right whitespace-nowrap">
                         <div class="inline-flex items-center gap-1.5">
                             <button onclick="exportProjectJson(${p.id})" title="Exportar JSON" class="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition">
-                                💾
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
                             </button>
-                            <button onclick="duplicateProject(${p.id})" title="Duplicar proxecto" class="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition">
-                                📑
+                            <button onclick="duplicateProject(${p.id})" title="Duplicar proxecto" class="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
                             </button>
                             ${deleteBtnHtml}
-                            <a href="/project/${p.id}" class="ml-1 px-3 py-1.5 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl shadow-sm transition inline-flex items-center gap-1">
-                                Abrir →
+                            <a href="/project/${p.id}" class="ml-1 px-3 py-1.5 text-xs font-bold text-white bg-slate-900 hover:bg-slate-800 rounded-xl shadow-sm transition inline-flex items-center gap-1">
+                                <span>Abrir</span>
+                                <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
                             </a>
                         </div>
                     </td>
@@ -555,7 +614,7 @@
 
         function closeAdminModal() {
             document.getElementById('adminModal').classList.add('hidden');
-            loadProjects(); // Recargar proxectos por se cambiaron asignacións
+            loadProjects();
         }
 
         function switchAdminTab(tab) {
@@ -565,12 +624,12 @@
             const groupsSec = document.getElementById('adminTabGroupsSection');
 
             if (tab === 'users') {
-                usersBtn.className = 'py-3 text-xs font-bold border-b-2 border-purple-600 text-purple-700 flex items-center gap-2';
+                usersBtn.className = 'py-3 text-xs font-bold border-b-2 border-slate-900 text-slate-900 flex items-center gap-2';
                 groupsBtn.className = 'py-3 text-xs font-bold border-b-2 border-transparent text-slate-500 hover:text-slate-800 flex items-center gap-2';
                 usersSec.classList.remove('hidden');
                 groupsSec.classList.add('hidden');
             } else {
-                groupsBtn.className = 'py-3 text-xs font-bold border-b-2 border-purple-600 text-purple-700 flex items-center gap-2';
+                groupsBtn.className = 'py-3 text-xs font-bold border-b-2 border-slate-900 text-slate-900 flex items-center gap-2';
                 usersBtn.className = 'py-3 text-xs font-bold border-b-2 border-transparent text-slate-500 hover:text-slate-800 flex items-center gap-2';
                 groupsSec.classList.remove('hidden');
                 usersSec.classList.add('hidden');
@@ -604,7 +663,7 @@
                 if (data.status === 'success') {
                     adminGroups = data.groups;
                     renderAdminGroups();
-                    renderAdminUsers(); // Actualizar selectores de oficina nos usuarios
+                    renderAdminUsers();
                 }
             } catch (err) {
                 console.error(err);
@@ -626,9 +685,9 @@
 
                 const isPgarat = (u.username.toLowerCase() === 'pgarat');
 
-                // Rol Badge / Select
+                // Rol Badge
                 const roleBadge = u.role === 'admin' 
-                    ? `<span class="px-2 py-0.5 text-[10px] font-black uppercase rounded bg-purple-100 text-purple-700 border border-purple-200">Admin</span>`
+                    ? `<span class="px-2 py-0.5 text-[10px] font-black uppercase rounded bg-slate-900 text-white border border-slate-900">Admin</span>`
                     : `<span class="px-2 py-0.5 text-[10px] font-semibold uppercase rounded bg-slate-100 text-slate-600 border border-slate-200">Usuario</span>`;
 
                 // Selector de Oficina
@@ -638,7 +697,7 @@
                     groupOptions += `<option value="${g.id}" ${sel}>${escapeHtml(g.name)}</option>`;
                 });
                 const groupSelect = `
-                    <select onchange="updateUserGroup(${u.id}, this.value)" class="px-2.5 py-1 text-xs rounded-lg border border-slate-300 bg-white font-medium text-slate-700 focus:ring-1 focus:ring-purple-600">
+                    <select onchange="updateUserGroup(${u.id}, this.value)" class="px-2.5 py-1 text-xs rounded-lg border border-slate-300 bg-white font-medium text-slate-700 focus:ring-1 focus:ring-slate-700">
                         ${groupOptions}
                     </select>
                 `;
@@ -648,24 +707,25 @@
                 if (!u.is_approved) {
                     statusHtml = `
                         <div class="flex items-center gap-2">
-                            <span class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-amber-100 text-amber-800 border border-amber-200">
-                                ⚠️ Pendente
+                            <span class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-amber-50 text-amber-800 border border-amber-200">
+                                Pendente
                             </span>
-                            <button onclick="approveUser(${u.id})" class="px-2.5 py-1 text-[11px] font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg shadow-sm transition">
-                                ✅ Aprobar
+                            <button onclick="approveUser(${u.id})" class="px-2.5 py-1 text-[11px] font-bold text-white bg-slate-900 hover:bg-slate-800 rounded-lg shadow-sm transition inline-flex items-center gap-1">
+                                <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                Aprobar
                             </button>
                         </div>
                     `;
                 } else {
                     const toggleBtn = isPgarat ? '' : `
-                        <button onclick="toggleUserStatus(${u.id})" title="Suspender acceso" class="text-[10px] text-slate-400 hover:text-slate-700 ml-1 underline">
+                        <button onclick="toggleUserStatus(${u.id})" title="Suspender acceso" class="text-[10px] text-slate-400 hover:text-slate-700 ml-1.5 underline">
                             (Desactivar)
                         </button>
                     `;
                     statusHtml = `
                         <div class="flex items-center">
-                            <span class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200">
-                                ✓ Activo
+                            <span class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-slate-100 text-slate-700 border border-slate-200">
+                                Activo
                             </span>
                             ${toggleBtn}
                         </div>
@@ -675,7 +735,7 @@
                 // Botón Eliminar
                 const deleteBtn = isPgarat ? '' : `
                     <button onclick="deleteUser(${u.id}, '${escapeHtml(u.username)}')" title="Eliminar usuario" class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition">
-                        🗑️
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                     </button>
                 `;
 
@@ -708,22 +768,73 @@
                 tr.className = "hover:bg-slate-50/80 transition";
 
                 tr.innerHTML = `
-                    <td class="py-3 px-4 font-bold text-slate-800">🏢 ${escapeHtml(g.name)}</td>
+                    <td class="py-3 px-4 font-bold text-slate-800">
+                        <div class="flex items-center gap-1.5">
+                            <svg class="w-3.5 h-3.5 text-slate-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+                            <span>${escapeHtml(g.name)}</span>
+                        </div>
+                    </td>
                     <td class="py-3 px-4 text-slate-500">${escapeHtml(g.description || '—')}</td>
                     <td class="py-3 px-3 text-center">
-                        <span class="px-2 py-0.5 rounded-full bg-slate-100 font-bold text-slate-700 text-[10px]">
+                        <span class="px-2 py-0.5 rounded-full bg-slate-100 font-bold text-slate-700 text-[10px] border border-slate-200">
                             ${g.member_count} membros
                         </span>
                     </td>
                     <td class="py-3 px-4 text-right">
-                        <button onclick="deleteGroup(${g.id}, '${escapeHtml(g.name)}')" title="Eliminar oficina" class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition">
-                            🗑️
-                        </button>
+                        <div class="inline-flex items-center gap-1">
+                            <button onclick="openEditGroupModal(${g.id}, '${escapeHtml(g.name)}', '${escapeHtml(g.description || '')}')" title="Editar oficina" class="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                            </button>
+                            <button onclick="deleteGroup(${g.id}, '${escapeHtml(g.name)}')" title="Eliminar oficina (os usuarios quedarán sen grupo)" class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                            </button>
+                        </div>
                     </td>
                 `;
 
                 tbody.appendChild(tr);
             });
+        }
+
+        // =========================================================
+        // ACCIÓNS DE EDICIÓN E XESTIÓN DE GRUPOS
+        // =========================================================
+        function openEditGroupModal(id, name, desc) {
+            document.getElementById('editGroupId').value = id;
+            document.getElementById('editGroupName').value = name;
+            document.getElementById('editGroupDesc').value = desc || '';
+            document.getElementById('editGroupModal').classList.remove('hidden');
+            document.getElementById('editGroupName').focus();
+        }
+
+        function closeEditGroupModal() {
+            document.getElementById('editGroupModal').classList.add('hidden');
+        }
+
+        async function handleSaveEditedGroup(e) {
+            e.preventDefault();
+            const id = document.getElementById('editGroupId').value;
+            const name = document.getElementById('editGroupName').value.trim();
+            const desc = document.getElementById('editGroupDesc').value.trim();
+            if (!id || !name) return;
+
+            try {
+                const res = await fetch(`/api/admin/groups/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, description: desc })
+                });
+                const data = await res.json();
+                if (data.status === 'success') {
+                    closeEditGroupModal();
+                    loadAdminGroups();
+                    loadProjects();
+                } else {
+                    alert('Erro ao actualizar oficina: ' + data.error);
+                }
+            } catch (err) {
+                alert('Erro: ' + err.message);
+            }
         }
 
         async function approveUser(id) {
@@ -813,7 +924,7 @@
         }
 
         async function deleteGroup(id, name) {
-            if (!confirm(`¿Estás seguro de eliminar a oficina "${name}"? Os usuarios membros non se eliminarán, pero quedarán sen grupo asignado.`)) {
+            if (!confirm(`¿Estás seguro de eliminar a oficina "${name}"? Os usuarios membros deste grupo non se eliminarán, pero quedarán sen oficina asignada.`)) {
                 return;
             }
             try {
@@ -821,6 +932,8 @@
                 const data = await res.json();
                 if (data.status === 'success') {
                     loadAdminGroups();
+                    loadAdminUsers();
+                    loadProjects();
                 } else {
                     alert('Erro: ' + data.error);
                 }
