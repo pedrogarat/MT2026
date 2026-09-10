@@ -355,10 +355,14 @@
                     <h2 class="text-xl font-extrabold text-white">Estudio de Xestión de Residuos (EGR)</h2>
                     <p class="text-xs text-emerald-200 mt-1">Cálculo matemático automático segundo RD 105/2008 e xeración do documento oficial (.docx).</p>
                 </div>
-                <div class="flex items-center gap-3">
-                    <button onclick="generateResiduosDocument()" id="btnGenerateResiduos" class="px-5 py-2.5 bg-white hover:bg-emerald-50 text-emerald-900 font-bold text-xs rounded-xl shadow-sm transition flex items-center gap-2 shrink-0">
+                <div class="flex flex-col gap-2 shrink-0">
+                    <button type="button" onclick="generateResiduosDocument()" id="btnGenerateResiduos" class="px-5 py-2.5 bg-white hover:bg-emerald-50 text-emerald-900 font-bold text-xs rounded-xl shadow-sm transition flex items-center justify-center gap-2 shrink-0">
                         <svg class="w-4 h-4 text-emerald-900 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                         <span>Xerar e Descargar Residuos (.docx)</span>
+                    </button>
+                    <button type="button" onclick="openResiduosTablesModal()" id="btnViewResiduosTables" class="px-5 py-2 bg-emerald-800/80 hover:bg-emerald-800 text-white font-medium text-xs rounded-xl border border-emerald-400/40 shadow-sm transition flex items-center justify-center gap-2 shrink-0">
+                        <svg class="w-4 h-4 text-emerald-200 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 4h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                        <span>Ver tablas de residuos</span>
                     </button>
                 </div>
             </div>
@@ -496,6 +500,65 @@
                     <button type="button" onclick="closeNearbyHealthModal()" class="px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-xl transition">
                         Pechar
                     </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal: Previsualización de Táboas de Residuos -->
+        <div id="residuosTablesModal" onclick="if(event.target === this) closeResiduosTablesModal()" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-3 sm:p-6 hidden">
+            <div class="bg-white rounded-3xl shadow-2xl max-w-5xl w-full p-6 border border-slate-100 flex flex-col max-h-[92vh]">
+                <!-- Modal Header -->
+                <div class="flex items-start justify-between pb-3 border-b border-slate-100 mb-3">
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="px-2.5 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-emerald-50 text-emerald-800 border border-emerald-200">Previsualización Oficial</span>
+                            <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+                                <svg class="w-5 h-5 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 4h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                <span>Táboas de Xestión de Residuos (.docx)</span>
+                            </h3>
+                        </div>
+                        <p class="text-xs text-slate-500 mt-1">Táboas matemáticas calculadas en tempo real que se incorporarán no documento Word de Residuos.</p>
+                    </div>
+                    <button type="button" onclick="closeResiduosTablesModal()" class="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg text-lg transition">✕</button>
+                </div>
+
+                <!-- Modal Sub-Tabs / Filter -->
+                <div class="flex flex-wrap items-center gap-2 border-b border-slate-200 pb-2 mb-4 shrink-0">
+                    <button type="button" id="tabFilterAll" onclick="filterResiduosModalTable('all')" class="px-3 py-1.5 rounded-xl text-xs font-bold transition bg-emerald-50 text-emerald-800 border border-emerald-200 shadow-sm">
+                        Todas as Táboas
+                    </button>
+                    <button type="button" id="tabFilterT1" onclick="filterResiduosModalTable('t1')" class="px-3 py-1.5 rounded-xl text-xs font-bold transition text-slate-600 hover:text-slate-900 border border-transparent">
+                        Táboa 1: Datos Xerais
+                    </button>
+                    <button type="button" id="tabFilterT2" onclick="filterResiduosModalTable('t2')" class="px-3 py-1.5 rounded-xl text-xs font-bold transition text-slate-600 hover:text-slate-900 border border-transparent">
+                        Táboa 2: Estimación RCDs (22 LER)
+                    </button>
+                    <button type="button" id="tabFilterT3" onclick="filterResiduosModalTable('t3')" class="px-3 py-1.5 rounded-xl text-xs font-bold transition text-slate-600 hover:text-slate-900 border border-transparent">
+                        Táboa 3: Separación Obrigatoria
+                    </button>
+                </div>
+
+                <!-- Modal Content (Scrollable) -->
+                <div id="residuosModalContent" class="flex-1 overflow-y-auto space-y-6 pr-1 text-slate-800">
+                    <!-- Populated by JS -->
+                </div>
+
+                <!-- Modal Footer -->
+                <div class="pt-4 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 mt-4 shrink-0">
+                    <div class="flex items-center gap-3 text-xs text-slate-500">
+                        <span>Fórmula: <strong class="text-slate-700 font-mono">Volumen = Superficie × 0,20 m³/m²</strong></span>
+                        <span class="text-slate-300">•</span>
+                        <span>Normativa: <strong class="text-slate-700">RD 105/2008</strong></span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button type="button" onclick="closeResiduosTablesModal()" class="px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-xl transition">
+                            Pechar
+                        </button>
+                        <button type="button" onclick="generateResiduosDocument()" class="px-4 py-2 bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs rounded-xl shadow-sm transition flex items-center gap-2">
+                            <svg class="w-4 h-4 text-emerald-100 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                            <span>Xerar e Descargar (.docx)</span>
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -813,6 +876,9 @@
             updateLiveResiduosCalc();
         }
 
+        let lastResiduosCalc = null;
+        let activeResiduosModalFilter = 'all';
+
         async function updateLiveResiduosCalc() {
             const sup = parseFloat(document.getElementById('common_superficie_actuacion').value) || 9.84;
             const rSel = {};
@@ -832,6 +898,7 @@
                 });
                 const calc = await res.json();
                 if (calc.status !== 'error') {
+                    lastResiduosCalc = calc;
                     const volFormatted = `${calc.volumen_total_estimado.toFixed(2).replace('.', ',')} m³`;
                     const tonFormatted = `${calc.toneladas_total_estimadas.toFixed(2).replace('.', ',')} t`;
                     const supFormatted = `${calc.superficie_actuacion.toFixed(2).replace('.', ',')} m²`;
@@ -847,6 +914,12 @@
 
                     // Renderizar Táboa 3 (Separación obrigatoria)
                     renderSeparationTable(calc.separacion_tbl3);
+
+                    // Se a modal de táboas está aberta, refrescar contido
+                    const modal = document.getElementById('residuosTablesModal');
+                    if (modal && !modal.classList.contains('hidden')) {
+                        renderResiduosTablesModal();
+                    }
                 }
             } catch (err) {
                 console.error('Erro calculando residuos:', err);
@@ -1188,6 +1261,336 @@
             markDirty();
             closeNearbyHealthModal();
         }
+
+        // ================= PREVISUALIZACIÓN DE TÁBOAS DE RESIDUOS =================
+        async function openResiduosTablesModal() {
+            if (!lastResiduosCalc) {
+                await updateLiveResiduosCalc();
+            }
+            renderResiduosTablesModal();
+            document.getElementById('residuosTablesModal').classList.remove('hidden');
+        }
+
+        function closeResiduosTablesModal() {
+            document.getElementById('residuosTablesModal').classList.add('hidden');
+        }
+
+        function filterResiduosModalTable(filter) {
+            activeResiduosModalFilter = filter;
+            const filters = ['all', 't1', 't2', 't3'];
+            filters.forEach(f => {
+                const btn = document.getElementById(`tabFilter${capitalize(f)}`);
+                if (!btn) return;
+                if (f === filter) {
+                    btn.className = "px-3 py-1.5 rounded-xl text-xs font-bold transition bg-emerald-50 text-emerald-800 border border-emerald-200 shadow-sm";
+                } else {
+                    btn.className = "px-3 py-1.5 rounded-xl text-xs font-bold transition text-slate-600 hover:text-slate-900 border border-transparent";
+                }
+            });
+
+            const secT1 = document.getElementById('modalSecT1');
+            const secT2 = document.getElementById('modalSecT2');
+            const secT3 = document.getElementById('modalSecT3');
+            const secT4 = document.getElementById('modalSecT4');
+
+            if (filter === 'all') {
+                if (secT1) secT1.classList.remove('hidden');
+                if (secT2) secT2.classList.remove('hidden');
+                if (secT3) secT3.classList.remove('hidden');
+                if (secT4) secT4.classList.remove('hidden');
+            } else if (filter === 't1') {
+                if (secT1) secT1.classList.remove('hidden');
+                if (secT2) secT2.classList.add('hidden');
+                if (secT3) secT3.classList.add('hidden');
+                if (secT4) secT4.classList.add('hidden');
+            } else if (filter === 't2') {
+                if (secT1) secT1.classList.add('hidden');
+                if (secT2) secT2.classList.remove('hidden');
+                if (secT3) secT3.classList.add('hidden');
+                if (secT4) secT4.classList.add('hidden');
+            } else if (filter === 't3') {
+                if (secT1) secT1.classList.add('hidden');
+                if (secT2) secT2.classList.add('hidden');
+                if (secT3) secT3.classList.remove('hidden');
+                if (secT4) secT4.classList.add('hidden');
+            }
+        }
+
+        function renderResiduosTablesModal() {
+            const container = document.getElementById('residuosModalContent');
+            if (!container) return;
+
+            const calc = lastResiduosCalc || {
+                superficie_actuacion: parseFloat(document.getElementById('common_superficie_actuacion').value) || 9.84,
+                volumen_total_estimado: 1.97,
+                toneladas_total_estimadas: 1.97,
+                items: {},
+                separacion_tbl3: []
+            };
+
+            const tipoObra = document.getElementById('common_tipo_obra').value || '---';
+            const situacion = document.getElementById('common_situacion').value || '---';
+            const poboacion = document.getElementById('common_poboacion').value || '---';
+            const promotor = document.getElementById('common_promotor').value || '---';
+            const arquitecto = document.getElementById('common_arquitecto').value || '---';
+            const orzamentoPem = document.getElementById('common_orzamento_pem').value || '---';
+            const duracion = document.getElementById('common_duracion_obra').value || '---';
+            const supConstruida = document.getElementById('common_superficie_construida').value || (calc.superficie_actuacion.toFixed(2).replace('.', ',') + ' m²');
+            const asinantes = document.getElementById('common_asinantes').value || '---';
+            const colexiado = document.getElementById('common_colexiado').value || '---';
+
+            const items = calc.items || {};
+            const itemsKeysOrder = [
+                { key: "tierras_excavacion", group: "NIVEL I: Terras e materiais naturais escavados" },
+                { key: "grava_rocas", group: "NIVEL I: Terras e materiais naturais escavados" },
+                { key: "arena_arcillas", group: "NIVEL I: Terras e materiais naturais escavados" },
+                { key: "hormigon", group: "NIVEL II: Residuos de C e D Pétreos" },
+                { key: "ladrillos", group: "NIVEL II: Residuos de C e D Pétreos" },
+                { key: "tejas_ceramicos", group: "NIVEL II: Residuos de C e D Pétreos" },
+                { key: "madera", group: "NIVEL II: Residuos de C e D Non Pétreos" },
+                { key: "vidrio", group: "NIVEL II: Residuos de C e D Non Pétreos" },
+                { key: "plastico", group: "NIVEL II: Residuos de C e D Non Pétreos" },
+                { key: "cobre_laton", group: "NIVEL II: Residuos de C e D Non Pétreos (Metais)" },
+                { key: "hierro_acero", group: "NIVEL II: Residuos de C e D Non Pétreos (Metais)" },
+                { key: "metales_mezclados", group: "NIVEL II: Residuos de C e D Non Pétreos (Metais)" },
+                { key: "cables", group: "NIVEL II: Residuos de C e D Non Pétreos (Metais)" },
+                { key: "envases_papel", group: "NIVEL II: Residuos de C e D Non Pétreos" },
+                { key: "envases_metalicos", group: "NIVEL II: Residuos de C e D Non Pétreos" },
+                { key: "asfalto", group: "NIVEL II: Residuos de C e D Non Pétreos" },
+                { key: "yeso", group: "NIVEL II: Residuos de C e D Non Pétreos" },
+                { key: "aislamiento", group: "NIVEL II: Residuos de C e D Non Pétreos" },
+                { key: "mezclados_rcd", group: "NIVEL II: Residuos de C e D Non Pétreos" },
+                { key: "amianto", group: "NIVEL II: Residuos Peligosos" },
+                { key: "pintura_barniz", group: "NIVEL II: Residuos Peligosos" },
+                { key: "detergentes", group: "NIVEL II: Residuos Peligosos" }
+            ];
+
+            let html = `
+                <!-- Resumo global -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-between">
+                        <div>
+                            <span class="text-[10px] font-bold uppercase text-slate-400">Superficie Actuación</span>
+                            <div class="text-lg font-extrabold text-slate-900">${calc.superficie_actuacion.toFixed(2).replace('.', ',')} m²</div>
+                        </div>
+                        <div class="p-2 rounded-xl bg-white border border-slate-200 text-slate-400">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path></svg>
+                        </div>
+                    </div>
+                    <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-between">
+                        <div>
+                            <span class="text-[10px] font-bold uppercase text-slate-400">Volume Total Estimado</span>
+                            <div class="text-lg font-extrabold text-emerald-700">${calc.volumen_total_estimado.toFixed(2).replace('.', ',')} m³</div>
+                        </div>
+                        <div class="p-2 rounded-xl bg-white border border-slate-200 text-emerald-600">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
+                        </div>
+                    </div>
+                    <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-between">
+                        <div>
+                            <span class="text-[10px] font-bold uppercase text-slate-400">Peso Total Estimado</span>
+                            <div class="text-lg font-extrabold text-emerald-700">${calc.toneladas_total_estimadas.toFixed(2).replace('.', ',')} t</div>
+                        </div>
+                        <div class="p-2 rounded-xl bg-white border border-slate-200 text-emerald-600">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3"></path></svg>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECCIÓN TÁBOA 1: DATOS XERAIS -->
+                <div id="modalSecT1" class="space-y-3">
+                    <div class="flex items-center justify-between border-b border-slate-200 pb-2">
+                        <h4 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+                            <span class="w-5 h-5 rounded-md bg-slate-100 text-slate-700 text-xs flex items-center justify-center font-bold">1</span>
+                            <span>Táboa 1: Datos Xerais da Obra</span>
+                        </h4>
+                        <span class="text-[11px] text-slate-400">Incorporada na memoria do .docx</span>
+                    </div>
+                    <div class="overflow-hidden border border-slate-200 rounded-2xl shadow-sm">
+                        <table class="w-full text-xs text-left text-slate-700 divide-y divide-slate-200">
+                            <tbody class="divide-y divide-slate-100 bg-white">
+                                <tr class="hover:bg-slate-50"><td class="p-2.5 font-semibold text-slate-500 w-1/3 bg-slate-50/50">Tipo de obra</td><td class="p-2.5 font-medium text-slate-900">${escapeHtml(tipoObra)}</td></tr>
+                                <tr class="hover:bg-slate-50"><td class="p-2.5 font-semibold text-slate-500 bg-slate-50/50">Situación / Enderezo</td><td class="p-2.5 font-medium text-slate-900">${escapeHtml(situacion)}</td></tr>
+                                <tr class="hover:bg-slate-50"><td class="p-2.5 font-semibold text-slate-500 bg-slate-50/50">Poboación / Concello</td><td class="p-2.5 font-medium text-slate-900">${escapeHtml(poboacion)}</td></tr>
+                                <tr class="hover:bg-slate-50"><td class="p-2.5 font-semibold text-slate-500 bg-slate-50/50">Promotor / Titular</td><td class="p-2.5 font-medium text-slate-900">${escapeHtml(promotor)}</td></tr>
+                                <tr class="hover:bg-slate-50"><td class="p-2.5 font-semibold text-slate-500 bg-slate-50/50">Arquitecto / Técnico redactor</td><td class="p-2.5 font-medium text-slate-900">${escapeHtml(arquitecto)}</td></tr>
+                                <tr class="hover:bg-slate-50"><td class="p-2.5 font-semibold text-slate-500 bg-slate-50/50">Orzamento de Execución Material (PEM)</td><td class="p-2.5 font-medium text-slate-900">${escapeHtml(orzamentoPem)}</td></tr>
+                                <tr class="hover:bg-slate-50"><td class="p-2.5 font-semibold text-slate-500 bg-slate-50/50">Duración estimada da obra</td><td class="p-2.5 font-medium text-slate-900">${escapeHtml(duracion)}</td></tr>
+                                <tr class="hover:bg-slate-50"><td class="p-2.5 font-semibold text-slate-500 bg-slate-50/50">Superficie construída / Actuación</td><td class="p-2.5 font-medium text-slate-900">${escapeHtml(supConstruida)}</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- SECCIÓN TÁBOA 2: ESTIMACIÓN RCDS -->
+                <div id="modalSecT2" class="space-y-3">
+                    <div class="flex items-center justify-between border-b border-slate-200 pb-2">
+                        <h4 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+                            <span class="w-5 h-5 rounded-md bg-slate-100 text-slate-700 text-xs flex items-center justify-center font-bold">2</span>
+                            <span>Táboa 2: Estimación Cuantitativa de Residuos de C e D (RCDs)</span>
+                        </h4>
+                        <span class="text-[11px] text-slate-400">22 Categorías LER normalizadas</span>
+                    </div>
+                    <div class="overflow-x-auto border border-slate-200 rounded-2xl shadow-sm">
+                        <table class="w-full text-xs text-left text-slate-700">
+                            <thead class="bg-slate-100 text-slate-700 font-bold uppercase text-[10px] tracking-wider border-b border-slate-200">
+                                <tr>
+                                    <th class="p-2.5">Tipoloxía de Residuo</th>
+                                    <th class="p-2.5 text-center">Código LER</th>
+                                    <th class="p-2.5 text-right">% Peso</th>
+                                    <th class="p-2.5 text-right">Densidade</th>
+                                    <th class="p-2.5 text-right">Peso (t)</th>
+                                    <th class="p-2.5 text-right">Volume (m³)</th>
+                                    <th class="p-2.5">Destino Previsto</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100 bg-white">
+            `;
+
+            let currentGroup = '';
+            let sumPeso = 0;
+            let sumVol = 0;
+
+            itemsKeysOrder.forEach(itemInfo => {
+                const it = items[itemInfo.key];
+                if (!it) return;
+
+                if (itemInfo.group !== currentGroup) {
+                    currentGroup = itemInfo.group;
+                    html += `
+                        <tr class="bg-slate-50/80 font-bold text-[11px] text-slate-600">
+                            <td colspan="7" class="p-2.5 pl-3 border-t border-b border-slate-200/80">${escapeHtml(currentGroup)}</td>
+                        </tr>
+                    `;
+                }
+
+                const isActive = it.active !== false;
+                const peso = it.peso || 0;
+                const vol = it.volumen || 0;
+                sumPeso += peso;
+                sumVol += vol;
+
+                const pctStr = (it.pct * 100).toFixed(2).replace('.', ',') + ' %';
+                const densStr = it.dens ? it.dens.toFixed(2).replace('.', ',') + ' t/m³' : '---';
+                const pesoStr = peso.toFixed(2).replace('.', ',') + ' t';
+                const volStr = vol.toFixed(2).replace('.', ',') + ' m³';
+
+                html += `
+                    <tr class="hover:bg-slate-50 transition ${!isActive ? 'opacity-40' : ''}">
+                        <td class="p-2.5 font-medium text-slate-900 flex items-center gap-1.5">
+                            ${!isActive ? '<span class="text-[10px] text-slate-400 bg-slate-100 px-1 rounded font-normal shrink-0">Non previsto</span>' : ''}
+                            <span>${escapeHtml(it.name)}</span>
+                        </td>
+                        <td class="p-2.5 text-center font-mono whitespace-nowrap">
+                            <span class="px-1.5 py-0.5 rounded bg-slate-100 text-slate-800 text-[10px] font-semibold border border-slate-200">
+                                ${escapeHtml(it.ler)}
+                            </span>
+                        </td>
+                        <td class="p-2.5 text-right font-mono text-slate-500 whitespace-nowrap">${pctStr}</td>
+                        <td class="p-2.5 text-right font-mono text-slate-500 whitespace-nowrap">${densStr}</td>
+                        <td class="p-2.5 text-right font-mono font-bold ${isActive ? 'text-slate-900' : 'text-slate-400'} whitespace-nowrap">${pesoStr}</td>
+                        <td class="p-2.5 text-right font-mono font-bold ${isActive ? 'text-emerald-700' : 'text-slate-400'} whitespace-nowrap">${volStr}</td>
+                        <td class="p-2.5 text-slate-500 text-[11px] whitespace-nowrap">${escapeHtml(it.dest || 'Xestor autorizado')}</td>
+                    </tr>
+                `;
+            });
+
+            html += `
+                            </tbody>
+                            <tfoot class="bg-slate-100/90 font-bold border-t-2 border-slate-300 text-slate-900">
+                                <tr>
+                                    <td colspan="4" class="p-3 text-right uppercase text-[11px]">Total Estimación RCDs:</td>
+                                    <td class="p-3 text-right font-mono text-xs text-slate-900">${sumPeso.toFixed(2).replace('.', ',')} t</td>
+                                    <td class="p-3 text-right font-mono text-xs text-emerald-800">${sumVol.toFixed(2).replace('.', ',')} m³</td>
+                                    <td></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- SECCIÓN TÁBOA 3: SEPARACIÓN OBRIGATORIA -->
+                <div id="modalSecT3" class="space-y-3">
+                    <div class="flex items-center justify-between border-b border-slate-200 pb-2">
+                        <h4 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+                            <span class="w-5 h-5 rounded-md bg-slate-100 text-slate-700 text-xs flex items-center justify-center font-bold">3</span>
+                            <span>Táboa 3: Separación Obrigatoria en Obra (RD 105/2008, Artigo 5.5)</span>
+                        </h4>
+                        <span class="text-[11px] text-slate-400">Limiares legais de segregación en orixe</span>
+                    </div>
+                    <div class="overflow-x-auto border border-slate-200 rounded-2xl shadow-sm">
+                        <table class="w-full text-xs text-left text-slate-700">
+                            <thead class="bg-slate-100 text-slate-700 font-bold uppercase text-[10px] tracking-wider border-b border-slate-200">
+                                <tr>
+                                    <th class="p-2.5">Fracción / Tipo de Residuo</th>
+                                    <th class="p-2.5 text-right">Peso Estimado (t)</th>
+                                    <th class="p-2.5 text-center">Limiar RD 105/2008</th>
+                                    <th class="p-2.5 text-center">Separación en Obra</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100 bg-white">
+            `;
+
+            (calc.separacion_tbl3 || []).forEach(sep => {
+                const isOb = sep.obligatoria;
+                html += `
+                    <tr class="hover:bg-slate-50 transition">
+                        <td class="p-2.5 font-medium text-slate-900">${escapeHtml(sep.tipo)}</td>
+                        <td class="p-2.5 text-right font-mono font-bold text-slate-800">${sep.peso.toFixed(2).replace('.', ',')} t</td>
+                        <td class="p-2.5 text-center text-slate-500 font-mono">${sep.umbral ? '>' + sep.umbral + ' t' : '---'}</td>
+                        <td class="p-2.5 text-center">
+                            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold ${isOb ? 'bg-amber-50 text-amber-900 border border-amber-200' : 'bg-slate-100 text-slate-600'}">
+                                ${isOb ? '<svg class="w-3 h-3 text-amber-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg> OBLIGATORIA' : 'NON OBLIGATORIA'}
+                            </span>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            html += `
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- SECCIÓN TÁBOA 4: ASINATURAS -->
+                <div id="modalSecT4" class="space-y-3">
+                    <div class="flex items-center justify-between border-b border-slate-200 pb-2">
+                        <h4 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+                            <span class="w-5 h-5 rounded-md bg-slate-100 text-slate-700 text-xs flex items-center justify-center font-bold">4</span>
+                            <span>Táboa 4: Técnicos Asinantes e Colexiación</span>
+                        </h4>
+                        <span class="text-[11px] text-slate-400">Pé do documento .docx</span>
+                    </div>
+                    <div class="overflow-hidden border border-slate-200 rounded-2xl shadow-sm bg-white p-4 space-y-2">
+                        <div>
+                            <span class="text-[10px] font-bold uppercase text-slate-400">Técnicos Asinantes:</span>
+                            <div class="text-xs font-semibold text-slate-800 mt-0.5">${escapeHtml(asinantes)}</div>
+                        </div>
+                        <div class="pt-2 border-t border-slate-100">
+                            <span class="text-[10px] font-bold uppercase text-slate-400">Colexiado / Entidade:</span>
+                            <div class="text-xs font-semibold text-slate-800 mt-0.5">${escapeHtml(colexiado)}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            container.innerHTML = html;
+            filterResiduosModalTable(activeResiduosModalFilter);
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                const rm = document.getElementById('residuosTablesModal');
+                if (rm && !rm.classList.contains('hidden')) {
+                    closeResiduosTablesModal();
+                }
+                const hm = document.getElementById('nearbyHealthModal');
+                if (hm && !hm.classList.contains('hidden')) {
+                    closeNearbyHealthModal();
+                }
+            }
+        });
 
         initGrids();
         loadProject();
