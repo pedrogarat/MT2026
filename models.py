@@ -103,6 +103,9 @@ class Project(Base):
     # Datos técnicos específicos de Gestión de Residuos (Selección de RCDs, Firmas)
     residuos_data = Column(Text, nullable=False, default="{}")
 
+    # Datos técnicos específicos de Habitabilidade de Vivendas (NHV - Decreto 29/2010)
+    nhv_data = Column(Text, nullable=False, default="{}")
+
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
@@ -135,6 +138,15 @@ class Project(Base):
     def set_residuos_dict(self, d):
         self.residuos_data = json.dumps(d, ensure_ascii=False)
 
+    def get_nhv_dict(self):
+        try:
+            return json.loads(self.nhv_data) if self.nhv_data else {}
+        except Exception:
+            return {}
+
+    def set_nhv_dict(self, d):
+        self.nhv_data = json.dumps(d, ensure_ascii=False)
+
     def to_dict(self):
         common = self.get_common_dict()
         return {
@@ -148,6 +160,7 @@ class Project(Base):
             "common_data": common,
             "ebss_data": self.get_ebss_dict(),
             "residuos_data": self.get_residuos_dict(),
+            "nhv_data": self.get_nhv_dict(),
             "created_at": self.created_at.strftime("%Y-%m-%d %H:%M") if self.created_at else "",
             "updated_at": self.updated_at.strftime("%Y-%m-%d %H:%M") if self.updated_at else "",
             "poboacion": common.get("poboacion", ""),
@@ -158,7 +171,7 @@ class Project(Base):
 def init_db():
     Base.metadata.create_all(bind=engine)
 
-    # Migración segura e idempotente para columnas novas na táboa 'users'
+    # Migración segura e idempotente para columnas novas
     try:
         inspector = inspect(engine)
         if "users" in inspector.get_table_names():
@@ -185,6 +198,12 @@ def init_db():
                     text("UPDATE users SET is_approved = :appr WHERE is_approved IS NULL"),
                     {"appr": True}
                 )
+
+        if "projects" in inspector.get_table_names():
+            proj_cols = [col["name"] for col in inspector.get_columns("projects")]
+            with engine.begin() as conn:
+                if "nhv_data" not in proj_cols:
+                    conn.execute(text("ALTER TABLE projects ADD COLUMN nhv_data TEXT DEFAULT '{}'"))
     except Exception as e:
         print(f"[AVISO] Erro durante a comprobación/migración de columnas en init_db: {e}", flush=True)
 

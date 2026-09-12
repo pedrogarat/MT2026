@@ -29,6 +29,10 @@ from residuos_processor import (
     DEFAULT_RESIDUOS_DATA, generate_residuos, calculate_residuos,
     get_default_residuos_paths
 )
+from nhv_processor import (
+    DEFAULT_NHV_DATA, generate_nhv, NHV_CATALOG,
+    compute_nhv_defaults, get_default_nhv_paths
+)
 from geo_service import calculate_health_distances, find_nearby_health_facilities
 
 app = Flask(
@@ -415,7 +419,8 @@ def create_project():
             "superficie_actuacion": data.get("common_data", {}).get("superficie_actuacion", 9.84),
             "data_documento": data.get("common_data", {}).get("data_documento", "Ferrol, xullo de 2026"),
             "asinantes": data.get("common_data", {}).get("asinantes", "Fdo. Sergio J. Beceiro Lodeiro     M. Rosa Vilas Romalde"),
-            "colexiado": data.get("common_data", {}).get("colexiado", "ESTUDIO ANTA ARQUITECTOS S.L.P.\tNº COAG - 20.039")
+            "colexiado": data.get("common_data", {}).get("colexiado", "ESTUDIO ANTA ARQUITECTOS S.L.P.\tNº COAG - 20.039"),
+            "pezas": data.get("common_data", {}).get("pezas", [])
         }
 
         ebss = {
@@ -449,13 +454,18 @@ def create_project():
         if "residuos_data" in data and isinstance(data["residuos_data"], dict):
             residuos.update(data["residuos_data"])
 
+        nhv = dict(DEFAULT_NHV_DATA)
+        if "nhv_data" in data and isinstance(data["nhv_data"], dict):
+            nhv.update(data["nhv_data"])
+
         proj = Project(
             user_id=session["user_id"],
             name=name,
             description=data.get("description", ""),
             common_data=json.dumps(common, ensure_ascii=False),
             ebss_data=json.dumps(ebss, ensure_ascii=False),
-            residuos_data=json.dumps(residuos, ensure_ascii=False)
+            residuos_data=json.dumps(residuos, ensure_ascii=False),
+            nhv_data=json.dumps(nhv, ensure_ascii=False)
         )
         db.add(proj)
         db.commit()
@@ -507,6 +517,8 @@ def update_project(project_id):
             proj.set_ebss_dict(data["ebss_data"])
         if "residuos_data" in data:
             proj.set_residuos_dict(data["residuos_data"])
+        if "nhv_data" in data:
+            proj.set_nhv_dict(data["nhv_data"])
 
         proj.updated_at = datetime.utcnow()
         db.commit()
@@ -611,6 +623,60 @@ def project_generate_residuos(project_id):
         return jsonify({"status": "error", "error": str(e)}), 500
     finally:
         db.close()
+
+
+@app.route("/api/projects/<int:project_id>/generate-nhv", methods=["POST"])
+@login_required
+def project_generate_nhv(project_id):
+    db = get_db_session()
+    try:
+        user = db.query(User).filter(User.id == session["user_id"]).first()
+        proj = db.query(Project).filter(Project.id == project_id).first()
+        if not proj or not can_access_project(user, proj):
+            return jsonify({"status": "error", "error": "Proxecto non atopado ou sen permisos."}), 404
+
+        common = proj.get_common_dict()
+        nhv = proj.get_nhv_dict() or DEFAULT_NHV_DATA
+
+        merged_data = dict(common)
+        merged_data["nhv_data"] = nhv
+
+        stream = io.BytesIO()
+        pobl = common.get("poboacion", "Proxecto").strip() or "Proxecto"
+        filename = f"NHV_{pobl.replace(' ', '_')}.docx"
+
+        generate_nhv(merged_data, output_stream=stream)
+
+        return send_file(
+            stream,
+            mimetype="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            as_attachment=True,
+            download_name=filename
+        )
+    except Exception as e:
+        return jsonify({"status": "error", "error": str(e)}), 500
+    finally:
+        db.close()
+
+
+@app.route("/api/nhv/catalog", methods=["GET"])
+@login_required
+def get_nhv_catalog():
+    return jsonify({
+        "status": "success",
+        "catalog": NHV_CATALOG,
+        "default_data": DEFAULT_NHV_DATA
+    })
+
+
+@app.route("/api/nhv/compute-defaults", methods=["POST"])
+@login_required
+def post_nhv_compute_defaults():
+    body = request.get_json() or {}
+    master = body.get("master", {})
+    dimens = body.get("dimens", {})
+    items = compute_nhv_defaults(master, dimens)
+    return jsonify({"status": "success", "items": items})
 
 
 # ---------------------------------------------------------

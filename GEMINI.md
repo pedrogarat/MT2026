@@ -8,6 +8,7 @@ Este documento contén o contexto persistente, arquitectura, credenciais de serv
 Aplicación web multiusuario orientada a técnicos, arquitectos e enxeñeiros en Galicia para a redacción técnica automatizada de:
 1. **Estudo Básico de Seguridade e Saúde (EBSS)** segundo RD 1627/1997.
 2. **Estudo de Xestión de Residuos de Construcción e Demolición (EGR)** segundo RD 105/2008 e normativa galega.
+3. **Ficha de Xustificación de Habitabilidade de Vivendas (NHV)** segundo Decreto 29/2010 da Comunidade Autónoma de Galicia.
 
 - **Idioma de traballo do proxecto**: Galego na interface e documentos xerados en Word (`.docx`).
 - **Idioma de comunicación co usuario**: Responder SEMPRE en castelán (español) nas mensaxes co usuario.
@@ -18,19 +19,21 @@ Aplicación web multiusuario orientada a técnicos, arquitectos e enxeñeiros en
 ## 2. Arquitectura do Sistema
 
 ### Backend e Lóxica (Python Flask)
-- **`app.py`**: Servidor Flask con API REST, autenticación por sesión (`/api/auth/register`, `/login`, `/logout`), xestión de proxectos CRUD e descarga directa de documentos.
-- **`models.py`**: Modelos SQLAlchemy (`User`, `Project`). Xestión de persistencia híbrida (PostgreSQL en produción / SQLite en local).
+- **`app.py`**: Servidor Flask con API REST, autenticación por sesión (`/api/auth/register`, `/login`, `/logout`), xestión de proxectos CRUD e descarga directa de documentos (`/generate-ebss`, `/generate-residuos`, `/generate-nhv`).
+- **`models.py`**: Modelos SQLAlchemy (`User`, `Project`). Xestión de persistencia híbrida (PostgreSQL en produción / SQLite en local) con migracións idempotentes automáticas.
 - **`ebss_processor.py`**: Procesamento e xeración en memoria (`io.BytesIO`) da memoria e prego de seguridade e saúde.
 - **`residuos_processor.py`**: Estimación de volumes, pesos por codificación LER e xeración en memoria da memoria de xestión de residuos.
+- **`nhv_processor.py`**: Xustificación das Normas de Habitabilidade de Galicia (Decreto 29/2010) con asistente de parámetros mestres e xeración sobre plantilla orixinal `NHV.docx`.
 - **`geo_service.py`**: Xeolocalización aberta (OpenStreetMap / OSRM) e directorio de centros de saúde e complexos hospitalarios do SERGAS en Galicia. Cálculo de rutas e tempos en vehículo en tempo real.
 
 ### Interface Web (Frontend)
 - **`templates/login.html`**: Interface moderna de autenticación e rexistro.
 - **`templates/dashboard.html`**: Panel xeral con listado de proxectos, busca, creación, duplicación e exportación/importación JSON.
-- **`templates/project_editor.html`**: Editor unificado con 3 pestanas:
-  1. *Datos Comúns do Proxecto* (sincronizados entre ambos documentos).
+- **`templates/project_editor.html`**: Editor unificado con 4 pestanas:
+  1. *Datos Comúns do Proxecto* (sincronizados entre todos os documentos).
   2. *Estudo de Seguridade (EBSS)* con buscador a 1 clic de centros sanitarios e descarga independente do `.docx`.
   3. *Xestión de Residuos (EGR)* con matriz de segregación, cálculo en vivo e descarga independente do `.docx`.
+  4. *Habitabilidade (NHV)* con asistente rápido de 5 parámetros mestres, medidas de pezas, táboa completa de 173 comprobacións e descarga independente do `.docx`.
 
 ---
 

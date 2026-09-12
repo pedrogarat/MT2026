@@ -9,6 +9,7 @@
     <link rel="apple-touch-icon" href="/static/apple-touch-icon.png">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="/static/nhv_catalog.js"></script>
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; }
     </style>
@@ -67,6 +68,10 @@
             <button id="tabBtnResiduos" onclick="switchMainTab('residuos')" class="px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-2 text-slate-600 hover:text-slate-900 border border-transparent">
                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
                 <span>3. Xestión de Residuos (EGR)</span>
+            </button>
+            <button id="tabBtnNhv" onclick="switchMainTab('nhv')" class="px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-2 text-slate-600 hover:text-slate-900 border border-transparent">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+                <span>4. 1.1_DECRETO 29/2010 (NHV)</span>
             </button>
         </div>
     </div>
@@ -163,6 +168,76 @@
                             </div>
                         </div>
                         <p class="text-[11px] text-emerald-700">Fórmula Excel: Volume estimado (m³) = Superficie (m²) × 0,2.</p>
+                    </div>
+
+                    <!-- CADRO DE SUPERFICIES E OCOS DA VIVENDA (PESTAÑA 1) -->
+                    <div class="md:col-span-2 p-5 rounded-2xl border border-indigo-200 bg-gradient-to-br from-indigo-50/40 via-white to-purple-50/30 space-y-4 shadow-sm">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-indigo-100 pb-3">
+                            <div>
+                                <h3 class="text-sm font-bold text-indigo-950 flex items-center gap-2">
+                                    <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                                    <span>Cadro de Superficies e Ocos da Vivenda</span>
+                                </h3>
+                                <p class="text-xs text-indigo-700/80 mt-0.5">Programa de pezas da vivenda. Calcula a superficie útil total, as ratios de ocos (D. 29/2010) e sincronízase coas comprobacións de Habitabilidade (NHV).</p>
+                            </div>
+                            <div class="flex items-center gap-2 shrink-0 flex-wrap">
+                                <button type="button" onclick="loadStandardPezas()" class="px-3 py-1.5 bg-white hover:bg-indigo-50 border border-indigo-200 text-indigo-700 text-xs font-bold rounded-xl shadow-2xs transition flex items-center gap-1.5">
+                                    <span>🪄 Cargar Vivenda Estándar</span>
+                                </button>
+                                <button type="button" onclick="addPezaRow()" class="px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow-sm transition flex items-center gap-1.5">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                                    <span>Engadir Peza</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Táboa de Pezas -->
+                        <div class="overflow-x-auto border border-indigo-100 rounded-xl bg-white shadow-2xs">
+                            <table class="w-full text-left text-xs">
+                                <thead>
+                                    <tr class="bg-indigo-50/70 text-indigo-900 text-[11px] font-bold uppercase border-b border-indigo-100">
+                                        <th class="p-2.5">Nome / Uso da Peza</th>
+                                        <th class="p-2.5">Tipo de Peza</th>
+                                        <th class="p-2.5 w-28 text-right">Sup. Útil (m²)</th>
+                                        <th class="p-2.5 w-28 text-right">Ilum. (m²)</th>
+                                        <th class="p-2.5 w-28 text-right">Vent. (m²)</th>
+                                        <th class="p-2.5 text-center">Cumprimento D. 29/2010</th>
+                                        <th class="p-2.5 w-12 text-center"></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="pezasTableBody" class="divide-y divide-slate-100">
+                                    <!-- Filas xeradas dinamicamente por JS -->
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Barra de Totais e Resumo -->
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 bg-white rounded-xl border border-indigo-100 text-xs">
+                            <div class="flex items-center gap-4 flex-wrap">
+                                <div>
+                                    <span class="text-[10px] text-slate-500 uppercase font-bold block">Superficie Útil Total:</span>
+                                    <span id="pezasTotalSupUtil" class="text-sm font-extrabold text-indigo-900">0,00 m²</span>
+                                </div>
+                                <div class="h-6 w-px bg-slate-200"></div>
+                                <div>
+                                    <span class="text-[10px] text-slate-500 uppercase font-bold block">Estancias Vivideiras:</span>
+                                    <span id="pezasTotalEstancias" class="text-sm font-extrabold text-purple-700">0 estancias</span>
+                                </div>
+                                <div class="h-6 w-px bg-slate-200"></div>
+                                <div>
+                                    <span class="text-[10px] text-slate-500 uppercase font-bold block">Suxestión Sup. Construída (~1,20):</span>
+                                    <span id="pezasEstimatedConstruida" class="text-sm font-bold text-slate-700">0,00 m²</span>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <button type="button" onclick="applyPezasToProjectSurfaces()" class="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg font-semibold text-[11px] transition">
+                                    Aplicar a Sup. Construída
+                                </button>
+                                <button type="button" onclick="syncPezasToNhvTab()" class="px-3 py-1.5 bg-purple-100 hover:bg-purple-200 text-purple-800 rounded-lg font-bold text-[11px] transition flex items-center gap-1">
+                                    <span>🪄 Sincronizar con NHV</span>
+                                </button>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- DATOS DE SINATURA COMÚNS -->
@@ -447,6 +522,345 @@
 
         </section>
 
+        <!-- ============================================================ -->
+        <!-- PESTAÑA 4: HABITABILIDADE DE VIVENDAS (NHV - D. 29/2010)     -->
+        <!-- ============================================================ -->
+        <section id="tabContentNhv" class="space-y-6 hidden">
+            <!-- Header do Módulo NHV -->
+            <!-- Header do Módulo NHV -->
+            <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-purple-100 text-purple-800 border border-purple-200">
+                            Ficha de Xustificación
+                        </span>
+                    </div>
+                    <h2 class="text-xl font-bold text-slate-900 mt-1">
+                        1.1_DECRETO 29/2010, NORMAS DE HABITABILIDADE DE VIVENDAS EN GALICIA (NHV)
+                    </h2>
+                    <p class="text-xs text-slate-500 mt-1">
+                        Xeración da ficha oficial de comprobación e xustificación do Decreto 29/2010 en formato Word (.docx).
+                    </p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button type="button" onclick="generateNhvDocument()" id="btnGenerateNhv" class="px-4 py-2.5 bg-purple-700 hover:bg-purple-800 text-white font-bold text-xs rounded-xl shadow-sm transition flex items-center gap-2">
+                        <svg class="w-4 h-4 text-purple-200 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                        <span>Descargar Xustificación NHV (.docx)</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Caixa 1: Asistente Rápido de Parámetros Mestres -->
+            <div class="bg-gradient-to-br from-purple-50/80 via-indigo-50/50 to-white rounded-2xl border border-purple-200 p-6 shadow-sm">
+                <div class="flex items-center justify-between gap-4 border-b border-purple-100 pb-3 mb-4">
+                    <div>
+                        <h3 class="text-sm font-bold text-purple-900 flex items-center gap-2">
+                            <svg class="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                            <span>Asistente Rápido de Parámetros Mestres</span>
+                        </h3>
+                        <p class="text-xs text-purple-700/80 mt-0.5">Define o tipo de vivenda para que o sistema autocalcule e encha o 80% das celas de proxecto segundo a normativa.</p>
+                    </div>
+                    <button type="button" onclick="applyNhvMasterDefaults()" class="px-3.5 py-1.5 bg-purple-700 hover:bg-purple-800 text-white text-xs font-bold rounded-xl shadow-sm transition flex items-center gap-1.5 shrink-0">
+                        <span>🪄 Aplicar Recomendacións</span>
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-700 uppercase mb-1">Tipo de Actuación</label>
+                        <select id="nhv_master_actuacion" onchange="markDirty()" class="w-full rounded-xl border border-purple-200 bg-white p-2 text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-purple-500 focus:outline-none">
+                            <option value="rehabilitacion">Rehabilitación / Remodelación</option>
+                            <option value="obra_nova">Obra Nova</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-700 uppercase mb-1">Tipo de Vivenda</label>
+                        <select id="nhv_master_vivenda" onchange="markDirty()" class="w-full rounded-xl border border-purple-200 bg-white p-2 text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-purple-500 focus:outline-none">
+                            <option value="unifamiliar">Vivenda Unifamiliar</option>
+                            <option value="colectiva">Vivenda Colectiva en Bloque</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-700 uppercase mb-1">Nº Estancias Vivideiras</label>
+                        <select id="nhv_master_estancias" onchange="markDirty(); updateNhvEstanciasVisibility(); syncNhvDimToItems();" class="w-full rounded-xl border border-purple-200 bg-white p-2 text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-purple-500 focus:outline-none">
+                            <option value="1">1 Estancia (Estudio)</option>
+                            <option value="2">2 Estancias</option>
+                            <option value="3">3 Estancias</option>
+                            <option value="4">4 Estancias</option>
+                            <option value="5">5 Estancias</option>
+                            <option value="6" selected>>5 Estancias (6 ou máis)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-700 uppercase mb-1">Cociña</label>
+                        <select id="nhv_master_cocina" onchange="markDirty()" class="w-full rounded-xl border border-purple-200 bg-white p-2 text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-purple-500 focus:outline-none">
+                            <option value="integrada">Integrada na estancia maior</option>
+                            <option value="independente">Cociña Independente</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-700 uppercase mb-1">Baixo Cuberta?</label>
+                        <select id="nhv_master_baixocuberta" onchange="markDirty()" class="w-full rounded-xl border border-purple-200 bg-white p-2 text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-purple-500 focus:outline-none">
+                            <option value="non">Non (Planta piso estándar)</option>
+                            <option value="si">Si (Conta con espazos baixo cuberta)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Caixa 2: Dimensións e Programa da Vivenda (Medidas Reais do Proxecto) -->
+            <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+                <div class="border-b border-slate-100 pb-3 mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div>
+                        <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+                            <svg class="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path></svg>
+                            <span>Dimensións e Xeometría das Pezas (Medidas de Proxecto)</span>
+                        </h3>
+                        <p class="text-xs text-slate-500 mt-0.5">Estes valores transfírense automaticamente ás comprobacións de superficies e cadrados base do Decreto. Pódense vencellar co Cadro de Pezas da Vivenda.</p>
+                    </div>
+                    <button type="button" onclick="autoAssignPezasToNhv()" class="px-3.5 py-1.5 bg-purple-100 hover:bg-purple-200 border border-purple-200 text-purple-800 text-xs font-bold rounded-xl shadow-2xs transition flex items-center gap-1.5 shrink-0">
+                        <span>🪄 Auto-asignar pezas do cadro</span>
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <!-- E1 (Sempre visible) -->
+                    <div id="nhv_card_e1" class="p-3 bg-slate-50 rounded-xl border border-slate-100">
+                        <span class="text-xs font-bold text-purple-800 block mb-1">Estancia Maior (E1)</span>
+                        <select id="nhv_sel_e1" onchange="onNhvSelectPeza('e1', this.value)" class="w-full mb-2 text-[10px] rounded-lg border border-purple-200 bg-white p-1 text-slate-700 font-medium">
+                            <option value="">-- Vincular con peza do cadro --</option>
+                        </select>
+                        <div class="space-y-2">
+                            <div>
+                                <label class="block text-[10px] text-slate-500 font-bold uppercase">Superficie Útil</label>
+                                <input type="text" id="nhv_dim_sup_e1" value="61,35 m2" oninput="markDirty(); syncNhvDimToItems();" class="w-full rounded-lg border border-slate-300 p-1.5 text-xs bg-white focus:ring-1 focus:ring-purple-500">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] text-slate-500 font-bold uppercase">Cadrado Base (m)</label>
+                                <input type="text" id="nhv_dim_cad_e1" value="3,30 x 3,30 m" oninput="markDirty(); syncNhvDimToItems();" class="w-full rounded-lg border border-slate-300 p-1.5 text-xs bg-white focus:ring-1 focus:ring-purple-500">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- E2 (Visible se >= 2 estancias) -->
+                    <div id="nhv_card_e2" class="p-3 bg-slate-50 rounded-xl border border-slate-100">
+                        <span class="text-xs font-bold text-purple-800 block mb-1">Estancia E2 (Dormitorio 1)</span>
+                        <select id="nhv_sel_e2" onchange="onNhvSelectPeza('e2', this.value)" class="w-full mb-2 text-[10px] rounded-lg border border-purple-200 bg-white p-1 text-slate-700 font-medium">
+                            <option value="">-- Vincular con peza do cadro --</option>
+                        </select>
+                        <div class="space-y-2">
+                            <div>
+                                <label class="block text-[10px] text-slate-500 font-bold uppercase">Superficie Útil</label>
+                                <input type="text" id="nhv_dim_sup_e2" value="32,25 m2" oninput="markDirty(); syncNhvDimToItems();" class="w-full rounded-lg border border-slate-300 p-1.5 text-xs bg-white focus:ring-1 focus:ring-purple-500">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] text-slate-500 font-bold uppercase">Cadrado Base (m)</label>
+                                <input type="text" id="nhv_dim_cad_e2" value="2,60 x 2,60 m" oninput="markDirty(); syncNhvDimToItems();" class="w-full rounded-lg border border-slate-300 p-1.5 text-xs bg-white focus:ring-1 focus:ring-purple-500">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- E3 (Visible se >= 3 estancias) -->
+                    <div id="nhv_card_e3" class="p-3 bg-slate-50 rounded-xl border border-slate-100">
+                        <span class="text-xs font-bold text-purple-800 block mb-1">Estancia E3 (Dormitorio 2)</span>
+                        <select id="nhv_sel_e3" onchange="onNhvSelectPeza('e3', this.value)" class="w-full mb-2 text-[10px] rounded-lg border border-purple-200 bg-white p-1 text-slate-700 font-medium">
+                            <option value="">-- Vincular con peza do cadro --</option>
+                        </select>
+                        <div class="space-y-2">
+                            <div>
+                                <label class="block text-[10px] text-slate-500 font-bold uppercase">Superficie Útil</label>
+                                <input type="text" id="nhv_dim_sup_e3" value="12,90 m2" oninput="markDirty(); syncNhvDimToItems();" class="w-full rounded-lg border border-slate-300 p-1.5 text-xs bg-white focus:ring-1 focus:ring-purple-500">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] text-slate-500 font-bold uppercase">Cadrado Base (m)</label>
+                                <input type="text" id="nhv_dim_cad_e3" value="2,20 x 2,20 m" oninput="markDirty(); syncNhvDimToItems();" class="w-full rounded-lg border border-slate-300 p-1.5 text-xs bg-white focus:ring-1 focus:ring-purple-500">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- E4 (Visible se >= 4 estancias) -->
+                    <div id="nhv_card_e4" class="p-3 bg-slate-50 rounded-xl border border-slate-100">
+                        <span class="text-xs font-bold text-purple-800 block mb-1">Estancia E4 (Dormitorio 3)</span>
+                        <select id="nhv_sel_e4" onchange="onNhvSelectPeza('e4', this.value)" class="w-full mb-2 text-[10px] rounded-lg border border-purple-200 bg-white p-1 text-slate-700 font-medium">
+                            <option value="">-- Vincular con peza do cadro --</option>
+                        </select>
+                        <div class="space-y-2">
+                            <div>
+                                <label class="block text-[10px] text-slate-500 font-bold uppercase">Superficie Útil</label>
+                                <input type="text" id="nhv_dim_sup_e4" value="12,20 m2" oninput="markDirty(); syncNhvDimToItems();" class="w-full rounded-lg border border-slate-300 p-1.5 text-xs bg-white focus:ring-1 focus:ring-purple-500">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] text-slate-500 font-bold uppercase">Cadrado Base (m)</label>
+                                <input type="text" id="nhv_dim_cad_e4" value="2,20 x 2,20 m" oninput="markDirty(); syncNhvDimToItems();" class="w-full rounded-lg border border-slate-300 p-1.5 text-xs bg-white focus:ring-1 focus:ring-purple-500">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- E5 (Visible se >= 5 estancias) -->
+                    <div id="nhv_card_e5" class="p-3 bg-slate-50 rounded-xl border border-slate-100">
+                        <span class="text-xs font-bold text-purple-800 block mb-1">Estancia E5 (Dormitorio 4)</span>
+                        <select id="nhv_sel_e5" onchange="onNhvSelectPeza('e5', this.value)" class="w-full mb-2 text-[10px] rounded-lg border border-purple-200 bg-white p-1 text-slate-700 font-medium">
+                            <option value="">-- Vincular con peza do cadro --</option>
+                        </select>
+                        <div class="space-y-2">
+                            <div>
+                                <label class="block text-[10px] text-slate-500 font-bold uppercase">Superficie Útil</label>
+                                <input type="text" id="nhv_dim_sup_e5" value="10,77 m2" oninput="markDirty(); syncNhvDimToItems();" class="w-full rounded-lg border border-slate-300 p-1.5 text-xs bg-white focus:ring-1 focus:ring-purple-500">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] text-slate-500 font-bold uppercase">Cadrado Base (m)</label>
+                                <input type="text" id="nhv_dim_cad_e5" value="2,20 x 2,20 m" oninput="markDirty(); syncNhvDimToItems();" class="w-full rounded-lg border border-slate-300 p-1.5 text-xs bg-white focus:ring-1 focus:ring-purple-500">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- E6 (Visible se >= 6 estancias) -->
+                    <div id="nhv_card_e6" class="p-3 bg-slate-50 rounded-xl border border-slate-100">
+                        <span class="text-xs font-bold text-purple-800 block mb-1">Estancia E6 (Dormitorio 5)</span>
+                        <select id="nhv_sel_e6" onchange="onNhvSelectPeza('e6', this.value)" class="w-full mb-2 text-[10px] rounded-lg border border-purple-200 bg-white p-1 text-slate-700 font-medium">
+                            <option value="">-- Vincular con peza do cadro --</option>
+                        </select>
+                        <div class="space-y-2">
+                            <div>
+                                <label class="block text-[10px] text-slate-500 font-bold uppercase">Superficie Útil</label>
+                                <input type="text" id="nhv_dim_sup_e6" value="9,86 m2" oninput="markDirty(); syncNhvDimToItems();" class="w-full rounded-lg border border-slate-300 p-1.5 text-xs bg-white focus:ring-1 focus:ring-purple-500">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] text-slate-500 font-bold uppercase">Cadrado Base (m)</label>
+                                <input type="text" id="nhv_dim_cad_e6" value="2,20 x 2,20 m" oninput="markDirty(); syncNhvDimToItems();" class="w-full rounded-lg border border-slate-300 p-1.5 text-xs bg-white focus:ring-1 focus:ring-purple-500">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Cociña -->
+                    <div class="p-3 bg-slate-50 rounded-xl border border-slate-100">
+                        <span class="text-xs font-bold text-purple-800 block mb-1">Cociña</span>
+                        <select id="nhv_sel_cocina" onchange="onNhvSelectPeza('cocina', this.value)" class="w-full mb-2 text-[10px] rounded-lg border border-purple-200 bg-white p-1 text-slate-700 font-medium">
+                            <option value="">-- Vincular con peza do cadro --</option>
+                        </select>
+                        <div class="space-y-2">
+                            <div>
+                                <label class="block text-[10px] text-slate-500 font-bold uppercase">Superficie Útil</label>
+                                <input type="text" id="nhv_dim_sup_cocina" value="10,00 m2" oninput="markDirty(); syncNhvDimToItems();" class="w-full rounded-lg border border-slate-300 p-1.5 text-xs bg-white focus:ring-1 focus:ring-purple-500">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] text-slate-500 font-bold uppercase">Fronte de Mesado (m)</label>
+                                <input type="text" id="nhv_dim_mesado_cocina" value="3,77 m" oninput="markDirty(); syncNhvDimToItems();" class="w-full rounded-lg border border-slate-300 p-1.5 text-xs bg-white focus:ring-1 focus:ring-purple-500">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Baño e Aseo -->
+                    <div class="p-3 bg-slate-50 rounded-xl border border-slate-100">
+                        <span class="text-xs font-bold text-purple-800 block mb-1">Baño e Aseo</span>
+                        <div class="space-y-2">
+                            <div>
+                                <label class="block text-[10px] text-slate-500 font-bold uppercase">Sup. Cuarto de Baño</label>
+                                <select id="nhv_sel_bano" onchange="onNhvSelectPeza('bano', this.value)" class="w-full mb-1 text-[10px] rounded-lg border border-purple-200 bg-white p-1 text-slate-700 font-medium">
+                                    <option value="">-- Vincular Baño 1 --</option>
+                                </select>
+                                <input type="text" id="nhv_dim_sup_bano" value="5,49 m2" oninput="markDirty(); syncNhvDimToItems();" class="w-full rounded-lg border border-slate-300 p-1.5 text-xs bg-white focus:ring-1 focus:ring-purple-500">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] text-slate-500 font-bold uppercase">Sup. Cuarto de Aseo</label>
+                                <select id="nhv_sel_aseo" onchange="onNhvSelectPeza('aseo', this.value)" class="w-full mb-1 text-[10px] rounded-lg border border-purple-200 bg-white p-1 text-slate-700 font-medium">
+                                    <option value="">-- Vincular Baño 2 / Aseo --</option>
+                                </select>
+                                <input type="text" id="nhv_dim_sup_aseo" value="3,55 m2" oninput="markDirty(); syncNhvDimToItems();" class="w-full rounded-lg border border-slate-300 p-1.5 text-xs bg-white focus:ring-1 focus:ring-purple-500">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Almacenamento -->
+                    <div class="p-3 bg-slate-50 rounded-xl border border-slate-100">
+                        <span class="text-xs font-bold text-purple-800 block mb-2">Espazos de Almacenamento</span>
+                        <div class="space-y-2">
+                            <div>
+                                <label class="block text-[10px] text-slate-500 font-bold uppercase">Superficie Total Armarios</label>
+                                <input type="text" id="nhv_dim_sup_almacen" value="6,03 m2" oninput="markDirty(); syncNhvDimToItems();" class="w-full rounded-lg border border-slate-300 p-1.5 text-xs bg-white focus:ring-1 focus:ring-purple-500">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] text-slate-500 font-bold uppercase">Fondo de Armarios</label>
+                                <input type="text" id="nhv_dim_fondo_almacen" value="0,60 m" oninput="markDirty(); syncNhvDimToItems();" class="w-full rounded-lg border border-slate-300 p-1.5 text-xs bg-white focus:ring-1 focus:ring-purple-500">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Portas -->
+                    <div class="p-3 bg-slate-50 rounded-xl border border-slate-100">
+                        <span class="text-xs font-bold text-purple-800 block mb-2">Portas de Paso</span>
+                        <div class="space-y-2">
+                            <div>
+                                <label class="block text-[10px] text-slate-500 font-bold uppercase">Ancho Libre Mínimo</label>
+                                <input type="text" id="nhv_dim_ancho_portas" value="0,80 m" oninput="markDirty(); syncNhvDimToItems();" class="w-full rounded-lg border border-slate-300 p-1.5 text-xs bg-white focus:ring-1 focus:ring-purple-500">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] text-slate-500 font-bold uppercase">Altura Libre Mínima</label>
+                                <input type="text" id="nhv_dim_alto_portas" value="2,03 m" oninput="markDirty(); syncNhvDimToItems();" class="w-full rounded-lg border border-slate-300 p-1.5 text-xs bg-white focus:ring-1 focus:ring-purple-500">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Caixa 3: Cadro Completo de Xustificación das 173 Celas de PROXECTO -->
+            <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm space-y-4">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
+                    <div>
+                        <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+                            <svg class="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
+                            <span>Táboa Detallada de Comprobacións do Decreto 29/2010</span>
+                        </h3>
+                        <p class="text-xs text-slate-500 mt-0.5">Edita calquera cela puntual da columna <strong>PROXECTO</strong> que se incorporará directamente na memoria Word.</p>
+                    </div>
+
+                    <!-- Buscador e Filtro de Sección -->
+                    <div class="flex items-center gap-2">
+                        <div class="relative w-48 sm:w-64">
+                            <input type="text" id="nhvSearchInput" oninput="filterNhvTable()" placeholder="Buscar parámetro..." class="w-full pl-8 pr-3 py-1.5 rounded-xl border border-slate-300 text-xs focus:ring-1 focus:ring-purple-500">
+                            <svg class="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Selector de Pestañas de Sección (A.1, A.2, A.3, A.4) -->
+                <div class="flex flex-wrap items-center gap-1.5 border-b border-slate-100 pb-2">
+                    <button type="button" id="nhvFilterBtn_all" onclick="setNhvSectionFilter('all')" class="px-3 py-1.5 rounded-xl text-xs font-bold transition bg-purple-100 text-purple-800 border border-purple-200">
+                        Todas (<span id="nhvCountAll">173</span>)
+                    </button>
+                    <button type="button" id="nhvFilterBtn_A.1." onclick="setNhvSectionFilter('A.1.')" class="px-3 py-1.5 rounded-xl text-xs font-bold transition text-slate-600 hover:text-slate-900 border border-transparent">
+                        A.1 Vivenda Exterior e Ocos
+                    </button>
+                    <button type="button" id="nhvFilterBtn_A.2." onclick="setNhvSectionFilter('A.2.')" class="px-3 py-1.5 rounded-xl text-xs font-bold transition text-slate-600 hover:text-slate-900 border border-transparent">
+                        A.2 Condicións Funcionais
+                    </button>
+                    <button type="button" id="nhvFilterBtn_A.3." onclick="setNhvSectionFilter('A.3.')" class="px-3 py-1.5 rounded-xl text-xs font-bold transition text-slate-600 hover:text-slate-900 border border-transparent">
+                        A.3 Alturas e Dimensións
+                    </button>
+                    <button type="button" id="nhvFilterBtn_A.4." onclick="setNhvSectionFilter('A.4.')" class="px-3 py-1.5 rounded-xl text-xs font-bold transition text-slate-600 hover:text-slate-900 border border-transparent">
+                        A.4 Dotacións e Equipamento
+                    </button>
+                </div>
+
+                <!-- Táboa con scroll -->
+                <div class="overflow-x-auto rounded-xl border border-slate-200 max-h-[600px] overflow-y-auto">
+                    <table class="w-full text-left text-xs">
+                        <thead class="bg-slate-50 border-b border-slate-200 text-slate-600 font-bold uppercase sticky top-0 z-10">
+                            <tr>
+                                <th class="p-2.5 w-24">Sección</th>
+                                <th class="p-2.5">Concepto e Parámetro Normativo</th>
+                                <th class="p-2.5 w-48">Normativa (D. 29/2010)</th>
+                                <th class="p-2.5 w-64 bg-purple-50 text-purple-900 border-l border-purple-100 font-extrabold">PROXECTO</th>
+                            </tr>
+                        </thead>
+                        <tbody id="nhvCatalogTbody" class="divide-y divide-slate-100">
+                            <!-- Renderizado dinámicamente con JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
         <!-- Modal: Buscar e Seleccionar Centros Médicos Próximos -->
         <div id="nearbyHealthModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
             <div class="bg-white rounded-3xl shadow-2xl max-w-3xl w-full p-6 border border-slate-100 flex flex-col max-h-[90vh]">
@@ -711,6 +1125,9 @@
             document.getElementById('common_asinantes').value = c.asinantes || 'Fdo. Sergio J. Beceiro Lodeiro     M. Rosa Vilas Romalde';
             document.getElementById('common_colexiado').value = c.colexiado || 'ESTUDIO ANTA ARQUITECTOS S.L.P.\tNº COAG - 20.039';
 
+            // Cadro de Pezas da Vivenda
+            populatePezas(c.pezas || []);
+
             // EBSS data
             const eb = p.ebss_data || {};
             document.getElementById('ebss_accesos_obra').value = eb.accesos_obra || 'Directos dende vía pública pavimentada';
@@ -752,6 +1169,9 @@
                 }
             });
 
+            // Habitabilidade NHV
+            populateNhvForms(p.nhv_data);
+
             isDirty = false;
             updateSaveBadge();
         }
@@ -771,7 +1191,8 @@
                 superficie_actuacion: parseFloat(document.getElementById('common_superficie_actuacion').value) || 9.84,
                 data_documento: document.getElementById('common_data_documento').value.trim(),
                 asinantes: document.getElementById('common_asinantes').value.trim(),
-                colexiado: document.getElementById('common_colexiado').value.trim()
+                colexiado: document.getElementById('common_colexiado').value.trim(),
+                pezas: collectPezas()
             };
 
             const machinery = {};
@@ -817,7 +1238,8 @@
                 name: document.getElementById('project_name').value.trim() || 'Proxecto Sen Nome',
                 common_data: common,
                 ebss_data: ebss,
-                residuos_data: residuos
+                residuos_data: residuos,
+                nhv_data: collectNhvData()
             };
         }
 
@@ -988,13 +1410,22 @@
         }
 
         function switchMainTab(tab) {
-            const tabs = ['common', 'ebss', 'residuos'];
+            const tabs = ['common', 'ebss', 'residuos', 'nhv'];
             tabs.forEach(t => {
                 const content = document.getElementById(`tabContent${capitalize(t)}`);
                 const btn = document.getElementById(`tabBtn${capitalize(t)}`);
+                if (!content || !btn) return;
                 if (t === tab) {
                     content.classList.remove('hidden');
-                    btn.className = "px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-2 bg-blue-50 text-blue-700 border border-blue-200 shadow-sm";
+                    let activeClass = "px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-2 border shadow-sm ";
+                    if (t === 'common') activeClass += "bg-blue-50 text-blue-700 border-blue-200";
+                    else if (t === 'ebss') activeClass += "bg-emerald-50 text-emerald-800 border-emerald-200";
+                    else if (t === 'residuos') activeClass += "bg-amber-50 text-amber-800 border-amber-200";
+                    else if (t === 'nhv') {
+                        activeClass += "bg-purple-50 text-purple-800 border-purple-200";
+                        updateNhvPezaSelectors();
+                    }
+                    btn.className = activeClass;
                 } else {
                     content.classList.add('hidden');
                     btn.className = "px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-2 text-slate-600 hover:text-slate-900 border border-transparent";
@@ -1065,6 +1496,586 @@
                 }
             } catch (err) {
                 alert('Erro de conexión xerando o documento: ' + err.message);
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        }
+
+        // ================= CADRO DE SUPERFICIES E OCOS DA VIVENDA =================
+        let projectPezas = [];
+
+        function generatePezaId() {
+            return 'p_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4);
+        }
+
+        function populatePezas(list) {
+            if (Array.isArray(list) && list.length > 0) {
+                projectPezas = JSON.parse(JSON.stringify(list));
+            } else {
+                projectPezas = [];
+            }
+            renderPezasTable();
+            updateNhvPezaSelectors();
+        }
+
+        function collectPezas() {
+            return projectPezas;
+        }
+
+        function loadStandardPezas() {
+            if (projectPezas.length > 0 && !confirm('¿Substituír as pezas actuais polas da vivenda estándar?')) {
+                return;
+            }
+            projectPezas = [
+                { id: generatePezaId(), nome: 'Salón - Cociña', tipo: 'estancia', sup_util: 35.50, sup_ilum: 5.20, sup_vent: 1.80 },
+                { id: generatePezaId(), nome: 'Dormitorio 1 (Principal)', tipo: 'estancia', sup_util: 14.80, sup_ilum: 2.20, sup_vent: 0.80 },
+                { id: generatePezaId(), nome: 'Dormitorio 2', tipo: 'estancia', sup_util: 10.50, sup_ilum: 1.60, sup_vent: 0.60 },
+                { id: generatePezaId(), nome: 'Dormitorio 3', tipo: 'estancia', sup_util: 9.20, sup_ilum: 1.40, sup_vent: 0.50 },
+                { id: generatePezaId(), nome: 'Baño Principal', tipo: 'bano', sup_util: 4.80, sup_ilum: 0.00, sup_vent: 0.00 },
+                { id: generatePezaId(), nome: 'Aseo / Baño 2', tipo: 'bano', sup_util: 2.90, sup_ilum: 0.00, sup_vent: 0.00 },
+                { id: generatePezaId(), nome: 'Distribuidor e Entrada', tipo: 'circulacion', sup_util: 6.40, sup_ilum: 0.00, sup_vent: 0.00 },
+                { id: generatePezaId(), nome: 'Lavadoiro - Tendal', tipo: 'servizo', sup_util: 3.20, sup_ilum: 0.80, sup_vent: 0.80 }
+            ];
+            renderPezasTable();
+            updateNhvPezaSelectors();
+            markDirty();
+        }
+
+        function addPezaRow(data) {
+            const peza = data || {
+                id: generatePezaId(),
+                nome: 'Nova Peza ' + (projectPezas.length + 1),
+                tipo: 'estancia',
+                sup_util: 10.00,
+                sup_ilum: 1.50,
+                sup_vent: 0.50
+            };
+            projectPezas.push(peza);
+            renderPezasTable();
+            updateNhvPezaSelectors();
+            markDirty();
+        }
+
+        function removePeza(idx) {
+            projectPezas.splice(idx, 1);
+            renderPezasTable();
+            updateNhvPezaSelectors();
+            markDirty();
+        }
+
+        function onPezaChange(idx, field, val) {
+            if (!projectPezas[idx]) return;
+            if (field === 'sup_util' || field === 'sup_ilum' || field === 'sup_vent') {
+                projectPezas[idx][field] = parseFloat(val) || 0;
+            } else {
+                projectPezas[idx][field] = val;
+            }
+            renderPezasTable();
+            updateNhvPezaSelectors();
+            markDirty();
+        }
+
+        function renderPezasTable() {
+            const tbody = document.getElementById('pezasTableBody');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+
+            let totalSupUtil = 0;
+            let totalEstancias = 0;
+
+            projectPezas.forEach((p, idx) => {
+                totalSupUtil += (p.sup_util || 0);
+                if (p.tipo === 'estancia') totalEstancias++;
+
+                // Cálculo de ratios Decreto 29/2010
+                let statusBadge = '';
+                if (p.tipo === 'estancia' || p.tipo === 'cocina') {
+                    const minIlum8 = (p.sup_util || 0) / 8;
+                    const minIlum12 = (p.sup_util || 0) / 12;
+                    const hasIlum = (p.sup_ilum || 0) >= (minIlum8 - 0.01);
+                    const minVent = (p.sup_ilum || 0) / 3;
+                    const hasVent = (p.sup_vent || 0) >= (minVent - 0.01) && (p.sup_vent || 0) > 0;
+
+                    if (hasIlum && hasVent) {
+                        statusBadge = '<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">✓ Ilum. (≥1/8) e Vent. OK</span>';
+                    } else if (!hasIlum && (p.sup_ilum || 0) >= (minIlum12 - 0.01)) {
+                        statusBadge = '<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-200">⚠ Cumpre 1/12 (Rehab)</span>';
+                    } else if (!hasIlum) {
+                        statusBadge = `<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-rose-100 text-rose-800 border border-rose-200">✕ Ilum. baixa (${(p.sup_ilum||0).toFixed(2)} &lt; ${minIlum8.toFixed(2)})</span>`;
+                    } else {
+                        statusBadge = `<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-200">⚠ Vent. baixa (${(p.sup_vent||0).toFixed(2)} &lt; ${minVent.toFixed(2)})</span>`;
+                    }
+                } else if (p.tipo === 'bano') {
+                    statusBadge = '<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-slate-100 text-slate-600">Vent. Mecánica / Forzada</span>';
+                } else {
+                    statusBadge = '<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-slate-50 text-slate-500">Non esixible directa</span>';
+                }
+
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-indigo-50/30 transition border-b border-slate-100";
+                tr.innerHTML = `
+                    <td class="p-2">
+                        <input type="text" value="${(p.nome || '').replace(/"/g, '&quot;')}" oninput="onPezaChange(${idx}, 'nome', this.value)" class="w-full text-xs font-semibold rounded-lg border border-slate-300 p-1.5 bg-white focus:ring-1 focus:ring-indigo-500">
+                    </td>
+                    <td class="p-2">
+                        <select onchange="onPezaChange(${idx}, 'tipo', this.value)" class="w-full text-xs rounded-lg border border-slate-300 p-1.5 bg-white focus:ring-1 focus:ring-indigo-500">
+                            <option value="estancia" ${p.tipo === 'estancia' ? 'selected' : ''}>Estancia vivideira</option>
+                            <option value="cocina" ${p.tipo === 'cocina' ? 'selected' : ''}>Cociña</option>
+                            <option value="bano" ${p.tipo === 'bano' ? 'selected' : ''}>Cuarto de Baño / Aseo</option>
+                            <option value="servizo" ${p.tipo === 'servizo' ? 'selected' : ''}>Lavadoiro / Tendal</option>
+                            <option value="circulacion" ${p.tipo === 'circulacion' ? 'selected' : ''}>Distribuidor / Circulación</option>
+                            <option value="almacen" ${p.tipo === 'almacen' ? 'selected' : ''}>Almacenamento / Outros</option>
+                        </select>
+                    </td>
+                    <td class="p-2 text-right">
+                        <input type="number" step="0.01" min="0" value="${p.sup_util !== undefined ? p.sup_util : 0}" oninput="onPezaChange(${idx}, 'sup_util', this.value)" class="w-24 text-right text-xs font-bold rounded-lg border border-slate-300 p-1.5 bg-white focus:ring-1 focus:ring-indigo-500">
+                    </td>
+                    <td class="p-2 text-right">
+                        <input type="number" step="0.01" min="0" value="${p.sup_ilum !== undefined ? p.sup_ilum : 0}" oninput="onPezaChange(${idx}, 'sup_ilum', this.value)" class="w-24 text-right text-xs rounded-lg border border-slate-300 p-1.5 bg-white focus:ring-1 focus:ring-indigo-500">
+                    </td>
+                    <td class="p-2 text-right">
+                        <input type="number" step="0.01" min="0" value="${p.sup_vent !== undefined ? p.sup_vent : 0}" oninput="onPezaChange(${idx}, 'sup_vent', this.value)" class="w-24 text-right text-xs rounded-lg border border-slate-300 p-1.5 bg-white focus:ring-1 focus:ring-indigo-500">
+                    </td>
+                    <td class="p-2 text-center">
+                        ${statusBadge}
+                    </td>
+                    <td class="p-2 text-center">
+                        <button type="button" onclick="removePeza(${idx})" title="Eliminar peza" class="p-1 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-rose-50 transition">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            // Actualizar totais
+            const elTotSup = document.getElementById('pezasTotalSupUtil');
+            if (elTotSup) elTotSup.textContent = totalSupUtil.toFixed(2).replace('.', ',') + ' m²';
+
+            const elTotEst = document.getElementById('pezasTotalEstancias');
+            if (elTotEst) elTotEst.textContent = `${totalEstancias} estancia${totalEstancias === 1 ? '' : 's'}`;
+
+            const elEstConst = document.getElementById('pezasEstimatedConstruida');
+            if (elEstConst) elEstConst.textContent = (totalSupUtil * 1.20).toFixed(2).replace('.', ',') + ' m²';
+        }
+
+        function applyPezasToProjectSurfaces() {
+            let totalSupUtil = 0;
+            projectPezas.forEach(p => totalSupUtil += (p.sup_util || 0));
+            const constr = (totalSupUtil * 1.20).toFixed(2).replace('.', ',');
+            const el = document.getElementById('common_superficie_construida');
+            if (el) {
+                el.value = constr + ' m2';
+                markDirty();
+            }
+        }
+
+        function syncPezasToNhvTab() {
+            autoAssignPezasToNhv();
+            switchMainTab('nhv');
+        }
+
+        function updateNhvPezaSelectors() {
+            const slots = ['e1', 'e2', 'e3', 'e4', 'e5', 'e6', 'cocina', 'bano', 'aseo'];
+            slots.forEach(slot => {
+                const sel = document.getElementById(`nhv_sel_${slot}`);
+                if (!sel) return;
+                const curVal = sel.value;
+                sel.innerHTML = '<option value="">-- Vincular con peza do cadro --</option>';
+                projectPezas.forEach(p => {
+                    const opt = document.createElement('option');
+                    opt.value = p.id;
+                    opt.textContent = `${p.nome} (${(p.sup_util||0).toFixed(2).replace('.', ',')} m²) [${p.tipo}]`;
+                    if (p.id === curVal) opt.selected = true;
+                    sel.appendChild(opt);
+                });
+            });
+        }
+
+        function onNhvSelectPeza(slot, pezaId) {
+            const peza = projectPezas.find(p => p.id === pezaId);
+            if (!peza) return;
+            const supStr = (peza.sup_util || 0).toFixed(2).replace('.', ',') + ' m2';
+
+            if (slot === 'e1') {
+                const el = document.getElementById('nhv_dim_sup_e1');
+                if (el) el.value = supStr;
+            } else if (slot === 'e2') {
+                const el = document.getElementById('nhv_dim_sup_e2');
+                if (el) el.value = supStr;
+            } else if (slot === 'e3') {
+                const el = document.getElementById('nhv_dim_sup_e3');
+                if (el) el.value = supStr;
+            } else if (slot === 'e4') {
+                const el = document.getElementById('nhv_dim_sup_e4');
+                if (el) el.value = supStr;
+            } else if (slot === 'e5') {
+                const el = document.getElementById('nhv_dim_sup_e5');
+                if (el) el.value = supStr;
+            } else if (slot === 'e6') {
+                const el = document.getElementById('nhv_dim_sup_e6');
+                if (el) el.value = supStr;
+            } else if (slot === 'cocina') {
+                const el = document.getElementById('nhv_dim_sup_cocina');
+                if (el) el.value = supStr;
+            } else if (slot === 'bano') {
+                const el = document.getElementById('nhv_dim_sup_bano');
+                if (el) el.value = supStr;
+            } else if (slot === 'aseo') {
+                const el = document.getElementById('nhv_dim_sup_aseo');
+                if (el) el.value = supStr;
+            }
+
+            syncNhvDimToItems();
+            markDirty();
+        }
+
+        function autoAssignPezasToNhv() {
+            if (!projectPezas || projectPezas.length === 0) {
+                alert('Non hai pezas no Cadro de Superficies (Datos Comúns). Podes usar "🪄 Cargar Vivenda Estándar" ou engadilas manualmente.');
+                return;
+            }
+
+            // 1. Estancias vivideiras ordenadas por tamaño decrecente
+            const estancias = projectPezas
+                .filter(p => p.tipo === 'estancia')
+                .sort((a, b) => (b.sup_util || 0) - (a.sup_util || 0));
+
+            // 2. Axustar número de estancias
+            const numEst = Math.min(Math.max(estancias.length, 1), 6);
+            const selMasterEst = document.getElementById('nhv_master_estancias');
+            if (selMasterEst) {
+                selMasterEst.value = String(numEst);
+                updateNhvEstanciasVisibility();
+            }
+
+            // 3. Asignar E1..En
+            const eSlots = ['e1', 'e2', 'e3', 'e4', 'e5', 'e6'];
+            for (let i = 0; i < numEst; i++) {
+                const peza = estancias[i];
+                if (peza) {
+                    const slot = eSlots[i];
+                    const sel = document.getElementById(`nhv_sel_${slot}`);
+                    if (sel) sel.value = peza.id;
+                    const inputSup = document.getElementById(`nhv_dim_sup_${slot}`);
+                    if (inputSup) inputSup.value = (peza.sup_util || 0).toFixed(2).replace('.', ',') + ' m2';
+                }
+            }
+
+            // 4. Asignar Cociña
+            const cocinas = projectPezas.filter(p => p.tipo === 'cocina');
+            if (cocinas.length > 0) {
+                const sel = document.getElementById('nhv_sel_cocina');
+                if (sel) sel.value = cocinas[0].id;
+                const inputSup = document.getElementById('nhv_dim_sup_cocina');
+                if (inputSup) inputSup.value = (cocinas[0].sup_util || 0).toFixed(2).replace('.', ',') + ' m2';
+            }
+
+            // 5. Asignar Baño e Aseo
+            const banos = projectPezas.filter(p => p.tipo === 'bano');
+            if (banos.length > 0) {
+                const selB = document.getElementById('nhv_sel_bano');
+                if (selB) selB.value = banos[0].id;
+                const inputB = document.getElementById('nhv_dim_sup_bano');
+                if (inputB) inputB.value = (banos[0].sup_util || 0).toFixed(2).replace('.', ',') + ' m2';
+
+                if (banos.length > 1) {
+                    const selA = document.getElementById('nhv_sel_aseo');
+                    if (selA) selA.value = banos[1].id;
+                    const inputA = document.getElementById('nhv_dim_sup_aseo');
+                    if (inputA) inputA.value = (banos[1].sup_util || 0).toFixed(2).replace('.', ',') + ' m2';
+                }
+            }
+
+            // 6. Sincronizar táboa
+            syncNhvDimToItems();
+            markDirty();
+        }
+
+        // ================= XESTIÓN DE HABITABILIDADE (NHV) =================
+        let nhvCurrentItems = {};
+        let nhvCurrentSection = 'all';
+
+        function populateNhvForms(nhv) {
+            const data = (nhv && typeof nhv === 'object') ? nhv : (typeof DEFAULT_NHV_DATA !== 'undefined' ? DEFAULT_NHV_DATA : {});
+            const master = data.master || (typeof DEFAULT_NHV_DATA !== 'undefined' ? DEFAULT_NHV_DATA.master : {});
+            const dimens = data.dimens || (typeof DEFAULT_NHV_DATA !== 'undefined' ? DEFAULT_NHV_DATA.dimens : {});
+            nhvCurrentItems = Object.assign({}, (typeof DEFAULT_NHV_DATA !== 'undefined' ? DEFAULT_NHV_DATA.items : {}), data.items || {});
+
+            // 1. Parámetros Mestres
+            const elAct = document.getElementById('nhv_master_actuacion');
+            if (elAct && master.tipo_actuacion) elAct.value = master.tipo_actuacion;
+            const elViv = document.getElementById('nhv_master_vivenda');
+            if (elViv && master.tipo_vivenda) elViv.value = master.tipo_vivenda;
+            const elEst = document.getElementById('nhv_master_estancias');
+            if (elEst && master.num_estancias) elEst.value = String(master.num_estancias);
+            const elCoc = document.getElementById('nhv_master_cocina');
+            if (elCoc) elCoc.value = master.cocina_integrada ? 'integrada' : 'independente';
+            const elBcub = document.getElementById('nhv_master_baixocuberta');
+            if (elBcub) elBcub.value = master.baixo_cuberta ? 'si' : 'non';
+
+            // 2. Dimensións
+            const dimIds = [
+                'sup_e1', 'cad_e1', 'sup_e2', 'cad_e2', 'sup_e3', 'cad_e3',
+                'sup_e4', 'cad_e4', 'sup_e5', 'cad_e5', 'sup_e6', 'cad_e6',
+                'sup_cocina', 'mesado_cocina', 'sup_bano', 'sup_aseo',
+                'sup_almacen', 'fondo_almacen', 'ancho_portas', 'alto_portas'
+            ];
+            dimIds.forEach(id => {
+                const el = document.getElementById(`nhv_dim_${id}`);
+                if (el && dimens[id] !== undefined) el.value = dimens[id];
+            });
+
+            // 3. Axustar visibilidade de estancias E1..E6
+            updateNhvEstanciasVisibility();
+            updateNhvPezaSelectors();
+
+            // 4. Renderizar táboa
+            renderNhvTable();
+        }
+
+        function updateNhvEstanciasVisibility() {
+            const nest = parseInt(document.getElementById('nhv_master_estancias')?.value || '6', 10);
+            const setVis = (id, show) => {
+                const el = document.getElementById(id);
+                if (el) {
+                    if (show) {
+                        el.classList.remove('hidden');
+                    } else {
+                        el.classList.add('hidden');
+                    }
+                }
+            };
+            setVis('nhv_card_e1', true);
+            setVis('nhv_card_e2', nest >= 2);
+            setVis('nhv_card_e3', nest >= 3);
+            setVis('nhv_card_e4', nest >= 4);
+            setVis('nhv_card_e5', nest >= 5);
+            setVis('nhv_card_e6', nest >= 6);
+        }
+
+        function collectNhvData() {
+            const master = {
+                tipo_actuacion: document.getElementById('nhv_master_actuacion')?.value || 'rehabilitacion',
+                tipo_vivenda: document.getElementById('nhv_master_vivenda')?.value || 'unifamiliar',
+                num_estancias: parseInt(document.getElementById('nhv_master_estancias')?.value || '6', 10),
+                cocina_integrada: document.getElementById('nhv_master_cocina')?.value === 'integrada',
+                baixo_cuberta: document.getElementById('nhv_master_baixocuberta')?.value === 'si'
+            };
+
+            const dimens = {};
+            const dimIds = [
+                'sup_e1', 'cad_e1', 'sup_e2', 'cad_e2', 'sup_e3', 'cad_e3',
+                'sup_e4', 'cad_e4', 'sup_e5', 'cad_e5', 'sup_e6', 'cad_e6',
+                'sup_cocina', 'mesado_cocina', 'sup_bano', 'sup_aseo',
+                'sup_almacen', 'fondo_almacen', 'ancho_portas', 'alto_portas'
+            ];
+            dimIds.forEach(id => {
+                const el = document.getElementById(`nhv_dim_${id}`);
+                if (el) dimens[id] = el.value.trim();
+            });
+
+            return {
+                master: master,
+                dimens: dimens,
+                items: nhvCurrentItems
+            };
+        }
+
+        async function applyNhvMasterDefaults() {
+            const master = {
+                tipo_actuacion: document.getElementById('nhv_master_actuacion')?.value || 'rehabilitacion',
+                tipo_vivenda: document.getElementById('nhv_master_vivenda')?.value || 'unifamiliar',
+                num_estancias: parseInt(document.getElementById('nhv_master_estancias')?.value || '6', 10),
+                cocina_integrada: document.getElementById('nhv_master_cocina')?.value === 'integrada',
+                baixo_cuberta: document.getElementById('nhv_master_baixocuberta')?.value === 'si'
+            };
+
+            const dimens = {};
+            const dimIds = [
+                'sup_e1', 'cad_e1', 'sup_e2', 'cad_e2', 'sup_e3', 'cad_e3',
+                'sup_e4', 'cad_e4', 'sup_e5', 'cad_e5', 'sup_e6', 'cad_e6',
+                'sup_cocina', 'mesado_cocina', 'sup_bano', 'sup_aseo',
+                'sup_almacen', 'fondo_almacen', 'ancho_portas', 'alto_portas'
+            ];
+            dimIds.forEach(id => {
+                const el = document.getElementById(`nhv_dim_${id}`);
+                if (el) dimens[id] = el.value.trim();
+            });
+
+            try {
+                const res = await fetch('/api/nhv/compute-defaults', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ master, dimens })
+                });
+                const data = await res.json();
+                if (data.status === 'success') {
+                    nhvCurrentItems = data.items;
+                    updateNhvEstanciasVisibility();
+                    renderNhvTable();
+                    markDirty();
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        function syncNhvDimToItems() {
+            const nest = parseInt(document.getElementById('nhv_master_estancias')?.value || '6', 10);
+            const supE1 = document.getElementById('nhv_dim_sup_e1')?.value || '';
+            const e1Row = { 1: 't2_r20', 2: 't2_r21', 3: 't2_r22', 4: 't2_r23', 5: 't2_r24', 6: 't2_r25' }[nest] || 't2_r25';
+            nhvCurrentItems[e1Row] = supE1;
+
+            if (nest >= 2) {
+                nhvCurrentItems['t3_r3'] = document.getElementById('nhv_dim_sup_e2')?.value || '';
+                nhvCurrentItems['t3_r4'] = document.getElementById('nhv_dim_cad_e2')?.value || '';
+            }
+            if (nest >= 3) {
+                nhvCurrentItems['t3_r9'] = document.getElementById('nhv_dim_sup_e3')?.value || '';
+                nhvCurrentItems['t3_r10'] = document.getElementById('nhv_dim_cad_e3')?.value || '';
+            }
+            if (nest >= 4) {
+                nhvCurrentItems['t3_r15'] = document.getElementById('nhv_dim_sup_e4')?.value || '';
+                nhvCurrentItems['t3_r16'] = document.getElementById('nhv_dim_cad_e4')?.value || '';
+            }
+            if (nest === 5) {
+                nhvCurrentItems['t3_r21'] = document.getElementById('nhv_dim_sup_e5')?.value || '';
+                nhvCurrentItems['t3_r22'] = 'Non aplica';
+                nhvCurrentItems['t3_r23'] = document.getElementById('nhv_dim_cad_e5')?.value || '';
+            } else if (nest > 5) {
+                nhvCurrentItems['t3_r21'] = 'Non aplica';
+                nhvCurrentItems['t3_r22'] = document.getElementById('nhv_dim_sup_e5')?.value || '';
+                nhvCurrentItems['t3_r23'] = document.getElementById('nhv_dim_cad_e5')?.value || '';
+            }
+            if (nest >= 6) {
+                nhvCurrentItems['t3_r28'] = document.getElementById('nhv_dim_sup_e6')?.value || '';
+                nhvCurrentItems['t3_r29'] = document.getElementById('nhv_dim_cad_e6')?.value || '';
+            }
+            renderNhvTable();
+        }
+
+        function setNhvSectionFilter(sec) {
+            nhvCurrentSection = sec;
+            const btns = ['all', 'A.1.', 'A.2.', 'A.3.', 'A.4.'];
+            btns.forEach(b => {
+                const el = document.getElementById(`nhvFilterBtn_${b}`);
+                if (el) {
+                    if (b === sec) {
+                        el.className = "px-3 py-1.5 rounded-xl text-xs font-bold transition bg-purple-100 text-purple-800 border border-purple-200";
+                    } else {
+                        el.className = "px-3 py-1.5 rounded-xl text-xs font-bold transition text-slate-600 hover:text-slate-900 border border-transparent";
+                    }
+                }
+            });
+            renderNhvTable();
+        }
+
+        function filterNhvTable() {
+            renderNhvTable();
+        }
+
+        function onNhvItemChange(rowId, val) {
+            nhvCurrentItems[rowId] = val;
+            markDirty();
+        }
+
+        function renderNhvTable() {
+            const tbody = document.getElementById('nhvCatalogTbody');
+            if (!tbody || typeof NHV_CATALOG === 'undefined') return;
+
+            const q = (document.getElementById('nhvSearchInput')?.value || '').toLowerCase().trim();
+            tbody.innerHTML = '';
+
+            const STANDARD_OPTIONS = ['SI', 'NON', 'Non aplica', 'Existente (Rehab.)', 'h existente cumpre'];
+            let displayedCount = 0;
+
+            NHV_CATALOG.forEach(item => {
+                if (nhvCurrentSection !== 'all' && !item.section.startsWith(nhvCurrentSection)) {
+                    return;
+                }
+
+                if (q) {
+                    const matchConc = item.concepto.toLowerCase().includes(q);
+                    const matchTitle = item.title.toLowerCase().includes(q);
+                    const matchNorm = item.normativa.toLowerCase().includes(q);
+                    const matchVal = (nhvCurrentItems[item.id] || '').toLowerCase().includes(q);
+                    if (!matchConc && !matchTitle && !matchNorm && !matchVal) return;
+                }
+
+                displayedCount++;
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 transition border-b border-slate-100";
+
+                const curVal = nhvCurrentItems[item.id] !== undefined ? nhvCurrentItems[item.id] : item.default;
+                const isSelect = STANDARD_OPTIONS.includes(curVal) || ['SI/NON', 'SI/NO'].includes(item.normativa);
+
+                let inputHtml = '';
+                if (isSelect) {
+                    let opts = ['SI', 'NON', 'Non aplica', 'Existente (Rehab.)', 'h existente cumpre'];
+                    if (!opts.includes(curVal) && curVal) opts.push(curVal);
+                    inputHtml = `
+                        <select onchange="onNhvItemChange('${item.id}', this.value)" class="w-full text-xs font-semibold rounded-lg border border-purple-200 bg-white p-1.5 text-slate-800 focus:ring-1 focus:ring-purple-500">
+                            ${opts.map(o => `<option value="${o}" ${o === curVal ? 'selected' : ''}>${o}</option>`).join('')}
+                        </select>
+                    `;
+                } else {
+                    inputHtml = `
+                        <input type="text" value="${curVal.replace(/"/g, '&quot;')}" onchange="onNhvItemChange('${item.id}', this.value)" class="w-full text-xs rounded-lg border border-slate-300 p-1.5 bg-white focus:ring-1 focus:ring-purple-500">
+                    `;
+                }
+
+                tr.innerHTML = `
+                    <td class="p-2.5 font-bold text-[11px] text-purple-700 whitespace-nowrap align-top">
+                        ${item.section}
+                    </td>
+                    <td class="p-2.5 align-top">
+                        <span class="text-[10px] uppercase font-bold text-slate-400 block">${item.concepto}</span>
+                        <span class="text-xs font-semibold text-slate-800">${item.title}</span>
+                    </td>
+                    <td class="p-2.5 text-slate-600 font-mono text-[11px] align-top">
+                        ${item.normativa || '---'}
+                    </td>
+                    <td class="p-2.5 bg-purple-50/40 border-l border-purple-100 align-top">
+                        ${inputHtml}
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            const countEl = document.getElementById('nhvCountAll');
+            if (countEl && nhvCurrentSection === 'all' && !q) {
+                countEl.textContent = displayedCount;
+            }
+        }
+
+        async function generateNhvDocument() {
+            await saveProject(false);
+            const btn = document.getElementById('btnGenerateNhv');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = `<svg class="animate-spin w-3.5 h-3.5 inline-block text-current shrink-0" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> <span>Xerando NHV...</span>`;
+            btn.disabled = true;
+
+            try {
+                const res = await fetch(`/api/projects/${projectId}/generate-nhv`, { method: 'POST' });
+                if (res.ok) {
+                    const blob = await res.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    const pobl = document.getElementById('common_poboacion').value || 'Proxecto';
+                    a.download = `NHV_${pobl.replace(/\s+/g, '_')}.docx`;
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                    window.URL.revokeObjectURL(url);
+                } else {
+                    const err = await res.json();
+                    alert('Erro xerando o documento NHV: ' + (err.error || 'Erro descoñecido'));
+                }
+            } catch (err) {
+                alert('Erro de conexión xerando o documento NHV: ' + err.message);
             } finally {
                 btn.innerHTML = originalText;
                 btn.disabled = false;
