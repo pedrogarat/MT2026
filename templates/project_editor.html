@@ -1564,16 +1564,75 @@
             markDirty();
         }
 
-        function onPezaChange(idx, field, val) {
+        function getPezaStatusBadge(p) {
+            if (!p) return '';
+            if (p.tipo === 'estancia' || p.tipo === 'cocina') {
+                const minIlum8 = (p.sup_util || 0) / 8;
+                const minIlum12 = (p.sup_util || 0) / 12;
+                const hasIlum = (p.sup_ilum || 0) >= (minIlum8 - 0.01);
+                const minVent = (p.sup_ilum || 0) / 3;
+                const hasVent = (p.sup_vent || 0) >= (minVent - 0.01) && (p.sup_vent || 0) > 0;
+
+                if (hasIlum && hasVent) {
+                    return '<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">✓ Ilum. (≥1/8) e Vent. OK</span>';
+                } else if (!hasIlum && (p.sup_ilum || 0) >= (minIlum12 - 0.01)) {
+                    return '<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-200">⚠ Cumpre 1/12 (Rehab)</span>';
+                } else if (!hasIlum) {
+                    return `<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-rose-100 text-rose-800 border border-rose-200">✕ Ilum. baixa (${(p.sup_ilum||0).toFixed(2)} &lt; ${minIlum8.toFixed(2)})</span>`;
+                } else {
+                    return `<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-200">⚠ Vent. baixa (${(p.sup_vent||0).toFixed(2)} &lt; ${minVent.toFixed(2)})</span>`;
+                }
+            } else if (p.tipo === 'bano') {
+                return '<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-slate-100 text-slate-600">Vent. Mecánica / Forzada</span>';
+            } else {
+                return '<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-slate-50 text-slate-500">Non esixible directa</span>';
+            }
+        }
+
+        function updatePezaBadge(idx) {
+            const el = document.getElementById(`peza_badge_${idx}`);
+            if (el && projectPezas[idx]) {
+                el.innerHTML = getPezaStatusBadge(projectPezas[idx]);
+            }
+        }
+
+        function updatePezasSummary() {
+            let totalSupUtil = 0;
+            let totalEstancias = 0;
+            projectPezas.forEach(p => {
+                totalSupUtil += (p.sup_util || 0);
+                if (p.tipo === 'estancia') totalEstancias++;
+            });
+
+            const elTotSup = document.getElementById('pezasTotalSupUtil');
+            if (elTotSup) elTotSup.textContent = totalSupUtil.toFixed(2).replace('.', ',') + ' m²';
+
+            const elTotEst = document.getElementById('pezasTotalEstancias');
+            if (elTotEst) elTotEst.textContent = `${totalEstancias} estancia${totalEstancias === 1 ? '' : 's'}`;
+
+            const elEstConst = document.getElementById('pezasEstimatedConstruida');
+            if (elEstConst) elEstConst.textContent = (totalSupUtil * 1.20).toFixed(2).replace('.', ',') + ' m²';
+        }
+
+        function onPezaInput(idx, field, val) {
             if (!projectPezas[idx]) return;
             if (field === 'sup_util' || field === 'sup_ilum' || field === 'sup_vent') {
                 projectPezas[idx][field] = parseFloat(val) || 0;
+                updatePezaBadge(idx);
+                updatePezasSummary();
+            } else if (field === 'tipo') {
+                projectPezas[idx][field] = val;
+                updatePezaBadge(idx);
+                updatePezasSummary();
+                updateNhvPezaSelectors();
             } else {
                 projectPezas[idx][field] = val;
             }
-            renderPezasTable();
-            updateNhvPezaSelectors();
             markDirty();
+        }
+
+        function onPezaBlur(idx) {
+            updateNhvPezaSelectors();
         }
 
         function renderPezasTable() {
@@ -1581,45 +1640,15 @@
             if (!tbody) return;
             tbody.innerHTML = '';
 
-            let totalSupUtil = 0;
-            let totalEstancias = 0;
-
             projectPezas.forEach((p, idx) => {
-                totalSupUtil += (p.sup_util || 0);
-                if (p.tipo === 'estancia') totalEstancias++;
-
-                // Cálculo de ratios Decreto 29/2010
-                let statusBadge = '';
-                if (p.tipo === 'estancia' || p.tipo === 'cocina') {
-                    const minIlum8 = (p.sup_util || 0) / 8;
-                    const minIlum12 = (p.sup_util || 0) / 12;
-                    const hasIlum = (p.sup_ilum || 0) >= (minIlum8 - 0.01);
-                    const minVent = (p.sup_ilum || 0) / 3;
-                    const hasVent = (p.sup_vent || 0) >= (minVent - 0.01) && (p.sup_vent || 0) > 0;
-
-                    if (hasIlum && hasVent) {
-                        statusBadge = '<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">✓ Ilum. (≥1/8) e Vent. OK</span>';
-                    } else if (!hasIlum && (p.sup_ilum || 0) >= (minIlum12 - 0.01)) {
-                        statusBadge = '<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-200">⚠ Cumpre 1/12 (Rehab)</span>';
-                    } else if (!hasIlum) {
-                        statusBadge = `<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-rose-100 text-rose-800 border border-rose-200">✕ Ilum. baixa (${(p.sup_ilum||0).toFixed(2)} &lt; ${minIlum8.toFixed(2)})</span>`;
-                    } else {
-                        statusBadge = `<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-200">⚠ Vent. baixa (${(p.sup_vent||0).toFixed(2)} &lt; ${minVent.toFixed(2)})</span>`;
-                    }
-                } else if (p.tipo === 'bano') {
-                    statusBadge = '<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-slate-100 text-slate-600">Vent. Mecánica / Forzada</span>';
-                } else {
-                    statusBadge = '<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-slate-50 text-slate-500">Non esixible directa</span>';
-                }
-
                 const tr = document.createElement('tr');
                 tr.className = "hover:bg-indigo-50/30 transition border-b border-slate-100";
                 tr.innerHTML = `
                     <td class="p-2">
-                        <input type="text" value="${(p.nome || '').replace(/"/g, '&quot;')}" oninput="onPezaChange(${idx}, 'nome', this.value)" class="w-full text-xs font-semibold rounded-lg border border-slate-300 p-1.5 bg-white focus:ring-1 focus:ring-indigo-500">
+                        <input type="text" value="${(p.nome || '').replace(/"/g, '&quot;')}" oninput="onPezaInput(${idx}, 'nome', this.value)" onblur="onPezaBlur(${idx})" class="w-full text-xs font-semibold rounded-lg border border-slate-300 p-1.5 bg-white focus:ring-1 focus:ring-indigo-500">
                     </td>
                     <td class="p-2">
-                        <select onchange="onPezaChange(${idx}, 'tipo', this.value)" class="w-full text-xs rounded-lg border border-slate-300 p-1.5 bg-white focus:ring-1 focus:ring-indigo-500">
+                        <select onchange="onPezaInput(${idx}, 'tipo', this.value)" class="w-full text-xs rounded-lg border border-slate-300 p-1.5 bg-white focus:ring-1 focus:ring-indigo-500">
                             <option value="estancia" ${p.tipo === 'estancia' ? 'selected' : ''}>Estancia vivideira</option>
                             <option value="cocina" ${p.tipo === 'cocina' ? 'selected' : ''}>Cociña</option>
                             <option value="bano" ${p.tipo === 'bano' ? 'selected' : ''}>Cuarto de Baño / Aseo</option>
@@ -1629,16 +1658,16 @@
                         </select>
                     </td>
                     <td class="p-2 text-right">
-                        <input type="number" step="0.01" min="0" value="${p.sup_util !== undefined ? p.sup_util : 0}" oninput="onPezaChange(${idx}, 'sup_util', this.value)" class="w-24 text-right text-xs font-bold rounded-lg border border-slate-300 p-1.5 bg-white focus:ring-1 focus:ring-indigo-500">
+                        <input type="number" step="0.01" min="0" value="${p.sup_util !== undefined ? p.sup_util : 0}" oninput="onPezaInput(${idx}, 'sup_util', this.value)" onblur="onPezaBlur(${idx})" class="w-24 text-right text-xs font-bold rounded-lg border border-slate-300 p-1.5 bg-white focus:ring-1 focus:ring-indigo-500">
                     </td>
                     <td class="p-2 text-right">
-                        <input type="number" step="0.01" min="0" value="${p.sup_ilum !== undefined ? p.sup_ilum : 0}" oninput="onPezaChange(${idx}, 'sup_ilum', this.value)" class="w-24 text-right text-xs rounded-lg border border-slate-300 p-1.5 bg-white focus:ring-1 focus:ring-indigo-500">
+                        <input type="number" step="0.01" min="0" value="${p.sup_ilum !== undefined ? p.sup_ilum : 0}" oninput="onPezaInput(${idx}, 'sup_ilum', this.value)" onblur="onPezaBlur(${idx})" class="w-24 text-right text-xs rounded-lg border border-slate-300 p-1.5 bg-white focus:ring-1 focus:ring-indigo-500">
                     </td>
                     <td class="p-2 text-right">
-                        <input type="number" step="0.01" min="0" value="${p.sup_vent !== undefined ? p.sup_vent : 0}" oninput="onPezaChange(${idx}, 'sup_vent', this.value)" class="w-24 text-right text-xs rounded-lg border border-slate-300 p-1.5 bg-white focus:ring-1 focus:ring-indigo-500">
+                        <input type="number" step="0.01" min="0" value="${p.sup_vent !== undefined ? p.sup_vent : 0}" oninput="onPezaInput(${idx}, 'sup_vent', this.value)" onblur="onPezaBlur(${idx})" class="w-24 text-right text-xs rounded-lg border border-slate-300 p-1.5 bg-white focus:ring-1 focus:ring-indigo-500">
                     </td>
-                    <td class="p-2 text-center">
-                        ${statusBadge}
+                    <td id="peza_badge_${idx}" class="p-2 text-center">
+                        ${getPezaStatusBadge(p)}
                     </td>
                     <td class="p-2 text-center">
                         <button type="button" onclick="removePeza(${idx})" title="Eliminar peza" class="p-1 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-rose-50 transition">
@@ -1649,15 +1678,7 @@
                 tbody.appendChild(tr);
             });
 
-            // Actualizar totais
-            const elTotSup = document.getElementById('pezasTotalSupUtil');
-            if (elTotSup) elTotSup.textContent = totalSupUtil.toFixed(2).replace('.', ',') + ' m²';
-
-            const elTotEst = document.getElementById('pezasTotalEstancias');
-            if (elTotEst) elTotEst.textContent = `${totalEstancias} estancia${totalEstancias === 1 ? '' : 's'}`;
-
-            const elEstConst = document.getElementById('pezasEstimatedConstruida');
-            if (elEstConst) elEstConst.textContent = (totalSupUtil * 1.20).toFixed(2).replace('.', ',') + ' m²';
+            updatePezasSummary();
         }
 
         function applyPezasToProjectSurfaces() {
